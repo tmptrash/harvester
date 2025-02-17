@@ -84,4 +84,4 @@ The library works in three main steps:
 
 ## Conclusion
 
-DOM Tree Parser is a powerful and flexible JavaScript tool for structured data extraction from web pages. Its intuitive pseudo tree-like syntax and fuzzy matching capabilities simplify the process of navigating and parsing the DOM, making it an excellent choice for automation tasks, web scraping, and content analysis.
+Harvester is a powerful and flexible JavaScript tool for structured data extraction from web pages. Its intuitive pseudo tree-like syntax and fuzzy matching capabilities simplify the process of navigating and parsing the DOM, making it an excellent choice for automation tasks, web scraping, and content analysis.

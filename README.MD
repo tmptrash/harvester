@@ -1,8 +1,8 @@
-# DOM Tree Parser
+# Harvester
 
 ## Overview
 
-DOM Tree Parser is a JavaScript library designed to extract structured data from a DOM tree based on a pseudo tree-like string template. It allows users to define hierarchical relationships between elements using a simple indentation-based syntax and then search for matching structures within the DOM.
+Harvester is a JavaScript library designed to extract structured data from a DOM tree based on a pseudo tree-like string template. It allows users to define hierarchical relationships between elements using a simple indentation-based syntax and then search for matching structures within the DOM.
 
 ## Features
 
@@ -40,7 +40,7 @@ The library works in three main steps:
       span{price}
       img[img=src]
     `;
-    const result = harvest(tpl, document.querySelector("div"));
+    const [result] = harvest(tpl, document.querySelector("div"));
     console.log(result);
     ```
 
@@ -54,7 +54,7 @@ The library works in three main steps:
     {
       "title": "Product Name",
       "price": "$19.99",
-      "img": "[https://example.com/image.jpg](https://example.com/image.jpg)"
+      "img": "https://example.com/image.jpg"
     }
     ```
     This object maps the text and attribute tags defined in your template to the corresponding data found in the DOM.

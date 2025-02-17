@@ -64,8 +64,8 @@ The library works in three main steps:
 - **`toTree(tpl: string): Object[]`** – Converts a pseudo tree-like string into a structured tree representation, parsing the template syntax and hierarchy.
 - **`harvest(tpl: string, firstNodeEl: Element): [Object, number, number, Array]`** – The main function that orchestrates data extraction from the DOM based on the provided template and starting DOM element. Returns an array containing:
     -  Structured data map (Object).
-    -  Score of the found tree.
     -  Maximum possible score.
+    -  Score of the found tree.
     -  Array of found nodes with metadata.
 - **`find(nodes: Array, first: Element): [number, Array]`** – Recursively finds all possible matches in the DOM for the given tree structure defined by `nodes`, starting the search from the `first` DOM Element. Returns the best score and the array of matched nodes.
 - **`step(node: Node)`** – Performs a single step in the tree comparison process, evaluating the match of a template node against a DOM element and calculating a score.

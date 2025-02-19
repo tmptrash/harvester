@@ -278,3 +278,5 @@ function harvest(tpl, firstNodeEl) {
 
   return [map, score, maxScore, maxNodes]
 }
+
+module.exports = harvest

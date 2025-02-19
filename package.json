@@ -85,6 +85,7 @@
   },
   "homepage": "https://github.com/tmptrash/harvester#readme",
   "devDependencies": {
-    "jest": "^29.7.0"
+    "jest": "^29.7.0",
+    "jsdom": "^26.0.0"
   }
 }

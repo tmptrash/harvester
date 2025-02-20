@@ -27,9 +27,10 @@ function err(line, l, msg) {
  * @param {Number} l Current line index.
  * @param {Object[]} nodes Array to store parsed nodes.
  * @param {Number} level Current indentation level.
+ * @param {Number} startSpaces Left padding of the first not empty tag in a tree
  * @returns {[Number, Number]} The updated line index and level difference.
  */
-function tree(lines, l, nodes, level) {
+function tree(lines, l, nodes, level, startSpaces = -1) {
   for (let i = l; i < lines.length; i++) {
     const line = lines[i]
     if (!line) continue
@@ -37,7 +38,9 @@ function tree(lines, l, nodes, level) {
     if (!m) {err(line, i, `Wrong line format`); continue}
     const spaces = m[1]?.length || 0
     if (spaces % SPACE_AMOUNT !== 0) {err(line, i, `Wrong left indention. Must be a multiple of ${SPACE_AMOUNT}`); continue}
-    const curLevel = spaces / SPACE_AMOUNT
+    if (startSpaces < 0) startSpaces = spaces
+    if ((spaces - startSpaces) % SPACE_AMOUNT !== 0) {err(line, i, `Wrong left indention. Must be a multiple of ${SPACE_AMOUNT}`); continue}
+    const curLevel = (spaces - startSpaces) / SPACE_AMOUNT
     if (curLevel > level && curLevel - level > 1) {err(line, i, `Wrong left indention level`); continue}
     const node = {tag : m[2]}
     m[3] && (node.textTag = m[3])
@@ -48,7 +51,7 @@ function tree(lines, l, nodes, level) {
       if (!nodes.length) {err(line, i, `Wrong left indention level`); continue}
       nodes[nodes.length - 1].children = []
       let ret
-      [i, ret] = tree(lines, i, nodes[nodes.length - 1].children, level + 1)
+      [i, ret] = tree(lines, i, nodes[nodes.length - 1].children, level + 1, startSpaces)
       if (ret) return [i, ret - 1]
     }
     else return [i - 1, level - curLevel - 1]

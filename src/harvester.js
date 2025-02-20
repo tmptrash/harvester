@@ -12,6 +12,10 @@ const SPACE_AMOUNT = 2
  */
 const LINE_RE = /^( *)?([a-zA-Z0-9_-]+)(?:\{([^}]*)\})?(?:\[([a-zA-Z0-9_-]+)=([a-zA-Z0-9_-]+?)\])?$/
 /**
+ * Special constants for the jsdom emulation 
+ */
+const TEXT_NODE = 3
+/**
  * Displays an error message during parsing of the pseudo tree-like string.
  * @param {String} line The current line being parsed.
  * @param {Number} l Line number.
@@ -87,7 +91,7 @@ function text(el) {
   if (!el) return null
   let t;
   for (const child of el.childNodes) {
-    if (child.nodeType === Node.TEXT_NODE) {
+    if (child.nodeType === TEXT_NODE) {
       t = child.textContent.trim()
       break
     }

@@ -18,6 +18,12 @@ describe('harvester library tests', () => {
     expect(ret[1]).toEqual(0)
     expect(ret[2]).toEqual(0)
   })
+  it('test if there is no DOM tree', () => {
+    const ret = harvest('div', null)
+    expect(ret[0]).toEqual({})
+    expect(ret[1]).toEqual(1)
+    expect(ret[2]).toEqual(0)
+  })
   it('test for an empty template and wrong start padding', () => {
     const dom = new JSDOM(`
     <!DOCTYPE html>

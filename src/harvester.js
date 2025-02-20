@@ -207,7 +207,7 @@ function step(node) {
  * @returns [score, Nodes[]]
  */
 function find(nodes, first) {
-  if (!nodes?.length) return [0, undefined]
+  if (!nodes?.length || !first) return [0, undefined]
   const combinations = variants(nodes)
   let maxScore = 0
   let maxNodes = []

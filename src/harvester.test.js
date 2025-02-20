@@ -252,7 +252,7 @@ describe('harvester library tests', () => {
     expect(ret[1]).toEqual(6)
     expect(ret[2]).toEqual(6)
   })
-  it('test of pseudo tree template with 1 attr tag', () => {
+  it('test of pseudo tree template with 1 attr tag (1)', () => {
     const ret = testHarvester(`
     div[img=href]
       span
@@ -275,5 +275,101 @@ describe('harvester library tests', () => {
     expect(ret[0]).toEqual({img: 'test'})
     expect(ret[1]).toEqual(4)
     expect(ret[2]).toEqual(4)
+  })
+  it('test of pseudo tree template with 1 attr tag (2)', () => {
+    const ret = testHarvester(`
+    div
+      span[attr=src]
+        h1`, `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+    </head>
+    <body>
+      <div>
+        <span src="test">
+          <h1>
+        </span>
+      </div>
+    </body>
+    </html>
+    `, 'body > div')
+    expect(consoleSpy).not.toHaveBeenCalled()
+    expect(ret[0]).toEqual({attr: 'test'})
+    expect(ret[1]).toEqual(4)
+    expect(ret[2]).toEqual(4)
+  })
+  it('test of pseudo tree template with 1 attr tag (3)', () => {
+    const ret = testHarvester(`
+    div
+      span
+        h1[h2=h3]`, `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+    </head>
+    <body>
+      <div>
+        <span>
+          <h1 h3="h4">
+        </span>
+      </div>
+    </body>
+    </html>
+    `, 'body > div')
+    expect(consoleSpy).not.toHaveBeenCalled()
+    expect(ret[0]).toEqual({h2: 'h4'})
+    expect(ret[1]).toEqual(4)
+    expect(ret[2]).toEqual(4)
+  })
+  it('test of pseudo tree template with 1 text tag and 1 attr tag', () => {
+    const ret = testHarvester(`
+    div{div}
+      span
+        h1[src=href]`, `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+    </head>
+    <body>
+      <div>DIV
+        <span>
+          <h1 href="http">
+        </span>
+      </div>
+    </body>
+    </html>
+    `, 'body > div')
+    expect(consoleSpy).not.toHaveBeenCalled()
+    expect(ret[0]).toEqual({div: 'DIV', src: 'http'})
+    expect(ret[1]).toEqual(5)
+    expect(ret[2]).toEqual(5)
+  })
+  it('test of pseudo tree template which is partly equal to DOM tree', () => {
+    const ret = testHarvester(`
+    div
+      span
+        h1{h1}`, `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+    </head>
+    <body>
+      <section>
+        <span>
+          <h1>H1</h1>
+        </span>
+      </section>
+    </body>
+    </html>
+    `, 'body > section')
+    expect(consoleSpy).not.toHaveBeenCalled()
+    expect(ret[0]).toEqual({h1: 'H1'})
+    expect(ret[1]).toEqual(4)
+    expect(ret[2]).toEqual(3)
   })
 })

@@ -372,4 +372,28 @@ describe('harvester library tests', () => {
     expect(ret[1]).toEqual(4)
     expect(ret[2]).toEqual(3)
   })
+  it('test of pseudo tree template which is partly equal to DOM tree (2)', () => {
+    const ret = testHarvester(`
+    div
+      span
+        h1{h1}`, `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+    </head>
+    <body>
+      <section>
+        <div>
+          <h1>H1</h1>
+        </div>
+      </section>
+    </body>
+    </html>
+    `, 'body > section')
+    expect(consoleSpy).not.toHaveBeenCalled()
+    expect(ret[0]).toEqual({h1: 'H1'})
+    expect(ret[1]).toEqual(4)
+    expect(ret[2]).toEqual(2)
+  })
 })

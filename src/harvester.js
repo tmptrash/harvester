@@ -191,7 +191,7 @@ function step(node) {
     if (node.score + sc > score) {
       node.score += sc
       node.children = nodes?.length ? nodes : node.children
-    } else if (deepNodes && score > node.score + sc) {
+    } else if (deepNodes && score && score >= node.score + sc) {
       node.score = score
       node.children = deepNodes?.[0]?.children ? deepNodes?.[0]?.children : node.children
       node.text = deepNodes[0].text

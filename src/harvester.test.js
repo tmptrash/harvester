@@ -86,6 +86,30 @@ describe('harvester library tests', () => {
   })
   it('test of pseudo tree template with 1 text tag', () => {
     const ret = testHarvester(`
+    div{text}
+      span
+        h1`, `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+    </head>
+    <body>
+      <div>Text
+        <span>
+          <h1>
+        </span>
+      </div>
+    </body>
+    </html>
+    `, 'body > div')
+    expect(consoleSpy).not.toHaveBeenCalled()
+    expect(ret[0]).toEqual({text: 'Text'})
+    expect(ret[1]).toEqual(4)
+    expect(ret[2]).toEqual(4)
+  })
+  it('test of pseudo tree template with 1 text tag (2)', () => {
+    const ret = testHarvester(`
     div
       span{text}
         h1`, `
@@ -108,7 +132,31 @@ describe('harvester library tests', () => {
     expect(ret[1]).toEqual(4)
     expect(ret[2]).toEqual(4)
   })
-  it('test of pseudo tree template with 2 text tags', () => {
+  it('test of pseudo tree template with 1 text tag (3)', () => {
+    const ret = testHarvester(`
+    div
+      span
+        h1{text}`, `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+    </head>
+    <body>
+      <div>
+        <span>
+          <h1>Text</h1>
+        </span>
+      </div>
+    </body>
+    </html>
+    `, 'body > div')
+    expect(consoleSpy).not.toHaveBeenCalled()
+    expect(ret[0]).toEqual({text: 'Text'})
+    expect(ret[1]).toEqual(4)
+    expect(ret[2]).toEqual(4)
+  })
+  it('test of pseudo tree template with 2 text tags (2 & 3)', () => {
     const ret = testHarvester(`
     div
       span{text}
@@ -129,6 +177,54 @@ describe('harvester library tests', () => {
     `, 'body > div')
     expect(consoleSpy).not.toHaveBeenCalled()
     expect(ret[0]).toEqual({text: 'Text', h1: 'H1'})
+    expect(ret[1]).toEqual(5)
+    expect(ret[2]).toEqual(5)
+  })
+  it('test of pseudo tree template with 2 text tags (1 & 3)', () => {
+    const ret = testHarvester(`
+    div{text}
+      span
+        h1{h1}`, `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+    </head>
+    <body>
+      <div>Text
+        <span>
+          <h1>H1</h1>
+        </span>
+      </div>
+    </body>
+    </html>
+    `, 'body > div')
+    expect(consoleSpy).not.toHaveBeenCalled()
+    expect(ret[0]).toEqual({text: 'Text', h1: 'H1'})
+    expect(ret[1]).toEqual(5)
+    expect(ret[2]).toEqual(5)
+  })
+  it('test of pseudo tree template with 2 text tags (1 & 2)', () => {
+    const ret = testHarvester(`
+    div{text}
+      span{span}
+        h1`, `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+    </head>
+    <body>
+      <div>Text
+        <span>SPAN
+          <h1>
+        </span>
+      </div>
+    </body>
+    </html>
+    `, 'body > div')
+    expect(consoleSpy).not.toHaveBeenCalled()
+    expect(ret[0]).toEqual({text: 'Text', span: 'SPAN'})
     expect(ret[1]).toEqual(5)
     expect(ret[2]).toEqual(5)
   })
@@ -155,5 +251,29 @@ describe('harvester library tests', () => {
     expect(ret[0]).toEqual({text: 'Text', h1: 'H1', div: 'DIV'})
     expect(ret[1]).toEqual(6)
     expect(ret[2]).toEqual(6)
+  })
+  it('test of pseudo tree template with 1 attr tag', () => {
+    const ret = testHarvester(`
+    div[img=href]
+      span
+        h1`, `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+    </head>
+    <body>
+      <div href="test">
+        <span>
+          <h1>
+        </span>
+      </div>
+    </body>
+    </html>
+    `, 'body > div')
+    expect(consoleSpy).not.toHaveBeenCalled()
+    expect(ret[0]).toEqual({img: 'test'})
+    expect(ret[1]).toEqual(4)
+    expect(ret[2]).toEqual(4)
   })
 })

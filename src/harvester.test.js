@@ -348,7 +348,7 @@ describe('harvester library tests', () => {
     expect(ret[1]).toEqual(5)
     expect(ret[2]).toEqual(5)
   })
-  it('test of pseudo tree template which is partly equal to DOM tree', () => {
+  it('test of pseudo tree template which is partly equal to DOM tree (1)', () => {
     const ret = testHarvester(`
     div
       span
@@ -387,6 +387,85 @@ describe('harvester library tests', () => {
         <div>
           <h1>H1</h1>
         </div>
+      </section>
+    </body>
+    </html>
+    `, 'body > section')
+    expect(consoleSpy).not.toHaveBeenCalled()
+    expect(ret[0]).toEqual({h1: 'H1'})
+    expect(ret[1]).toEqual(4)
+    expect(ret[2]).toEqual(2)
+  })
+  it('test of pseudo tree template which is partly equal to DOM tree (3)', () => {
+    const ret = testHarvester(`
+    div
+      span
+        h1{h1}`, `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+    </head>
+    <body>
+      <section>
+        <div>
+          <h1>
+          <h1>H1</h1>
+        </div>
+      </section>
+    </body>
+    </html>
+    `, 'body > section')
+    expect(consoleSpy).not.toHaveBeenCalled()
+    expect(ret[0]).toEqual({h1: 'H1'})
+    expect(ret[1]).toEqual(4)
+    expect(ret[2]).toEqual(2)
+  })
+  it('test of pseudo tree template which is partly equal to DOM tree (4)', () => {
+    const ret = testHarvester(`
+    div
+      span
+        h1{h1}`, `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+    </head>
+    <body>
+      <section>
+        <div>
+          <div>
+            <h1>
+            <h1>H1</h1>
+          </div>
+        </div>
+      </section>
+    </body>
+    </html>
+    `, 'body > section')
+    expect(consoleSpy).not.toHaveBeenCalled()
+    expect(ret[0]).toEqual({h1: 'H1'})
+    expect(ret[1]).toEqual(4)
+    expect(ret[2]).toEqual(2)
+  })
+  it('test of pseudo tree template which is partly equal to DOM tree (5)', () => {
+    const ret = testHarvester(`
+    div
+      span
+        h1{h1}`, `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+    </head>
+    <body>
+      <section>
+        <span>
+          <div>
+            <h1>
+            <h1>H1</h1>
+          </div>
+        </span>
       </section>
     </body>
     </html>

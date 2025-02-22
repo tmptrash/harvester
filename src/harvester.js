@@ -1,3 +1,4 @@
+// TODO: update comments
 /**
  * Properties to skip during deep copy or traversal of arrays/objects.
  */
@@ -130,7 +131,7 @@ function variants(nodes) {
  * @param {Object} skipProps Map of the properties we have to skip during traverse
  * @returns {Object|Array} Copied object or array
  */
-function copy(obj, skipProps = {}) {
+function copy(obj, skipProps = SKIP) {
   if (!obj) return obj
   let cpy = obj
   if (Array.isArray(obj)) {
@@ -148,7 +149,7 @@ function copy(obj, skipProps = {}) {
  * @param {Function} cb Callback function (cb(node, key)).
  * @param {Object} skipProps Properties to skip during traversal.
  */
-function traverse(obj, cb, skipProps = {}) {
+function traverse(obj, cb, skipProps = SKIP) {
   if (Array.isArray(obj)) {
     for (let i = 0; i < obj.length; i++) {
       if (!skipProps[i]) cb(obj[i], i), traverse(obj[i], cb, skipProps)
@@ -160,45 +161,6 @@ function traverse(obj, cb, skipProps = {}) {
   } else cb(obj)
 }
 /**
- * Makes one step in trees comparison process with recursion. First we go deep into 
- * the DOM element, but decrease score by 1, because we cut current JSON node and 
- * check if deeper node is similar. Also, we check nextChild on the same level and 
- * not decrease a score. So we do two checks here: one deeper and one on the same 
- * level and compares which variant is better (with bigger score). Result will be
- * stored into the node. This function is used inside find().
- * @param {Node} node 
- */
-function step(node) {
-  if (!node.el) return
-  let score = -1
-  let deepNodes
-  const firstChild = node.el.firstElementChild
-  if (firstChild && node.children) {
-    [score, deepNodes] = find(copy([node], SKIP), firstChild)
-  }
-  // This is a second part, where we check nodes of the same level (node.el.nextSibling)
-  node.score = 0
-  const correctTag = node.el.tagName?.toLowerCase() === node.tag
-  if (correctTag) {
-    node.score++
-    node.textTag && (node.text = text(node.el)) && node.score++
-    node.attrTag && (node.attr = node.el.getAttribute(node.attrTag[1])) && node.score++
-  }
-  if (node.children) {
-    // Here we compare our two approaches and get one, which better (with bigger score)
-    const firstChild = node?.el?.firstElementChild
-    const [sc, nodes] = firstChild ? find(node.children, firstChild): [0, node.children]
-    if (node.score + sc > score) {
-      node.score += sc
-      node.children = nodes?.length ? nodes : node.children
-    } else if (deepNodes && score && score >= node.score + sc) {
-      node.score = score
-      node.children = deepNodes?.[0]?.children ? deepNodes?.[0]?.children : node.children
-      node.text = deepNodes[0].text
-    }
-  }
-}
-/**
  * Finds all nodes in a DOM tree according to JSON tree template. The format of one node
  * is following: {el: Element, tag: str, score: num, text: str, textTag: str, children: []},
  * where: el - reference to DOM element, tag - name of the HTML tag we are looking for, score -
@@ -206,34 +168,118 @@ function step(node) {
  * contains a text in it), text - text from HTML tag, textTag - name of the text alias (will
  * be used later for creating data map), children - an array of the same nodes to support 
  * recursion search.
- * @param {Array} nodes Array of nodes
- * @param {Element} first Reference to first DOM element to start finding on
+ * @param {Array} tplNodes Array of nodes
+ * @param {Array} tplParent Parent node of tplNodes
+ * @param {Element} firstEl Reference to first DOM element to start finding on
+ * @param {Element} parentEl Parent element of the first
  * @returns [score, Nodes[]]
  */
-function find(nodes, first) {
-  if (!nodes?.length || !first) return [0, undefined]
-  const combinations = variants(nodes)
+function find(tplNodes, tplParent, firstEl, parentEl, level, maxLevel) {
+  if (!tplNodes?.length || !firstEl) return [0, undefined]
   let maxScore = 0
-  let maxNodes = []
+  let maxNodes
+  /**
+   * First, we check similar nodes in a one level deeper without combinations. This variant
+   * is used when DOM tree has extra nodes between current nodes in pseudo tree and DOM tree.
+   * For example (pseudo tree on the left and DOM tree on the right):
+   * 
+   * h1
+   * h1 -> div
+   *         h1
+   *         h1
+   * 
+   * In this example, we have to find two h1 tags inside the div, but div itself should be 
+   * skipped. We also should decrease score with -1 score, because we are skipping one level
+   * in a DOM tree. Every level skip decreases score with 1. So max possible score here === 2,
+   * but algorithm should return 1 (2 - 1: two h1 tags found minus one skipped level).
+   */
+  if (level < maxLevel) {
+    let el = firstEl
+    while (el) {
+      const firstChild = el.firstElementChild
+      if (firstChild) {
+        const [deepScore, deepNodes] = find(tplNodes, tplParent, firstChild, el, level + 1, maxLevel)
+        if (deepScore - 1 > maxScore && deepNodes) maxScore = deepScore - 1, maxNodes = deepNodes
+      }
+      el = el.nextElementSibling
+    }
+  }
+  /**
+   * Second, we check similar nodes in one level upper without combinations. This variant
+   * is used when DOM tree has a lack of nodes between current nodes in pseudo tree and DOM
+   * tree. For example (pseudo tree on the left and DOM tree on the right):
+   * 
+   *         h1
+   * div  -> h1
+   *   h1      div
+   *   h1
+   * 
+   * In this example, we have to find two h1 tags of a div in a pseudo tree in a DOM tree.
+   * Please pay attention on the fact that two h1 tags in a DOM tree are on the root level
+   * and we have to skip div tag in a pseudo tree. In this case we also should decrease score
+   * with 1, because we skip one level in a pseudo tree. And again every level skipping
+   * decreases score with 1. Max possible score here is 3, but algorithm returns 1 (2 - 1:
+   * 2 h1 tags found minus one level skipped).
+   */
+  if (level < maxLevel) {
+    const upParent = parentEl?.parentNode
+    const upFirst = upParent?.firstElementChild
+    if (upFirst && upParent) {
+      const [upScore, upNodes] = find(tplNodes, tplParent, upFirst, upParent, level + 1, maxLevel)
+      if (upScore - 1 > maxScore && upNodes) maxScore = upScore - 1, maxNodes = upNodes
+    }
+  }
+  /**
+   * Third, we check similar nodes on the same level with all possible combinations of pseudo
+   * tree. For example if we have 2 nodes: [{tag: 'div'}, {tag: 'span'}], we will have 3
+   * possible combinations with different max scores:
+   * 
+   * 1. [{tag: 'div'}]                 // max score 1
+   * 2. [{tag: 'span'}]                // max score 1
+   * 3. [{tag: 'div'}, {tag: 'span'}]  // max score 2
+   * 
+   * Algorithm will pick tree with maximized score.
+   */
+  const combinations = copy(variants(tplNodes))
   for (let c = 0; c < combinations.length; c++) {
     const comb = combinations[c]
     let i = 0
-    comb[0].el = first
+    comb[0].el = firstEl
     for (let i = 1; i < comb.length; i++) comb[i].el = null
     while (true) {
       const node = comb[i]
-      step(node)
       if (node.el) {
+        node.score = 0
+        // here we check tag name, tag text and attribute
+        const correctTag = node.el.tagName?.toLowerCase() === node.tag
+        if (correctTag) {
+          node.score++
+          node.textTag && (node.text = text(node.el)) && node.score++
+          node.attrTag && (node.attr = node.el.getAttribute(node.attrTag[1])) && node.score++
+        }
+        // Here we go deeper and check inner nodes
+        const firstChild = node.el?.firstElementChild
+        if (firstChild) {
+          const score = node.score
+          find(node.children, node, firstChild, node.el, level, maxLevel)
+          node.score += score
+        }
+
         if (i >= comb.length - 1) {
           i = comb.length - 1
           // all nodes found let's check if it's a best score
           const nodesScore = comb.reduce((acc, cur) => acc + cur.score || 0, 0)
-          if (nodesScore > maxScore) maxScore = nodesScore, maxNodes = copy(comb, SKIP)
+          if (nodesScore > maxScore) maxScore = nodesScore, maxNodes = copy(comb)
         } else i++
       } else if (--i < 0) break
       // skip all text nodes
       comb[i].el = (comb[i]?.el || node.el)?.nextElementSibling
     }
+  }
+
+  if (maxNodes?.length) {
+    tplParent.children = maxNodes
+    tplParent.score = maxScore
   }
 
   return [maxScore, maxNodes]
@@ -249,7 +295,7 @@ function find(nodes, first) {
  * in out tpl.
  * 
  * @param {String} tpl template of pseudo tree-like string
- * @param {Element} firstNodeEl Reference to the first DOM element for nodes[0]
+ * @param {Element} firstEl Reference to the first DOM element for nodes[0]
  * @returns {[maxScore: Number, foundScore: Number, map: Object, foundNodes: Array]} maxScore - 
  * maximum score. It means that found tree is identical to your pseudo tree-like template; 
  * foundScore - score of found tree may be between [0..maxScore]. Shows similarity between 
@@ -264,26 +310,26 @@ function find(nodes, first) {
  *   img[img=href]`
  * harvest(tpl, $('div')) //-> [{title: 'My title', price: '12.34', img: 'https://...'}, 7, 7, [...]]
  */
-function harvest(tpl, firstNodeEl) {
-  const nodes = toTree(tpl)
-  let score = 0
-  traverse(nodes, d => { if (isObj(d)) d.tag && score++, d.textTag && score++, d.attrTag && score++ }, SKIP)
-  const [maxScore, maxNodes] = find(nodes, firstNodeEl)
+function harvest(tpl, firstEl) {
+  const tplNodes = {tag: 'root', children: toTree(tpl)} // add one more level as a root element
+  let tplScore = 0
+  traverse(tplNodes, d => { if (isObj(d)) d.tag && tplScore++, d.textTag && tplScore++, d.attrTag && tplScore++ })
+  if (!firstEl) return [{}, tplScore, 0, []]
+  const [score, nodes] = find(tplNodes.children, tplNodes, firstEl, firstEl.parentNode, 0, tplScore)
   const map = {}
-  traverse(maxNodes, d => {
-    if (isObj(d)) {
-      if (d.textTag && d.text) {
-        if (map[d.textTag]) console.error(`Two or more equal text tags were found. Found text tag: "${d.textTag}"`)
-        map[d.textTag] = d.text
-      }
-      if (d.attrTag && d.attr) {
-        if (map[d.attrTag[0]]) console.error(`Two or more equal attr tags were found. Found attr tag: "${d.attrTag[0]}"`)
-        map[d.attrTag[0]] = d.attr
-      }
+  traverse(nodes, d => {
+    if (!isObj(d)) return
+    if (d.textTag && d.text) {
+      map[d.textTag] && console.error(`Two or more equal text tags were found. Text tag: "${d.textTag}"`)
+      map[d.textTag] = d.text
     }
-  }, SKIP)
+    if (d.attrTag && d.attr) {
+      map[d.attrTag[0]] && console.error(`Two or more equal attr tags were found. Attr tag: "${d.attrTag[0]}"`)
+      map[d.attrTag[0]] = d.attr
+    }
+  })
 
-  return [map, score, maxScore, maxNodes]
+  return [map, tplScore, score, nodes]
 }
 
 module.exports = harvest

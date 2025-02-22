@@ -13,7 +13,7 @@ const SPACE_AMOUNT = 2
  */
 const LINE_RE = /^( *)?([a-zA-Z0-9_-]+)(?:\{([^}]*)\})?(?:\[([a-zA-Z0-9_-]+)=([a-zA-Z0-9_-]+?)\])?$/
 /**
- * Special constants for the jsdom emulation 
+ * Special constant for the jsdom emulation. The same like Node.TEXT_NODE under browser
  */
 const TEXT_NODE = 3
 /**
@@ -66,7 +66,13 @@ function tree(lines, l, nodes, level, startSpaces = -1) {
 }
 /**
  * Converts a pseudo tree-like string into a structured tree.
- * @param {String} tpl The pseudo tree-like string.
+ * @param {String} tpl The pseudo tree-like string in format:
+ * 
+ * div
+ *   span
+ *     h1{h1}
+ *     img[src=src]
+ * 
  * @returns {Object[]} Parsed tree structure.
  */
 function toTree(tpl) {
@@ -84,26 +90,23 @@ function isObj(val) {
   return typeof val === 'object' && !Array.isArray(val) && val !== null
 }
 /**
- * Retrieves the first direct text content of an element, skipping nested elements.
+ * Retrieves the first direct trimmed text content of an element, skipping nested elements.
  * @param {Element} el The DOM element.
  * @returns {String|undefined} The text content or undefined if none found.
  */
 function text(el) {
   if (!el) return null
-  let t;
   for (const child of el.childNodes) {
     if (child.nodeType === TEXT_NODE) {
-      t = child.textContent.trim()
-      break
+      const t = child.textContent.trim()
+      if (t) return t
     }
   }
-
-  return t || undefined
+  return undefined
 }
 /**
- * Returns all possible variants of nodes of the one level. For example if we have two
- * nodes, variants will be like this:
- * 
+ * Returns all possible variants of nodes of the one level. Is used to compare all possible
+ * nodes variants of pseudo tree and DOM nodes of one level.
  * @param {Node[]} nodes Array of nodes we have create variants from
  * @returns 
  * 
@@ -125,11 +128,11 @@ function variants(nodes) {
   return result
 }
 /**
- * Makes a deep copy of the object or array. skipProps is used to skip some properties
+ * Makes a deep copy of the object or an array. skipProps is used to skip some properties
  * and copy them as is.
- * @param {Object|Array} obj Object to copy
- * @param {Object} skipProps Map of the properties we have to skip during traverse
- * @returns {Object|Array} Copied object or array
+ * @param {Object|Array} obj Object or array to copy
+ * @param {Object} skipProps Map of the properties we have to skip during copy
+ * @returns {Object|Array} Copy of object or array
  */
 function copy(obj, skipProps = SKIP) {
   if (!obj) return obj
@@ -145,8 +148,8 @@ function copy(obj, skipProps = SKIP) {
 }
 /**
  * Recursively traverses an object or array, applying a callback to each node.
- * @param {Object|Array} obj Structure to traverse.
- * @param {Function} cb Callback function (cb(node, key)).
+ * @param {Object|Array} obj Object or array to traverse.
+ * @param {Function} cb Callback function (cb(node, key)) for every node
  * @param {Object} skipProps Properties to skip during traversal.
  */
 function traverse(obj, cb, skipProps = SKIP) {
@@ -161,18 +164,21 @@ function traverse(obj, cb, skipProps = SKIP) {
   } else cb(obj)
 }
 /**
- * Finds all nodes in a DOM tree according to JSON tree template. The format of one node
- * is following: {el: Element, tag: str, score: num, text: str, textTag: str, children: []},
- * where: el - reference to DOM element, tag - name of the HTML tag we are looking for, score -
- * score of the current node (+1 if tag exist, +1 if textTag is not empty and HTML element also
- * contains a text in it), text - text from HTML tag, textTag - name of the text alias (will
- * be used later for creating data map), children - an array of the same nodes to support 
- * recursion search.
- * @param {Array} tplNodes Array of nodes
- * @param {Array} tplParent Parent node of tplNodes
- * @param {Element} firstEl Reference to first DOM element to start finding on
- * @param {Element} parentEl Parent element of the first
- * @returns [score, Nodes[]]
+ * Finds all nodes in a DOM tree according to JSON tree. The starting format of one node 
+ * is following: {el: Element, tag: str, textTag: str, children: []}, where: el - reference
+ * to DOM element, tag - name of the HTML tag we are looking for, score - score of the 
+ * current node (+1 if tag exist, +1 if textTag is not empty and HTML element also contains
+ * a text in it), text - text from HTML tag, textTag - name of the text alias (will be used
+ * later for creating data map), children - an array of the same nodes to support recursion
+ * search. After all nodes will be found "score" and "text" properties will be added into
+ * the result tree.
+ * 
+ * @param {Array} tplNodes Array of JSON nodes
+ * @param {Array} tplParent Parent node of tplNodes array
+ * @param {Element} firstEl Reference to the first DOM element to start finding on. Should
+ * be associated with tplNodes[0]
+ * @param {Element} parentEl Parent element of the firstEl
+ * @returns [score, Nodes[]|undefined]
  */
 function find(tplNodes, tplParent, firstEl, parentEl, level, maxLevel) {
   if (!tplNodes?.length || !firstEl) return [0, undefined]

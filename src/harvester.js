@@ -95,7 +95,7 @@ function isObj(val) {
  * @returns {String|undefined} The text content or undefined if none found.
  */
 function text(el) {
-  if (!el) return null
+  if (!el) return undefined
   for (const child of el.childNodes) {
     if (child.nodeType === TEXT_NODE) {
       const t = child.textContent.trim()
@@ -181,7 +181,7 @@ function traverse(obj, cb, skipProps = SKIP) {
  * @returns [score, Nodes[]|undefined]
  */
 function find(tplNodes, tplParent, firstEl, parentEl, level, maxLevel) {
-  if (!tplNodes?.length || !firstEl) return [0, undefined]
+  if (!tplNodes?.length || !firstEl || !parentEl) return [0, undefined]
   let maxScore = 0
   let maxNodes
   /**

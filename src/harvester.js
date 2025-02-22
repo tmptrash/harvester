@@ -267,8 +267,10 @@ function find(tplNodes, tplParent, firstEl, parentEl, level, maxLevel) {
         const firstChild = node.el?.firstElementChild
         if (firstChild) {
           const score = node.score
-          find(node.children, node, firstChild, node.el, level, maxLevel)
-          node.score += score
+          if (node.children) {
+            find(node.children, node, firstChild, node.el, level, maxLevel)
+            node.score += score
+          }
         }
 
         if (i >= comb.length - 1) {

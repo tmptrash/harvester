@@ -11,7 +11,7 @@ const SPACE_AMOUNT = 2
  * Regular expression to parse a single line of the pseudo tree-like string.
  * Matches: indentation, tag name, optional text, and optional attribute.
  */
-const LINE_RE = /^( *)?([a-zA-Z0-9_-]+)(?:\{([^}]*)\})?(?:\[([a-zA-Z0-9_-]+)=([a-zA-Z0-9_-]+?)\])?$/
+const LINE_RE = /^( *)?([a-zA-Z0-9_-]+)(?:\{([^}]*)\})?(?:\[([a-zA-Z0-9_-]+)=([a-zA-Z0-9_-]+?)\])? *$/
 /**
  * Special constant for the jsdom emulation. The same like Node.TEXT_NODE under browser
  */
@@ -38,7 +38,7 @@ function logErr(line, l, msg) {
 function parse(lines, l, nodes, level, startSpaces = -1) {
   for (let i = l; i < lines.length; i++) {
     const line = lines[i]
-    if (!line) continue
+    if (!line || line.trim() === '') continue
     const m = line.match(LINE_RE) // 1: spaces, 2: tag, 3: textTag
     if (!m) {logErr(line, i, `Wrong line format`); continue}
     const spaces = m[1]?.length || 0
@@ -46,6 +46,7 @@ function parse(lines, l, nodes, level, startSpaces = -1) {
     if (startSpaces < 0) startSpaces = spaces
     if ((spaces - startSpaces) % SPACE_AMOUNT !== 0) {logErr(line, i, `Wrong left indentation. Must be a multiple of ${SPACE_AMOUNT}`); continue}
     const curLevel = (spaces - startSpaces) / SPACE_AMOUNT
+    if (curLevel < 0) {logErr(line, i, `Wrong left indentation level`); continue}
     if (curLevel > level && curLevel - level > 1) {logErr(line, i, `Wrong left indentation level`); continue}
     const node = {tag : m[2]}
     m[3] && (node.textTag = m[3])
@@ -340,4 +341,4 @@ function harvest(tpl, firstEl) {
   return [map, tplScore, score, nodes]
 }
 
-module.exports = harvest
+module.exports = {toTree, harvest}

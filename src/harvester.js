@@ -22,12 +22,12 @@ const TEXT_NODE = 3
  * @param {Number} l Line number.
  * @param {String} msg Error message.
  */
-function err(line, l, msg) {
+function logErr(line, l, msg) {
   console.error(`Error in line '${line}' #:${l}. ${msg}.`)
 }
 /**
  * Recursively converts a pseudo tree-like string into an array of tree nodes.
- * Invalid nodes are skipped.
+ * Invalid nodes are skipped and only valid lines will be in final JSON tree.
  * @param {String[]} lines The pseudo tree-like string split into lines.
  * @param {Number} l Current line index.
  * @param {Object[]} nodes Array to store parsed nodes.
@@ -35,28 +35,28 @@ function err(line, l, msg) {
  * @param {Number} startSpaces Left padding of the first not empty tag in a tree
  * @returns {[Number, Number]} The updated line index and level difference.
  */
-function tree(lines, l, nodes, level, startSpaces = -1) {
+function parse(lines, l, nodes, level, startSpaces = -1) {
   for (let i = l; i < lines.length; i++) {
     const line = lines[i]
     if (!line) continue
     const m = line.match(LINE_RE) // 1: spaces, 2: tag, 3: textTag
-    if (!m) {err(line, i, `Wrong line format`); continue}
+    if (!m) {logErr(line, i, `Wrong line format`); continue}
     const spaces = m[1]?.length || 0
-    if (spaces % SPACE_AMOUNT !== 0) {err(line, i, `Wrong left indention. Must be a multiple of ${SPACE_AMOUNT}`); continue}
+    if (spaces % SPACE_AMOUNT !== 0) {logErr(line, i, `Wrong left indentation. Must be a multiple of ${SPACE_AMOUNT}`); continue}
     if (startSpaces < 0) startSpaces = spaces
-    if ((spaces - startSpaces) % SPACE_AMOUNT !== 0) {err(line, i, `Wrong left indention. Must be a multiple of ${SPACE_AMOUNT}`); continue}
+    if ((spaces - startSpaces) % SPACE_AMOUNT !== 0) {logErr(line, i, `Wrong left indentation. Must be a multiple of ${SPACE_AMOUNT}`); continue}
     const curLevel = (spaces - startSpaces) / SPACE_AMOUNT
-    if (curLevel > level && curLevel - level > 1) {err(line, i, `Wrong left indention level`); continue}
+    if (curLevel > level && curLevel - level > 1) {logErr(line, i, `Wrong left indentation level`); continue}
     const node = {tag : m[2]}
     m[3] && (node.textTag = m[3])
-    if (m[4] && !m[5]) {err(line, i, `Wrong attribute format. Should be [attrTag=attrName]`); continue}
+    if (m[4] && !m[5]) {logErr(line, i, `Wrong attribute format. Should be [attrTag=attrName]`); continue}
     m[4] && (node.attrTag = [m[4], m[5]])
     if (curLevel === level) nodes.push(node)
     else if (curLevel > level) {
-      if (!nodes.length) {err(line, i, `Wrong left indention level`); continue}
+      if (!nodes.length) {logErr(line, i, `Wrong left indentation level`); continue}
       nodes[nodes.length - 1].children = []
       let ret
-      [i, ret] = tree(lines, i, nodes[nodes.length - 1].children, level + 1, startSpaces)
+      [i, ret] = parse(lines, i, nodes[nodes.length - 1].children, level + 1, startSpaces)
       if (ret) return [i, ret - 1]
     }
     else return [i - 1, level - curLevel - 1]
@@ -78,7 +78,7 @@ function tree(lines, l, nodes, level, startSpaces = -1) {
 function toTree(tpl) {
   const lines = tpl.split('\n')
   const nodes = []
-  tree(lines, 0, nodes, 0)
+  parse(lines, 0, nodes, 0)
   return nodes
 }
 /**
@@ -114,7 +114,7 @@ function text(el) {
  * const nodes = [{tag: 'div'}, {tag: 'span'}]
  * const vars = variants(nodes) // -> [[{tag: 'div'}], [{tag: 'span'}], [{tag: 'div'}, {tag: 'span'}]]
  */
-function variants(nodes) {
+function subsets(nodes) {
   const len = nodes.length
   const size = 1 << len
   const result = new Array(size - 1)
@@ -152,14 +152,14 @@ function copy(obj, skipProps = SKIP) {
  * @param {Function} cb Callback function (cb(node, key)) for every node
  * @param {Object} skipProps Properties to skip during traversal.
  */
-function traverse(obj, cb, skipProps = SKIP) {
+function walk(obj, cb, skipProps = SKIP) {
   if (Array.isArray(obj)) {
     for (let i = 0; i < obj.length; i++) {
-      if (!skipProps[i]) cb(obj[i], i), traverse(obj[i], cb, skipProps)
+      if (!skipProps[i]) cb(obj[i], i), walk(obj[i], cb, skipProps)
     }
   } else if (typeof obj === 'object') {
     for (const p in obj) {
-      if (!skipProps[p]) cb(obj[p], p), traverse(obj[p], cb, skipProps)
+      if (!skipProps[p]) cb(obj[p], p), walk(obj[p], cb, skipProps)
     }
   } else cb(obj)
 }
@@ -180,7 +180,7 @@ function traverse(obj, cb, skipProps = SKIP) {
  * @param {Element} parentEl Parent element of the firstEl
  * @returns [score, Nodes[]|undefined]
  */
-function find(tplNodes, tplParent, firstEl, parentEl, level, maxLevel) {
+function match(tplNodes, tplParent, firstEl, parentEl, level, maxLevel) {
   if (!tplNodes?.length || !firstEl || !parentEl) return [0, undefined]
   let maxScore = 0
   let maxNodes
@@ -204,7 +204,7 @@ function find(tplNodes, tplParent, firstEl, parentEl, level, maxLevel) {
     while (el) {
       const firstChild = el.firstElementChild
       if (firstChild) {
-        const [deepScore, deepNodes] = find(tplNodes, tplParent, firstChild, el, level + 1, maxLevel)
+        const [deepScore, deepNodes] = match(tplNodes, tplParent, firstChild, el, level + 1, maxLevel)
         if (deepScore - 1 > maxScore && deepNodes) maxScore = deepScore - 1, maxNodes = deepNodes
       }
       el = el.nextElementSibling
@@ -231,7 +231,7 @@ function find(tplNodes, tplParent, firstEl, parentEl, level, maxLevel) {
     const upParent = parentEl?.parentNode
     const upFirst = upParent?.firstElementChild
     if (upFirst && upParent) {
-      const [upScore, upNodes] = find(tplNodes, tplParent, upFirst, upParent, level + 1, maxLevel)
+      const [upScore, upNodes] = match(tplNodes, tplParent, upFirst, upParent, level + 1, maxLevel)
       if (upScore - 1 > maxScore && upNodes) maxScore = upScore - 1, maxNodes = upNodes
     }
   }
@@ -244,9 +244,10 @@ function find(tplNodes, tplParent, firstEl, parentEl, level, maxLevel) {
    * 2. [{tag: 'span'}]                // max score 1
    * 3. [{tag: 'div'}, {tag: 'span'}]  // max score 2
    * 
-   * Algorithm will pick tree with maximized score.
+   * It picks every combination of pseudo nodes and try to find it in a DOM tree. The tree with
+   * maximized score will be returned as a result.
    */
-  const combinations = copy(variants(tplNodes))
+  const combinations = copy(subsets(tplNodes))
   for (let c = 0; c < combinations.length; c++) {
     const comb = combinations[c]
     let i = 0
@@ -260,15 +261,15 @@ function find(tplNodes, tplParent, firstEl, parentEl, level, maxLevel) {
         const correctTag = node.el.tagName?.toLowerCase() === node.tag
         if (correctTag) {
           node.score++
-          node.textTag && (node.text = text(node.el)) && node.score++
-          node.attrTag && (node.attr = node.el.getAttribute(node.attrTag[1])) && node.score++
+          if (node.textTag) {const t = text(node.el); t && (node.text = t) && node.score++}
+          if (node.attrTag) {const a = node.el.getAttribute(node.attrTag[1]); a && (node.attr = a) && node.score++}
         }
         // Here we go deeper and check inner nodes
         const firstChild = node.el?.firstElementChild
         if (firstChild) {
           const score = node.score
           if (node.children) {
-            find(node.children, node, firstChild, node.el, level, maxLevel)
+            match(node.children, node, firstChild, node.el, level, maxLevel)
             node.score += score
           }
         }
@@ -321,11 +322,11 @@ function find(tplNodes, tplParent, firstEl, parentEl, level, maxLevel) {
 function harvest(tpl, firstEl) {
   const tplNodes = {tag: 'root', children: toTree(tpl)} // add one more level as a root element
   let tplScore = 0
-  traverse(tplNodes, d => { if (isObj(d)) d.tag && tplScore++, d.textTag && tplScore++, d.attrTag && tplScore++ })
+  walk(tplNodes, d => { if (isObj(d)) d.tag && tplScore++, d.textTag && tplScore++, d.attrTag && tplScore++ })
   if (!firstEl) return [{}, tplScore, 0, []]
-  const [score, nodes] = find(tplNodes.children, tplNodes, firstEl, firstEl.parentNode, 0, tplScore)
+  const [score, nodes] = match(tplNodes.children, tplNodes, firstEl, firstEl.parentNode, 0, tplScore)
   const map = {}
-  traverse(nodes, d => {
+  walk(nodes, d => {
     if (!isObj(d)) return
     if (d.textTag && d.text) {
       map[d.textTag] && console.error(`Two or more equal text tags were found. Text tag: "${d.textTag}"`)

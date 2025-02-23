@@ -175,15 +175,15 @@ function walk(obj, cb, skipProps = SKIP) {
  * search. After all nodes will be found "score" and "text" properties will be added into
  * the result tree.
  * 
- * @param {Array} tplNodes Array of JSON nodes
- * @param {Array} tplParent Parent node of tplNodes array
- * @param {Element} firstEl Reference to the first DOM element to start finding on. Should
- * be associated with tplNodes[0]
+ * @param {Object} parentTpl Parent node of tplNodes array
  * @param {Element} parentEl Parent element of the firstEl
  * @returns [score, Nodes[]|undefined]
  */
-function match(tplNodes, tplParent, firstEl, parentEl, level, maxLevel) {
-  if (!tplNodes?.length || !firstEl || !parentEl) return [0, undefined]
+function match(parentTpl, parentEl, level, maxLevel) {
+  if (!parentTpl || !parentEl) return [0, undefined]
+  const tplNodes = parentTpl.children
+  const firstEl = parentEl.firstElementChild
+  if (!firstEl || !tplNodes) return [0, undefined]
   let maxScore = 0
   let maxNodes
 
@@ -207,7 +207,7 @@ function match(tplNodes, tplParent, firstEl, parentEl, level, maxLevel) {
     while (el) {
       const firstChild = el.firstElementChild
       if (firstChild) {
-        const [deepScore, deepNodes] = match(tplNodes, tplParent, firstChild, el, level + 1, maxLevel)
+        const [deepScore, deepNodes] = match(parentTpl, el, level + 1, maxLevel)
         if (deepScore - 1 > maxScore && deepNodes) maxScore = deepScore - 1, maxNodes = deepNodes
       }
       el = el.nextElementSibling
@@ -230,9 +230,8 @@ function match(tplNodes, tplParent, firstEl, parentEl, level, maxLevel) {
      * 2 h1 tags found minus one level skipped).
      */
     const upParent = parentEl?.parentNode
-    const upFirst = upParent?.firstElementChild
-    if (upFirst && upParent) {
-      const [upScore, upNodes] = match(tplNodes, tplParent, upFirst, upParent, level + 1, maxLevel)
+    if (upParent) {
+      const [upScore, upNodes] = match(parentTpl, upParent, level + 1, maxLevel)
       if (upScore - 1 > maxScore && upNodes) maxScore = upScore - 1, maxNodes = upNodes
     }
   }
@@ -266,11 +265,10 @@ function match(tplNodes, tplParent, firstEl, parentEl, level, maxLevel) {
           if (node.attrTag) {const a = node.el.getAttribute(node.attrTag[1]); a && (node.attr = a) && node.score++}
         }
         // Here we go deeper and check inner nodes
-        const firstChild = node.el?.firstElementChild
-        if (firstChild) {
+        if (node.el?.firstElementChild) {
           const score = node.score
           if (node.children) {
-            match(node.children, node, firstChild, node.el, level, maxLevel)
+            match(node, node.el, level, maxLevel)
             node.score += score
           }
         }
@@ -288,8 +286,8 @@ function match(tplNodes, tplParent, firstEl, parentEl, level, maxLevel) {
   }
 
   if (maxNodes?.length) {
-    tplParent.children = maxNodes
-    tplParent.score = maxScore
+    parentTpl.children = maxNodes
+    parentTpl.score = maxScore
   }
 
   return [maxScore, maxNodes]
@@ -325,7 +323,7 @@ function harvest(tpl, firstEl) {
   let tplScore = 0
   walk(tplNodes, d => { if (isObj(d)) d.tag && tplScore++, d.textTag && tplScore++, d.attrTag && tplScore++ })
   if (!firstEl) return [{}, tplScore, 0, []]
-  const [score, nodes] = match(tplNodes.children, tplNodes, firstEl, firstEl.parentNode, 0, tplScore)
+  const [score, nodes] = match(tplNodes, firstEl.parentNode, 0, tplScore)
   const map = {}
   walk(nodes, d => {
     if (!isObj(d)) return

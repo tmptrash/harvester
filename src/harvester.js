@@ -130,7 +130,8 @@ function subsets(nodes) {
 }
 /**
  * Makes a deep copy of the object or an array. skipProps is used to skip some properties
- * and copy them as is.
+ * and copy them as is. This is your responsibility to pass obj parameter without circular
+ * nodes. Use skipProps for that.
  * @param {Object|Array} obj Object or array to copy
  * @param {Object} skipProps Map of the properties we have to skip during copy
  * @returns {Object|Array} Copy of object or array
@@ -185,22 +186,23 @@ function match(tplNodes, tplParent, firstEl, parentEl, level, maxLevel) {
   if (!tplNodes?.length || !firstEl || !parentEl) return [0, undefined]
   let maxScore = 0
   let maxNodes
-  /**
-   * First, we check similar nodes in a one level deeper without combinations. This variant
-   * is used when DOM tree has extra nodes between current nodes in pseudo tree and DOM tree.
-   * For example (pseudo tree on the left and DOM tree on the right):
-   * 
-   * h1
-   * h1 -> div
-   *         h1
-   *         h1
-   * 
-   * In this example, we have to find two h1 tags inside the div, but div itself should be 
-   * skipped. We also should decrease score with -1 score, because we are skipping one level
-   * in a DOM tree. Every level skip decreases score with 1. So max possible score here === 2,
-   * but algorithm should return 1 (2 - 1: two h1 tags found minus one skipped level).
-   */
+
   if (level < maxLevel) {
+    /**
+     * First, we check similar nodes in a one level deeper without combinations. This variant
+     * is used when DOM tree has extra nodes between current nodes in pseudo tree and DOM tree.
+     * For example (pseudo tree on the left and DOM tree on the right):
+     * 
+     * h1
+     * h1 -> div
+     *         h1
+     *         h1
+     * 
+     * In this example, we have to find two h1 tags inside the div, but div itself should be 
+     * skipped. We also should decrease score with -1 score, because we are skipping one level
+     * in a DOM tree. Every level skip decreases score with 1. So max possible score here === 2,
+     * but algorithm should return 1 (2 - 1: two h1 tags found minus one skipped level).
+     */
     let el = firstEl
     while (el) {
       const firstChild = el.firstElementChild
@@ -210,25 +212,23 @@ function match(tplNodes, tplParent, firstEl, parentEl, level, maxLevel) {
       }
       el = el.nextElementSibling
     }
-  }
-  /**
-   * Second, we check similar nodes in one level upper without combinations. This variant
-   * is used when DOM tree has a lack of nodes between current nodes in pseudo tree and DOM
-   * tree. For example (pseudo tree on the left and DOM tree on the right):
-   * 
-   *         h1
-   * div  -> h1
-   *   h1      div
-   *   h1
-   * 
-   * In this example, we have to find two h1 tags of a div in a pseudo tree in a DOM tree.
-   * Please pay attention on the fact that two h1 tags in a DOM tree are on the root level
-   * and we have to skip div tag in a pseudo tree. In this case we also should decrease score
-   * with 1, because we skip one level in a pseudo tree. And again every level skipping
-   * decreases score with 1. Max possible score here is 3, but algorithm returns 1 (2 - 1:
-   * 2 h1 tags found minus one level skipped).
-   */
-  if (level < maxLevel) {
+    /**
+     * Second, we check similar nodes in one level upper without combinations. This variant
+     * is used when DOM tree has a lack of nodes between current nodes in pseudo tree and DOM
+     * tree. For example (pseudo tree on the left and DOM tree on the right):
+     * 
+     *         h1
+     * div  -> h1
+     *   h1      div
+     *   h1
+     * 
+     * In this example, we have to find two h1 tags of a div in a pseudo tree in a DOM tree.
+     * Please pay attention on the fact that two h1 tags in a DOM tree are on the root level
+     * and we have to skip div tag in a pseudo tree. In this case we also should decrease score
+     * with 1, because we skip one level in a pseudo tree. And again every level skipping
+     * decreases score with 1. Max possible score here is 3, but algorithm returns 1 (2 - 1:
+     * 2 h1 tags found minus one level skipped).
+     */
     const upParent = parentEl?.parentNode
     const upFirst = upParent?.firstElementChild
     if (upFirst && upParent) {

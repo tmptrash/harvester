@@ -108,13 +108,14 @@ function text(el) {
  * Returns all possible variants of nodes of the one level. Is used to compare all possible
  * nodes variants of pseudo tree and DOM nodes of one level.
  * @param {Node[]} nodes Array of nodes we have create variants from
- * @returns 
+ * @returns {Nodes[][]} Array of arrays of Nodes combinations
  * 
  * @example
  * const nodes = [{tag: 'div'}, {tag: 'span'}]
  * const vars = variants(nodes) // -> [[{tag: 'div'}], [{tag: 'span'}], [{tag: 'div'}, {tag: 'span'}]]
  */
 function subsets(nodes) {
+  if (!nodes) return []
   const len = nodes.length
   const size = 1 << len
   const result = new Array(size - 1)

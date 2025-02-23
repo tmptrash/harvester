@@ -57,7 +57,7 @@ describe('harvester library tests', () => {
     </body>
     </html>
     `, 'body > div')
-    expect(consoleSpy).toHaveBeenCalledWith("Error in line '     div' #:1. Wrong left indention. Must be a multiple of 2.")
+    expect(consoleSpy).toHaveBeenCalledWith("Error in line '     div' #:1. Wrong left indentation. Must be a multiple of 2.")
     expect(ret[0]).toEqual({})
   })
   it('test for an empty template and correct start padding', () => {

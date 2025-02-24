@@ -97,6 +97,72 @@ describe('harvester library tests', () => {
       expect(consoleSpy).toHaveBeenCalled()
       expect(tree).toEqual([{tag: 'div'}])
     })
+    it('parse an incorrect template with bad levels', () => {
+      const tpl = `
+          div
+        span
+      h1
+      `
+      const tree = toTree(tpl)
+      expect(consoleSpy).toHaveBeenCalled()
+      expect(tree).toEqual([{tag: 'div'}])
+    })
+    it('parse a correct template with tag name (1)', () => {
+      const tpl = `
+        div_123
+      `
+      const tree = toTree(tpl)
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(tree).toEqual([{tag: 'div_123'}])
+    })
+    it('parse a correct template with tag name (2)', () => {
+      const tpl = `
+        div-123
+      `
+      const tree = toTree(tpl)
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(tree).toEqual([{tag: 'div-123'}])
+    })
+    it('parse an incorrect template with space in tag name', () => {
+      const tpl = `
+        div 123
+      `
+      const tree = toTree(tpl)
+      expect(consoleSpy).toHaveBeenCalled()
+      expect(tree).toEqual([])
+    })
+    it('parse an incorrect template with a wrong tag name', () => {
+      const tpl = `
+        div/123
+      `
+      const tree = toTree(tpl)
+      expect(consoleSpy).toHaveBeenCalled()
+      expect(tree).toEqual([])
+    })
+    it('parse an incorrect template with wrong text tag', () => {
+      const tpl = `
+        div {text}
+      `
+      const tree = toTree(tpl)
+      expect(consoleSpy).toHaveBeenCalled()
+      expect(tree).toEqual([])
+    })
+    it('parse a correct template with correct text tag', () => {
+      const tpl = `
+        div{text}
+      `
+      const tree = toTree(tpl)
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(tree).toEqual([{tag: 'div', textTag: 'text'}])
+    })
+    it('parse an incorrect template with 2 text tags', () => {
+      const tpl = `
+        div{text}{test}
+      `
+      const tree = toTree(tpl)
+      expect(consoleSpy).toHaveBeenCalled()
+      expect(tree).toEqual([])
+    })
   })
 
   describe('test harvest() function', () => {

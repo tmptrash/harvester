@@ -58,12 +58,12 @@ function parse(lines, l, nodes, level, startSpaces = -1) {
       logErr(line, i, `Wrong left indentation level`)
       continue
     }
-    const node = {tag : m[2]}
-    m[3] && (node.textTag = m[3])
     if (m[4] && !m[5]) {
       logErr(line, i, `Wrong attribute format. Should be [attrTag=attrName]`)
       continue
     }
+    const node = {tag : m[2]}
+    m[3] && (node.textTag = m[3])
     m[4] && (node.attrTag = [m[4], m[5]])
     if (curLevel === level) nodes.push(node)
     else if (curLevel > level) {

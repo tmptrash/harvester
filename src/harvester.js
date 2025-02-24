@@ -12,7 +12,7 @@ const SPACE_AMOUNT = 2
  * Matches: indentation, tag name, optional text, and optional attribute.
  */
 const LINE_RE =
-  /^( *)?([a-zA-Z0-9_-]+)(?:\{([^}]*)\})?(?:\[([a-zA-Z0-9_-]+)=([a-zA-Z0-9_-]+?)\])? *$/
+  /^( *)?([a-zA-Z0-9_-]+)(?:\{([a-zA-Z0-9_]+)\})?(?:\[([a-zA-Z0-9_-]+)=([a-zA-Z0-9_-]+?)\])? *$/
 /**
  * Special constant for the jsdom emulation. The same like Node.TEXT_NODE under browser
  */

@@ -295,7 +295,7 @@ describe('harvester library tests', () => {
       expect(consoleSpy).toHaveBeenCalled()
       expect(tree).toEqual([{tag: 'div', textTag: 'l1'}, {tag: 'span', textTag: 'l3'}])
     })
-    it('parse a correct template with text', () => {
+    it('parse a correct template with text (1)', () => {
       const tree = toTree(`
       div{l1}
         div{l2}
@@ -304,6 +304,31 @@ describe('harvester library tests', () => {
       expect(tree).toEqual([
         {tag: 'div', textTag: 'l1', children: [{tag: 'div', textTag: 'l2'}]},
         {tag: 'span', textTag: 'l3'}
+      ])
+    })
+    it('parse a correct template with text (2)', () => {
+      const tree = toTree(`
+      div
+        div{l2}`)
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(tree).toEqual([{tag: 'div', children: [{tag: 'div', textTag: 'l2'}]}])
+    })
+    it('parse an incorrect template with empty text', () => {
+      const tree = toTree(`
+      div
+        div{}`)
+      expect(consoleSpy).toHaveBeenCalled()
+      expect(tree).toEqual([{tag: 'div'}])
+    })
+    it('parse a correct template with texts & attrs', () => {
+      const tree = toTree(`
+      div{text}[src=href]
+        h1{div}[href=src]`)
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(tree).toEqual([
+        {tag: 'div', textTag: 'text', attrTag: ['src', 'href'], children: [
+          {tag: 'h1', textTag: 'div', attrTag: ['href', 'src']}
+        ]}
       ])
     })
   })

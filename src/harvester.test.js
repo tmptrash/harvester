@@ -163,6 +163,62 @@ describe('harvester library tests', () => {
       expect(consoleSpy).toHaveBeenCalled()
       expect(tree).toEqual([])
     })
+    it('parse a correct template with a text tags & an attr', () => {
+      const tpl = `
+        div{text}[test=href]
+      `
+      const tree = toTree(tpl)
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(tree).toEqual([{tag: 'div', textTag: 'text', attrTag: ['test', 'href']}])
+    })
+    it('parse a correct template with an attr', () => {
+      const tpl = `
+        div[test=href]
+      `
+      const tree = toTree(tpl)
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(tree).toEqual([{tag: 'div', attrTag: ['test', 'href']}])
+    })
+    it('parse an incorrect template with only attr', () => {
+      const tpl = `
+        [test=href]
+      `
+      const tree = toTree(tpl)
+      expect(consoleSpy).toHaveBeenCalled()
+      expect(tree).toEqual([])
+    })
+    it('parse an incorrect template with only tag text', () => {
+      const tpl = `
+        {test}
+      `
+      const tree = toTree(tpl)
+      expect(consoleSpy).toHaveBeenCalled()
+      expect(tree).toEqual([])
+    })
+    it('parse a correct template with different levels (1)', () => {
+      const tree = toTree(`
+      div
+      div
+        span`)
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(tree).toEqual([{tag: 'div'}, {tag: 'div', children: [{tag: 'span'}]}])
+    })
+    it('parse a correct template with different levels (2)', () => {
+      const tree = toTree(`
+      div
+        div
+          h1`)
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(tree).toEqual([{tag: 'div', children: [{tag: 'div', children: [{tag: 'h1'}]}]}])
+    })
+    it('parse a correct template with different levels (3)', () => {
+      const tree = toTree(`
+      div
+        div
+      h1`)
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(tree).toEqual([{tag: 'div', children: [{tag: 'div'}]}, {tag: 'h1'}])
+    })
   })
 
   describe('test harvest() function', () => {

@@ -1,4 +1,3 @@
-// TODO: update comments
 /**
  * Properties to skip during deep copy or traversal of arrays/objects.
  */
@@ -27,8 +26,10 @@ function logErr(line, l, msg) {
   console.error(`Error in line '${line}' #:${l}. ${msg}.`)
 }
 /**
- * Recursively converts a pseudo tree-like string into an array of tree nodes.
+ * Recursively converts a pseudo tree-like string into an array of nodes.
  * Invalid nodes are skipped and only valid lines will be in final JSON tree.
+ * Full format of one line is: "  tag[textTag]{attrTag=attrName}".
+ * 
  * @param {String[]} lines The pseudo tree-like string split into lines.
  * @param {Number} l Current line index.
  * @param {Object[]} nodes Array to store parsed nodes.
@@ -79,13 +80,13 @@ function parse(lines, l, nodes, level, startSpaces = -1) {
   return [lines.length, 0]
 }
 /**
- * Converts a pseudo tree-like string into a structured tree.
+ * Converts a pseudo tree-like string into a JSON tree. Only valid nodes will be parsed.
  * @param {String} tpl The pseudo tree-like string in format:
  * 
  * div
  *   span
  *     h1{h1}
- *     img[src=src]
+ *     img{text}[src=src]
  * 
  * @returns {Object[]} Parsed tree structure.
  */
@@ -180,17 +181,22 @@ function walk(obj, cb, skipProps = SKIP) {
   } else cb(obj)
 }
 /**
- * Finds all nodes in a DOM tree according to JSON tree. The starting format of one node 
+ * Finds all nodes in a DOM tree according to JSON tree. The starting format of one JSON node 
  * is following: {el: Element, tag: str, textTag: str, children: []}, where: el - reference
  * to DOM element, tag - name of the HTML tag we are looking for, score - score of the 
  * current node (+1 if tag exist, +1 if textTag is not empty and HTML element also contains
  * a text in it), text - text from HTML tag, textTag - name of the text alias (will be used
  * later for creating data map), children - an array of the same nodes to support recursion
- * search. After all nodes will be found "score" and "text" properties will be added into
- * the result tree.
+ * search, attrTag - an array of two elements with name of the attribute tag and name of the
+ * attribute of the DOM element. After all nodes will be found "score" and "text" properties 
+ * will be added into the result nodes. The minimum node contains only "tag" property. This
+ * function uses fuzzy trees comparison and don't violate sequence of nodes on the same level.
+ * So if we are looking for span, div, h1 on one level their order is important. It's possible
+ * to have tags between them, but div is always stays after span and h1 is always after div 
+ * and span.
  * 
- * @param {Object} parentTpl Parent node of tplNodes array
- * @param {Element} parentEl Parent element of the firstEl
+ * @param {Object} parentTpl Parent node of the children we are comparing
+ * @param {Element} parentEl Assocoated with parentTpl node element in a DOM
  * @returns [score, Nodes[]|undefined]
  */
 function match(parentTpl, parentEl, level, maxLevel) {
@@ -266,7 +272,7 @@ function match(parentTpl, parentEl, level, maxLevel) {
     const comb = combinations[c]
     let i = 0
     comb[0].el = firstEl
-    for (let i = 1; i < comb.length; i++) comb[i].el = null
+    for (let i = 1; i < comb.length; i++) comb[i].el = undefined
     while (true) {
       const node = comb[i]
       const el = node.el
@@ -318,7 +324,7 @@ function match(parentTpl, parentEl, level, maxLevel) {
  * Difference between parent and child nodes may be only 2 spaces if we go from up to down. 
  * If we go from bottom to up it may be different. This template should pass as a first 
  * parameter to harvest() function. Second, firstNodeEl - should point to the first element 
- * in out tpl.
+ * in out tpl in a DOM.
  * 
  * @param {String} tpl template of pseudo tree-like string
  * @param {Element} firstEl Reference to the first DOM element for nodes[0]
@@ -334,7 +340,7 @@ function match(parentTpl, parentEl, level, maxLevel) {
  *   h1{title}
  *   span{price}
  *   img[img=href]`
- * harvest(tpl, $('div')) // [{title: 'Title', price: '12.34', img: 'http://...'}, 7, 7, [...]]
+ * harvest(tpl, $('div')) // [{title: 'Title', price: '12.34', img: 'http://...'}, 7, 6, [...]]
  */
 function harvest(tpl, firstEl) {
   const tplNodes = {tag: 'root', children: toTree(tpl)} // add one more level as a root element

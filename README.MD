@@ -2,8 +2,6 @@
 
 Harvester is a lightweight library for parsing pseudo-tree string representations into JSON structures and extracting matching data from DOM elements.
 
-## Usage
-
 ### `harvest(tpl: string, firstEl: Element): [Map, Number, Number, Object[]]`
 
 Finds matches between a pseudo-tree and the DOM structure, extracting text and attributes.
@@ -32,14 +30,6 @@ console.log(result)
   [...] // Extracted tree with metadata
 ]
 ```
-
-## Code Structure
-
-- `toTree()` – Converts a pseudo-tree string into JSON.
-- `harvest()` – Finds matches between a JSON tree and the DOM.
-- `copy()`, `walk()` – Utility functions for traversing and copying structures.
-- `match()` – Compares JSON tree nodes with DOM elements.
-- `parse()` – Main parser for the pseudo-tree.
 
 ## License
 

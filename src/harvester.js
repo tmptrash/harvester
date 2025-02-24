@@ -11,7 +11,8 @@ const SPACE_AMOUNT = 2
  * Regular expression to parse a single line of the pseudo tree-like string.
  * Matches: indentation, tag name, optional text, and optional attribute.
  */
-const LINE_RE = /^( *)?([a-zA-Z0-9_-]+)(?:\{([^}]*)\})?(?:\[([a-zA-Z0-9_-]+)=([a-zA-Z0-9_-]+?)\])? *$/
+const LINE_RE =
+  /^( *)?([a-zA-Z0-9_-]+)(?:\{([^}]*)\})?(?:\[([a-zA-Z0-9_-]+)=([a-zA-Z0-9_-]+?)\])? *$/
 /**
  * Special constant for the jsdom emulation. The same like Node.TEXT_NODE under browser
  */
@@ -42,15 +43,27 @@ function parse(lines, l, nodes, level, startSpaces = -1) {
     const m = line.match(LINE_RE) // 1: spaces, 2: tag, 3: textTag
     if (!m) {logErr(line, i, `Wrong line format`); continue}
     const spaces = m[1]?.length || 0
-    if (spaces % SPACE_AMOUNT !== 0) {logErr(line, i, `Wrong left indentation. Must be a multiple of ${SPACE_AMOUNT}`); continue}
+    if (spaces % SPACE_AMOUNT !== 0) {
+      logErr(line, i, `Wrong left indentation. Must be a multiple of ${SPACE_AMOUNT}`)
+      continue
+    }
     if (startSpaces < 0) startSpaces = spaces
-    if ((spaces - startSpaces) % SPACE_AMOUNT !== 0) {logErr(line, i, `Wrong left indentation. Must be a multiple of ${SPACE_AMOUNT}`); continue}
+    if ((spaces - startSpaces) % SPACE_AMOUNT !== 0) {
+      logErr(line, i, `Wrong left indentation. Must be a multiple of ${SPACE_AMOUNT}`)
+      continue
+    }
     const curLevel = (spaces - startSpaces) / SPACE_AMOUNT
     if (curLevel < 0) {logErr(line, i, `Wrong left indentation level`); continue}
-    if (curLevel > level && curLevel - level > 1) {logErr(line, i, `Wrong left indentation level`); continue}
+    if (curLevel > level && curLevel - level > 1) {
+      logErr(line, i, `Wrong left indentation level`)
+      continue
+    }
     const node = {tag : m[2]}
     m[3] && (node.textTag = m[3])
-    if (m[4] && !m[5]) {logErr(line, i, `Wrong attribute format. Should be [attrTag=attrName]`); continue}
+    if (m[4] && !m[5]) {
+      logErr(line, i, `Wrong attribute format. Should be [attrTag=attrName]`)
+      continue
+    }
     m[4] && (node.attrTag = [m[4], m[5]])
     if (curLevel === level) nodes.push(node)
     else if (curLevel > level) {
@@ -113,7 +126,7 @@ function text(el) {
  * 
  * @example
  * const nodes = [{tag: 'div'}, {tag: 'span'}]
- * const vars = variants(nodes) // -> [[{tag: 'div'}], [{tag: 'span'}], [{tag: 'div'}, {tag: 'span'}]]
+ * const vars = subsets(nodes) // [[{tag: 'div'}], [{tag: 'span'}], [{tag: 'div'}, {tag: 'span'}]]
  */
 function subsets(nodes) {
   if (!nodes) return []
@@ -256,20 +269,24 @@ function match(parentTpl, parentEl, level, maxLevel) {
     for (let i = 1; i < comb.length; i++) comb[i].el = null
     while (true) {
       const node = comb[i]
-      if (node.el) {
+      const el = node.el
+      if (el) {
         node.score = 0
         // here we check tag name, tag text and attribute
-        const correctTag = node.el.tagName?.toLowerCase() === node.tag
+        const correctTag = el.tagName?.toLowerCase() === node.tag
         if (correctTag) {
           node.score++
-          if (node.textTag) {const t = text(node.el); t && (node.text = t) && node.score++}
-          if (node.attrTag) {const a = node.el.getAttribute(node.attrTag[1]); a && (node.attr = a) && node.score++}
+          if (node.textTag) {const t = text(el); t && (node.text = t) && node.score++}
+          if (node.attrTag) {
+            const a = el.getAttribute(node.attrTag[1])
+            a && (node.attr = a) && node.score++
+          }
         }
         // Here we go deeper and check inner nodes
-        if (node.el?.firstElementChild) {
+        if (el?.firstElementChild) {
           const score = node.score
           if (node.children) {
-            match(node, node.el, level, maxLevel)
+            match(node, el, level, maxLevel)
             node.score += score
           }
         }
@@ -282,7 +299,7 @@ function match(parentTpl, parentEl, level, maxLevel) {
         } else i++
       } else if (--i < 0) break
       // skip all text nodes
-      comb[i].el = (comb[i]?.el || node.el)?.nextElementSibling
+      comb[i].el = (comb[i]?.el || el)?.nextElementSibling
     }
   }
 
@@ -317,24 +334,26 @@ function match(parentTpl, parentEl, level, maxLevel) {
  *   h1{title}
  *   span{price}
  *   img[img=href]`
- * harvest(tpl, $('div')) //-> [{title: 'My title', price: '12.34', img: 'https://...'}, 7, 7, [...]]
+ * harvest(tpl, $('div')) // [{title: 'Title', price: '12.34', img: 'http://...'}, 7, 7, [...]]
  */
 function harvest(tpl, firstEl) {
   const tplNodes = {tag: 'root', children: toTree(tpl)} // add one more level as a root element
   let tplScore = 0
-  walk(tplNodes, d => { if (isObj(d)) d.tag && tplScore++, d.textTag && tplScore++, d.attrTag && tplScore++ })
+  walk(tplNodes, d => {d?.tag && tplScore++, d.textTag && tplScore++, d.attrTag && tplScore++})
   if (!firstEl) return [{}, tplScore, 0, []]
   const [score, nodes] = match(tplNodes, firstEl.parentNode, 0, tplScore)
   const map = {}
   walk(nodes, d => {
     if (!isObj(d)) return
     if (d.textTag && d.text) {
-      map[d.textTag] && console.error(`Two or more equal text tags were found. Text tag: "${d.textTag}"`)
-      map[d.textTag] = d.text
+      const tag = d.textTag
+      map[tag] && console.error(`Two or more equal text tags were found. Text tag: "${tag}"`)
+      map[tag] = d.text
     }
     if (d.attrTag && d.attr) {
-      map[d.attrTag[0]] && console.error(`Two or more equal attr tags were found. Attr tag: "${d.attrTag[0]}"`)
-      map[d.attrTag[0]] = d.attr
+      const tag = d.attrTag[0]
+      map[tag] && console.error(`Two or more equal attr tags were found. Attr tag: "${tag}"`)
+      map[tag] = d.attr
     }
   })
 

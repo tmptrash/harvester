@@ -897,19 +897,19 @@ describe('harvester library tests', () => {
         <meta charset="UTF-8">
       </head>
       <body>
-      <section>
-        <span>span1
-          <span>span2</span>
-          <h1 src="test">H1</h1>
-          <div></div>
-          <h1>
+        <section>
+          <span>span1
+            <span>span2</span>
+            <h1 src="test">H1</h1>
             <div></div>
-            H2
-          </h1>
-        </span>
-        <div>div</div>
-      </section>
-    </body>
+            <h1>
+              <div></div>
+              H2
+            </h1>
+          </span>
+          <div>div</div>
+        </section>
+      </body>
       </html>
       `, 'body > section')
       expect(consoleSpy).not.toHaveBeenCalled()
@@ -927,17 +927,41 @@ describe('harvester library tests', () => {
         <meta charset="UTF-8">
       </head>
       <body>
-      <div>
-        <span src="src" attr="attr">span1
-        </span>
-      </div>
-    </body>
+        <div>
+          <span src="src" attr="attr">span1
+          </span>
+        </div>
+      </body>
       </html>
       `, 'body > div')
       expect(consoleSpy).not.toHaveBeenCalled()
       expect(ret[0]).toEqual({span: 'span1', attr: 'src'})
       expect(ret[1]).toEqual(4)
       expect(ret[2]).toEqual(4)
+    })
+    it('test a template with wrong text + attr format', () => {
+      const ret = testHarvester(`
+      div
+        span[attr=src]{span}
+        h1{h1}`, `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+        <div>
+          <span src="src" attr="attr">span1
+          </span>
+          <h1>H1</h1>
+        </div>
+      </body>
+      </html>
+      `, 'body > div')
+      expect(consoleSpy).toHaveBeenCalled()
+      expect(ret[0]).toEqual({h1: 'H1'})
+      expect(ret[1]).toEqual(3)
+      expect(ret[2]).toEqual(3)
     })
   })
 })

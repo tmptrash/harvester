@@ -199,7 +199,6 @@ function walk(obj, cb, skipProps = SKIP) {
  * @param {Element} parentEl Assocoated with parentTpl node element in a DOM
  * @param {Number} level Current level during compare
  * @param {Number} maxLevel Max level we may go to
- * @param {Element} root Root element we are not reaching during compare
  * @returns [score, Nodes[]|undefined]
  */
 function match(parentTpl, parentEl, level, maxLevel) {

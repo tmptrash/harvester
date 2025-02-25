@@ -823,5 +823,67 @@ describe('harvester library tests', () => {
       expect(ret[1]).toEqual(5)
       expect(ret[2]).toEqual(3)
     })
+    it('test complex template and the DOM', () => {
+      const ret = testHarvester(`
+      div
+        h1{h1}
+        h1{h2}`, `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+      <section>
+        <span>
+          <span>H0</span>
+          <h1>H1</h1>
+          <div></div>
+          <h1>
+            <div></div>
+            H2
+          </h1>
+        </span>
+      </section>
+    </body>
+      </html>
+      `, 'body > section')
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(ret[0]).toEqual({h1: 'H1', h2: 'H2'})
+      expect(ret[1]).toEqual(5)
+      expect(ret[2]).toEqual(3)
+    })
+    it('test complex template and the DOM', () => {
+      const ret = testHarvester(`
+      div
+        span{span}
+          h1{h1}
+        div{div}`, `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+      <section>
+        <span>span1
+          <span>span2</span>
+          <h1>H1</h1>
+          <div></div>
+          <h1>
+            <div></div>
+            H2
+          </h1>
+        </span>
+        <div>div</div>
+      </section>
+    </body>
+      </html>
+      `, 'body > section')
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(ret[0]).toEqual({span: 'span1', h1: 'H1', div: 'div'})
+      expect(ret[1]).toEqual(7)
+      expect(ret[2]).toEqual(6)
+    })
   })
 })

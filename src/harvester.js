@@ -201,7 +201,7 @@ function walk(obj, cb, skipProps = SKIP) {
  * @param {Number} maxLevel Max level we may go to
  * @returns [score, Nodes[]|undefined]
  */
-function match(parentTpl, parentEl, level, maxLevel) {
+function match(parentTpl, parentEl, rootEl, level, maxLevel) {
   if (!parentTpl || !parentEl) return [0, undefined]
   const tplNodes = parentTpl.children
   const firstEl = parentEl.firstElementChild
@@ -229,7 +229,7 @@ function match(parentTpl, parentEl, level, maxLevel) {
     while (el) {
       const firstChild = el.firstElementChild
       if (firstChild) {
-        const [deepScore, deepNodes] = match(parentTpl, el, level + 1, maxLevel)
+        const [deepScore, deepNodes] = match(parentTpl, el, rootEl, level + 1, maxLevel)
         if (deepScore - 1 > maxScore && deepNodes) maxScore = deepScore - 1, maxNodes = deepNodes
       }
       el = el.nextElementSibling
@@ -252,8 +252,8 @@ function match(parentTpl, parentEl, level, maxLevel) {
      * 2 h1 tags found minus one level skipped).
      */
     const upParent = parentEl?.parentNode
-    if (upParent) {
-      const [upScore, upNodes] = match(parentTpl, upParent, level + 1, maxLevel)
+    if (upParent && parentEl !== rootEl) {
+      const [upScore, upNodes] = match(parentTpl, upParent,  rootEl, level + 1, maxLevel)
       if (upScore - 1 > maxScore && upNodes) maxScore = upScore - 1, maxNodes = upNodes
     }
   }
@@ -294,7 +294,7 @@ function match(parentTpl, parentEl, level, maxLevel) {
         if (el?.firstElementChild) {
           const score = node.score
           if (node.children) {
-            match(node, el, level, maxLevel)
+            match(node, el, rootEl, level, maxLevel)
             node.score += score
           }
         }
@@ -349,7 +349,8 @@ function harvest(tpl, firstEl) {
   let tplScore = 0
   walk(tplNodes, d => {d?.tag && tplScore++, d.textTag && tplScore++, d.attrTag && tplScore++})
   if (!firstEl) return [{}, tplScore, 0, []]
-  const [score, nodes] = match(tplNodes, firstEl.parentNode, 0, tplScore)
+  const parentNode = firstEl.parentNode
+  const [score, nodes] = match(tplNodes, parentNode, parentNode, 0, tplScore)
   const map = {}
   walk(nodes, d => {
     if (!isObj(d)) return

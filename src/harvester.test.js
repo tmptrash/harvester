@@ -939,7 +939,7 @@ describe('harvester library tests', () => {
       expect(ret[1]).toEqual(4)
       expect(ret[2]).toEqual(4)
     })
-    it('test a template with wrong text + attr format', () => {
+    it('test a template with wrong text + attr format (1)', () => {
       const ret = testHarvester(`
       div
         span[attr=src]{span}
@@ -962,6 +962,141 @@ describe('harvester library tests', () => {
       expect(ret[0]).toEqual({h1: 'H1'})
       expect(ret[1]).toEqual(3)
       expect(ret[2]).toEqual(3)
+    })
+    it('test a template with wrong text + attr format (2)', () => {
+      const ret = testHarvester(`
+      div
+        span[attr=src][attr=src]
+        h1{h1}`, `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+        <div>
+          <span src="src" attr="attr">span1
+          </span>
+          <h1>H1</h1>
+        </div>
+      </body>
+      </html>
+      `, 'body > div')
+      expect(consoleSpy).toHaveBeenCalled()
+      expect(ret[0]).toEqual({h1: 'H1'})
+      expect(ret[1]).toEqual(3)
+      expect(ret[2]).toEqual(3)
+    })
+    it('test a template with attr name & _', () => {
+      const ret = testHarvester(`
+      div
+        span[attr_1=src]
+        h1{h1_}`, `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+        <div>
+          <span src="src" attr="attr">span1
+          </span>
+          <h1>H1</h1>
+        </div>
+      </body>
+      </html>
+      `, 'body > div')
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(ret[0]).toEqual({attr_1: 'src', h1_: 'H1'})
+      expect(ret[1]).toEqual(5)
+      expect(ret[2]).toEqual(5)
+    })
+    it('test a template with incorrect order on a same DOM level', () => {
+      const ret = testHarvester(`
+      div
+        span{s0}
+        h1{h1}
+        span{s1}`, `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+        <div>
+          <h1>H1</h1>
+          <span src="src" attr="attr">span0</span>
+          <div/>
+          <h1></h1>
+        </div>
+      </body>
+      </html>
+      `, 'body > div')
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(ret[0]).toEqual({h1: 'H1', s1: 'span0'})
+      expect(ret[1]).toEqual(7)
+      expect(ret[2]).toEqual(5)
+    })
+    xit('test a template with deep structure', () => {
+      const ret = testHarvester(`
+      div
+        span
+          ban
+           err1
+           err2
+            norm
+            norm
+          ban
+      span
+        a
+          span
+            h1
+            h1
+              section
+              h1
+          spun
+            a
+              img
+      close`, `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+        <div>
+          <span>
+            <ban>
+              <norm/>
+              <norm/>
+            </ban>
+            <ban/>
+          </span>
+        </div>
+        <span>
+          <a>
+            <span>
+              <h1>
+              <h1>
+                <section/>
+                <h1>
+              </h1>
+            </span>
+            <spun>
+              <a>
+                <img/>
+              </a>
+            </spun>
+          </a>
+        </span>
+        <close/>
+      </body>
+      </html>
+      `, 'body > div')
+      expect(consoleSpy).toHaveBeenCalled()
+      expect(ret[0]).toEqual({})
+      expect(ret[1]).toEqual(17)
+      expect(ret[2]).toEqual(17)
     })
   })
 })

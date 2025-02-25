@@ -24,9 +24,13 @@ console.log(result)
 
 ```js
 [
-  { title: 'Product Name', price: '99.99', img: 'https://example.com/image.jpg' }, // Extracted data
-  7, // Maximum possible score
-  6, // Matched score
+  {
+    title: 'Product Name',
+    price: '99.99',
+    img: 'https://example.com/image.jpg'
+  },    // Extracted data
+  7,    // Maximum possible score
+  6,    // Matched score
   [...] // Extracted tree with metadata
 ]
 ```

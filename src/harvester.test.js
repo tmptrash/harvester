@@ -823,7 +823,7 @@ describe('harvester library tests', () => {
       expect(ret[1]).toEqual(5)
       expect(ret[2]).toEqual(3)
     })
-    it('test complex template and the DOM', () => {
+    it('test complex template and the DOM (1)', () => {
       const ret = testHarvester(`
       div
         h1{h1}
@@ -853,7 +853,7 @@ describe('harvester library tests', () => {
       expect(ret[1]).toEqual(5)
       expect(ret[2]).toEqual(3)
     })
-    it('test complex template and the DOM', () => {
+    it('test complex template and the DOM (2)', () => {
       const ret = testHarvester(`
       div
         span{span}
@@ -884,6 +884,60 @@ describe('harvester library tests', () => {
       expect(ret[0]).toEqual({span: 'span1', h1: 'H1', div: 'div'})
       expect(ret[1]).toEqual(7)
       expect(ret[2]).toEqual(6)
+    })
+    it('test complex template and the DOM (3)', () => {
+      const ret = testHarvester(`
+      div
+        span{span}
+          h1{h1}[attr=src]
+        div{div}`, `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+      <section>
+        <span>span1
+          <span>span2</span>
+          <h1 src="test">H1</h1>
+          <div></div>
+          <h1>
+            <div></div>
+            H2
+          </h1>
+        </span>
+        <div>div</div>
+      </section>
+    </body>
+      </html>
+      `, 'body > section')
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(ret[0]).toEqual({span: 'span1', h1: 'H1', attr: 'test', div: 'div'})
+      expect(ret[1]).toEqual(8)
+      expect(ret[2]).toEqual(7)
+    })
+    it('test complex template and the DOM (3)', () => {
+      const ret = testHarvester(`
+      div
+        span{span}[attr=src]`, `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+      <div>
+        <span src="src" attr="attr">span1
+        </span>
+      </div>
+    </body>
+      </html>
+      `, 'body > div')
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(ret[0]).toEqual({span: 'span1', attr: 'src'})
+      expect(ret[1]).toEqual(4)
+      expect(ret[2]).toEqual(4)
     })
   })
 })

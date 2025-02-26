@@ -31,7 +31,7 @@ describe('harvester library tests', () => {
     it('parse a template (1)', () => {
       const tpl = `div`
       const tree = toTree(tpl)
-      expect(tree).toEqual([{tag: 'div'}])
+      expect(tree).toEqual([{tag: 'DIV'}])
     })
     it('parse an incorrect template (1)', () => {
       const tpl = ` div`
@@ -55,19 +55,19 @@ describe('harvester library tests', () => {
       const tpl = `  div`
       const tree = toTree(tpl)
       expect(consoleSpy).not.toHaveBeenCalled()
-      expect(tree).toEqual([{tag: 'div'}])
+      expect(tree).toEqual([{tag: 'DIV'}])
     })
     it('parse a correct template (2)', () => {
       const tpl = `    div`
       const tree = toTree(tpl)
       expect(consoleSpy).not.toHaveBeenCalled()
-      expect(tree).toEqual([{tag: 'div'}])
+      expect(tree).toEqual([{tag: 'DIV'}])
     })
     it('parse a correct template (3)', () => {
       const tpl = `    div  `
       const tree = toTree(tpl)
       expect(consoleSpy).not.toHaveBeenCalled()
-      expect(tree).toEqual([{tag: 'div'}])
+      expect(tree).toEqual([{tag: 'DIV'}])
     })
     it('parse a correct template (4)', () => {
       const tpl = `
@@ -77,7 +77,7 @@ describe('harvester library tests', () => {
       `
       const tree = toTree(tpl)
       expect(consoleSpy).not.toHaveBeenCalled()
-      expect(tree).toEqual([{tag: 'div'}])
+      expect(tree).toEqual([{tag: 'DIV'}])
     })
     it('parse a correct template (5)', () => {
       const tpl = `
@@ -86,7 +86,7 @@ describe('harvester library tests', () => {
       `
       const tree = toTree(tpl)
       expect(consoleSpy).not.toHaveBeenCalled()
-      expect(tree).toEqual([{tag: 'div'}, {tag: 'span'}])
+      expect(tree).toEqual([{tag: 'DIV'}, {tag: 'SPAN'}])
     })
     it('parse an incorrect template with bad level', () => {
       const tpl = `
@@ -95,7 +95,7 @@ describe('harvester library tests', () => {
       `
       const tree = toTree(tpl)
       expect(consoleSpy).toHaveBeenCalled()
-      expect(tree).toEqual([{tag: 'div'}])
+      expect(tree).toEqual([{tag: 'DIV'}])
     })
     it('parse an incorrect template with bad levels', () => {
       const tpl = `
@@ -105,7 +105,7 @@ describe('harvester library tests', () => {
       `
       const tree = toTree(tpl)
       expect(consoleSpy).toHaveBeenCalled()
-      expect(tree).toEqual([{tag: 'div'}])
+      expect(tree).toEqual([{tag: 'DIV'}])
     })
     it('parse a correct template with tag name (1)', () => {
       const tpl = `
@@ -113,7 +113,7 @@ describe('harvester library tests', () => {
       `
       const tree = toTree(tpl)
       expect(consoleSpy).not.toHaveBeenCalled()
-      expect(tree).toEqual([{tag: 'div_123'}])
+      expect(tree).toEqual([{tag: 'DIV_123'}])
     })
     it('parse a correct template with tag name (2)', () => {
       const tpl = `
@@ -121,7 +121,7 @@ describe('harvester library tests', () => {
       `
       const tree = toTree(tpl)
       expect(consoleSpy).not.toHaveBeenCalled()
-      expect(tree).toEqual([{tag: 'div-123'}])
+      expect(tree).toEqual([{tag: 'DIV-123'}])
     })
     it('parse an incorrect template with space in tag name', () => {
       const tpl = `
@@ -153,7 +153,7 @@ describe('harvester library tests', () => {
       `
       const tree = toTree(tpl)
       expect(consoleSpy).not.toHaveBeenCalled()
-      expect(tree).toEqual([{tag: 'div', textTag: 'text'}])
+      expect(tree).toEqual([{tag: 'DIV', textTag: 'text'}])
     })
     it('parse an incorrect template with 2 text tags', () => {
       const tpl = `
@@ -169,7 +169,7 @@ describe('harvester library tests', () => {
       `
       const tree = toTree(tpl)
       expect(consoleSpy).not.toHaveBeenCalled()
-      expect(tree).toEqual([{tag: 'div', textTag: 'text', attrTag: ['test', 'href']}])
+      expect(tree).toEqual([{tag: 'DIV', textTag: 'text', attrTag: ['test', 'href']}])
     })
     it('parse a correct template with an attr', () => {
       const tpl = `
@@ -177,7 +177,7 @@ describe('harvester library tests', () => {
       `
       const tree = toTree(tpl)
       expect(consoleSpy).not.toHaveBeenCalled()
-      expect(tree).toEqual([{tag: 'div', attrTag: ['test', 'href']}])
+      expect(tree).toEqual([{tag: 'DIV', attrTag: ['test', 'href']}])
     })
     it('parse an incorrect template with only attr', () => {
       const tpl = `
@@ -202,7 +202,7 @@ describe('harvester library tests', () => {
       h1
     section`)
       expect(consoleSpy).toHaveBeenCalled()
-      expect(tree).toEqual([{tag: 'div', children: [{tag: 'div'}]}, {tag: 'h1'}])
+      expect(tree).toEqual([{tag: 'DIV', children: [{tag: 'DIV'}]}, {tag: 'H1'}])
     })
     it('parse a correct template with different levels (1)', () => {
       const tree = toTree(`
@@ -210,7 +210,7 @@ describe('harvester library tests', () => {
       div
         span`)
       expect(consoleSpy).not.toHaveBeenCalled()
-      expect(tree).toEqual([{tag: 'div'}, {tag: 'div', children: [{tag: 'span'}]}])
+      expect(tree).toEqual([{tag: 'DIV'}, {tag: 'DIV', children: [{tag: 'SPAN'}]}])
     })
     it('parse a correct template with different levels (2)', () => {
       const tree = toTree(`
@@ -218,7 +218,7 @@ describe('harvester library tests', () => {
         div
           h1`)
       expect(consoleSpy).not.toHaveBeenCalled()
-      expect(tree).toEqual([{tag: 'div', children: [{tag: 'div', children: [{tag: 'h1'}]}]}])
+      expect(tree).toEqual([{tag: 'DIV', children: [{tag: 'DIV', children: [{tag: 'H1'}]}]}])
     })
     it('parse a correct template with different levels (3)', () => {
       const tree = toTree(`
@@ -226,7 +226,7 @@ describe('harvester library tests', () => {
         div
       h1`)
       expect(consoleSpy).not.toHaveBeenCalled()
-      expect(tree).toEqual([{tag: 'div', children: [{tag: 'div'}]}, {tag: 'h1'}])
+      expect(tree).toEqual([{tag: 'DIV', children: [{tag: 'DIV'}]}, {tag: 'H1'}])
     })
     it('parse a correct template with different levels (4)', () => {
       const tree = toTree(`
@@ -236,7 +236,7 @@ describe('harvester library tests', () => {
         table`)
       expect(consoleSpy).not.toHaveBeenCalled()
       expect(tree).toEqual([
-        {tag: 'div', children: [{tag: 'div'}]}, {tag: 'h1', children: [{tag: 'table'}]}
+        {tag: 'DIV', children: [{tag: 'DIV'}]}, {tag: 'H1', children: [{tag: 'TABLE'}]}
       ])
     })
     it('parse a correct template with different levels (5)', () => {
@@ -247,7 +247,7 @@ describe('harvester library tests', () => {
       table`)
       expect(consoleSpy).not.toHaveBeenCalled()
       expect(tree).toEqual([
-        {tag: 'div', children: [{tag: 'div', children: [{tag: 'h1'}]}]}, {tag: 'table'}
+        {tag: 'DIV', children: [{tag: 'DIV', children: [{tag: 'H1'}]}]}, {tag: 'TABLE'}
       ])
     })
     it('parse an incorrect template with broken levels (1)', () => {
@@ -261,7 +261,7 @@ describe('harvester library tests', () => {
       div
           div`)
       expect(consoleSpy).toHaveBeenCalled()
-      expect(tree).toEqual([{tag: 'div'}])
+      expect(tree).toEqual([{tag: 'DIV'}])
     })
     it('parse an incorrect template with broken levels (3)', () => {
       const tree = toTree(`
@@ -269,7 +269,7 @@ describe('harvester library tests', () => {
           div
       span`)
       expect(consoleSpy).toHaveBeenCalled()
-      expect(tree).toEqual([{tag: 'div'}, {tag: 'span'}])
+      expect(tree).toEqual([{tag: 'DIV'}, {tag: 'SPAN'}])
     })
     it('parse an incorrect template with broken levels (4)', () => {
       const tree = toTree(`
@@ -277,7 +277,7 @@ describe('harvester library tests', () => {
     div
       span`)
       expect(consoleSpy).toHaveBeenCalled()
-      expect(tree).toEqual([{tag: 'div'}, {tag: 'span'}])
+      expect(tree).toEqual([{tag: 'DIV'}, {tag: 'SPAN'}])
     })
     it('parse an incorrect template with broken levels & with text (1)', () => {
       const tree = toTree(`
@@ -285,7 +285,7 @@ describe('harvester library tests', () => {
     div{l2}
       span{l3}`)
       expect(consoleSpy).toHaveBeenCalled()
-      expect(tree).toEqual([{tag: 'div', textTag: 'l1'}, {tag: 'span', textTag: 'l3'}])
+      expect(tree).toEqual([{tag: 'DIV', textTag: 'l1'}, {tag: 'SPAN', textTag: 'l3'}])
     })
     it('parse an incorrect template with broken levels & with text (2)', () => {
       const tree = toTree(`
@@ -293,7 +293,7 @@ describe('harvester library tests', () => {
           div{l2}
       span{l3}`)
       expect(consoleSpy).toHaveBeenCalled()
-      expect(tree).toEqual([{tag: 'div', textTag: 'l1'}, {tag: 'span', textTag: 'l3'}])
+      expect(tree).toEqual([{tag: 'DIV', textTag: 'l1'}, {tag: 'SPAN', textTag: 'l3'}])
     })
     it('parse a correct template with text (1)', () => {
       const tree = toTree(`
@@ -302,8 +302,8 @@ describe('harvester library tests', () => {
       span{l3}`)
       expect(consoleSpy).not.toHaveBeenCalled()
       expect(tree).toEqual([
-        {tag: 'div', textTag: 'l1', children: [{tag: 'div', textTag: 'l2'}]},
-        {tag: 'span', textTag: 'l3'}
+        {tag: 'DIV', textTag: 'l1', children: [{tag: 'DIV', textTag: 'l2'}]},
+        {tag: 'SPAN', textTag: 'l3'}
       ])
     })
     it('parse a correct template with text (2)', () => {
@@ -311,14 +311,14 @@ describe('harvester library tests', () => {
       div
         div{l2}`)
       expect(consoleSpy).not.toHaveBeenCalled()
-      expect(tree).toEqual([{tag: 'div', children: [{tag: 'div', textTag: 'l2'}]}])
+      expect(tree).toEqual([{tag: 'DIV', children: [{tag: 'DIV', textTag: 'l2'}]}])
     })
     it('parse an incorrect template with empty text', () => {
       const tree = toTree(`
       div
         div{}`)
       expect(consoleSpy).toHaveBeenCalled()
-      expect(tree).toEqual([{tag: 'div'}])
+      expect(tree).toEqual([{tag: 'DIV'}])
     })
     it('parse a correct template with texts & attrs', () => {
       const tree = toTree(`
@@ -326,8 +326,8 @@ describe('harvester library tests', () => {
         h1{div}[href=src]`)
       expect(consoleSpy).not.toHaveBeenCalled()
       expect(tree).toEqual([
-        {tag: 'div', textTag: 'text', attrTag: ['src', 'href'], children: [
-          {tag: 'h1', textTag: 'div', attrTag: ['href', 'src']}
+        {tag: 'DIV', textTag: 'text', attrTag: ['src', 'href'], children: [
+          {tag: 'H1', textTag: 'div', attrTag: ['href', 'src']}
         ]}
       ])
     })

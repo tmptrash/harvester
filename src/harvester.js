@@ -308,8 +308,7 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
       if (el) {
         node.score = 0
         // here we check tag name, tag text and attribute
-        const correctTag = el.tagName === node.tag
-        if (correctTag) {
+        if (el.tagName === node.tag) {
           node.score++
           if (node.textTag) {const t = text(el); t && (node.text = t) && node.score++}
           if (node.attrTag) {
@@ -318,7 +317,7 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
           }
         }
         // Here we go deeper and check inner nodes
-        if (el?.firstElementChild) {
+        if (el.firstElementChild) {
           const score = node.score
           if (node.children) {
             match(node, el, rootEl, level, maxLevel)

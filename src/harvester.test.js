@@ -1037,7 +1037,7 @@ describe('harvester library tests', () => {
       expect(ret[1]).toEqual(7)
       expect(ret[2]).toEqual(5)
     })
-    xit('test a template with deep structure', () => {
+    it('test a template with deep structure', () => {
       const ret = testHarvester(`
       div
         span
@@ -1048,15 +1048,9 @@ describe('harvester library tests', () => {
             norm
           ban
       span
-        a
-          span
-            h1
-            h1
-              section
-              h1
-          spun
-            a
-              img
+        a[href=href]
+          h1
+          h1{h1}
       close`, `
       <!DOCTYPE html>
       <html lang="en">
@@ -1074,10 +1068,10 @@ describe('harvester library tests', () => {
           </span>
         </div>
         <span>
-          <a>
+          <a href="url">
             <span>
-              <h1>
-              <h1>
+              <h1></h1>
+              <h1>H1</h1>
                 <section/>
                 <h1>
               </h1>
@@ -1094,9 +1088,9 @@ describe('harvester library tests', () => {
       </html>
       `, 'body > div')
       expect(consoleSpy).toHaveBeenCalled()
-      expect(ret[0]).toEqual({})
-      expect(ret[1]).toEqual(17)
-      expect(ret[2]).toEqual(17)
+      expect(ret[0]).toEqual({href: 'url', h1: 'H1'})
+      expect(ret[1]).toEqual(13)
+      expect(ret[2]).toEqual(10)
     })
   })
 })

@@ -17,6 +17,12 @@ const LINE_RE =
  */
 const TEXT_NODE = 3
 /**
+ * Cache for recursion. Contains DOM node as a key and score as a value. It's used to optimize
+ * recursion process. If score of cached sub-tree is lower than maxScore there is no sense to
+ * traverse into this sub-node and we may skip it.
+ */
+const SCORE_CACHE = new Map()
+/**
  * Displays an error message during parsing of the pseudo tree-like string.
  * @param {String} line The current line being parsed.
  * @param {Number} l Line number.
@@ -227,10 +233,20 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
      */
     let el = firstEl
     while (el) {
-      const firstChild = el.firstElementChild
-      if (firstChild) {
-        const [deepScore, deepNodes] = match(parentTpl, el, rootEl, level + 1, maxLevel)
-        if (deepScore - 1 > maxScore && deepNodes) maxScore = deepScore - 1, maxNodes = deepNodes
+      if (el.firstElementChild) {
+        /**
+         * Optimization logic: we have to skip nodes with lower score, because other node is
+         * better than current.
+         */
+        const score = SCORE_CACHE.get(el)
+        if (score === undefined || score > maxScore) {
+          const [deepScore, deepNodes] = match(parentTpl, el, rootEl, level + 1, maxLevel)
+          if (deepScore - 1 > maxScore && deepNodes) {
+            maxScore = deepScore - 1
+            score === undefined && SCORE_CACHE.set(el, maxScore)
+            maxNodes = deepNodes
+          }
+        }
       }
       el = el.nextElementSibling
     }
@@ -253,8 +269,19 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
      */
     const upParent = parentEl?.parentNode
     if (upParent && parentEl !== rootEl) {
-      const [upScore, upNodes] = match(parentTpl, upParent,  rootEl, level + 1, maxLevel)
-      if (upScore - 1 > maxScore && upNodes) maxScore = upScore - 1, maxNodes = upNodes
+      /**
+       * Optimization logic: we have to skip nodes with lower score, because other node is
+       * better than current.
+       */
+      const score = SCORE_CACHE.get(el)
+      if (score === undefined || score > maxScore) {
+        const [upScore, upNodes] = match(parentTpl, upParent,  rootEl, level + 1, maxLevel)
+        if (upScore - 1 > maxScore && upNodes) {
+          maxScore = upScore - 1
+          score === undefined && SCORE_CACHE.set(el, maxScore)
+          maxNodes = upNodes
+        }
+      }
     }
   }
   /**
@@ -295,6 +322,7 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
           const score = node.score
           if (node.children) {
             match(node, el, rootEl, level, maxLevel)
+            SCORE_CACHE.set(el, node.score)
             node.score += score
           }
         }
@@ -350,6 +378,7 @@ function harvest(tpl, firstEl) {
   walk(tplNodes, d => {d?.tag && tplScore++, d.textTag && tplScore++, d.attrTag && tplScore++})
   if (!firstEl) return [{}, tplScore, 0, []]
   const parentNode = firstEl.parentNode
+  SCORE_CACHE.clear()
   const [score, nodes] = match(tplNodes, parentNode, parentNode, 0, tplScore)
   const map = {}
   walk(nodes, d => {

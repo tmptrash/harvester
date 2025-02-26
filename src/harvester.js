@@ -23,6 +23,10 @@ const TEXT_NODE = 3
  */
 const SCORE_CACHE = new Map()
 /**
+ * Global identifier for pseudo tree-like nodes
+ */
+let id = 0
+/**
  * Displays an error message during parsing of the pseudo tree-like string.
  * @param {String} line The current line being parsed.
  * @param {Number} l Line number.
@@ -69,11 +73,12 @@ function parse(lines, l, nodes, level, startSpaces = -1) {
       logErr(line, i, `Wrong attribute format. Should be [attrTag=attrName]`)
       continue
     }
-    const node = {tag : m[2].toUpperCase()}
-    m[3] && (node.textTag = m[3])
-    m[4] && (node.attrTag = [m[4], m[5]])
-    if (curLevel === level) nodes.push(node)
-    else if (curLevel > level) {
+    if (curLevel === level) {
+      const node = {id: id++, tag : m[2].toUpperCase()}
+      m[3] && (node.textTag = m[3])
+      m[4] && (node.attrTag = [m[4], m[5]])  
+      nodes.push(node)
+    } else if (curLevel > level) {
       if (!nodes.length) {logErr(line, i, `Wrong left indentation level`); continue}
       nodes[nodes.length - 1].children = []
       let ret
@@ -99,6 +104,7 @@ function parse(lines, l, nodes, level, startSpaces = -1) {
 function toTree(tpl) {
   const lines = tpl.split('\n')
   const nodes = []
+  id = 0
   parse(lines, 0, nodes, 0)
   return nodes
 }
@@ -109,6 +115,16 @@ function toTree(tpl) {
  */
 function isObj(val) {
   return typeof val === 'object' && !Array.isArray(val) && val !== null
+}
+/**
+ * Returns a cached scope for DOM element and pseudo tree-like node id
+ * @param {Element} el DOM element
+ * @param {Number} id Unique id of pseudo tree-like node
+ * @returns {Number|undefined} scope or undefined
+ */
+function cachedScope(el, id) {
+  if (SCORE_CACHE.get(el) === undefined) SCORE_CACHE.set(el, new Map())
+  return SCORE_CACHE.get(el).get(id)
 }
 /**
  * Retrieves the first direct trimmed text content of an element, skipping nested elements.
@@ -133,7 +149,7 @@ function text(el) {
  * 
  * @example
  * const nodes = [{tag: 'div'}, {tag: 'span'}]
- * const vars = subsets(nodes) // [[{tag: 'div'}], [{tag: 'span'}], [{tag: 'div'}, {tag: 'span'}]]
+ * const vars = subsets(nodes) // [[{tag: 'div'}, {tag: 'span'}], [{tag: 'span'}], [{tag: 'div'}]]
  */
 function subsets(nodes) {
   if (!nodes) return []
@@ -141,7 +157,7 @@ function subsets(nodes) {
   const size = 1 << len
   const result = new Array(size - 1)
 
-  for (let i = 1, idx = 0; i < size; i++) {
+  for (let i = size - 1, idx = 0; i > 0; i--) {
     const subset = []
     for (let j = 0; j < len; j++) (i & (1 << j)) && subset.push(nodes[j])
     subset.length && (result[idx++] = subset)
@@ -238,12 +254,12 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
          * Optimization logic: we have to skip nodes with lower score, because other node is
          * better than current.
          */
-        const score = SCORE_CACHE.get(el)
+        const score = cachedScope(el, parentTpl.id)
         if (score === undefined || score > maxScore) {
           const [deepScore, deepNodes] = match(parentTpl, el, rootEl, level + 1, maxLevel)
           if (deepScore - 1 > maxScore && deepNodes) {
             maxScore = deepScore - 1
-            score === undefined && SCORE_CACHE.set(el, maxScore)
+            score === undefined && SCORE_CACHE.get(el).set(parentTpl.id, maxScore)
             maxNodes = deepNodes
           }
         }
@@ -273,12 +289,12 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
        * Optimization logic: we have to skip nodes with lower score, because other node is
        * better than current.
        */
-      const score = SCORE_CACHE.get(el)
+      const score = cachedScope(upParent, parentTpl.id)
       if (score === undefined || score > maxScore) {
         const [upScore, upNodes] = match(parentTpl, upParent,  rootEl, level + 1, maxLevel)
         if (upScore - 1 > maxScore && upNodes) {
           maxScore = upScore - 1
-          score === undefined && SCORE_CACHE.set(el, maxScore)
+          score === undefined && SCORE_CACHE.get(upParent).set(parentTpl.id, maxScore)
           maxNodes = upNodes
         }
       }
@@ -321,7 +337,7 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
           const score = node.score
           if (node.children) {
             match(node, el, rootEl, level, maxLevel)
-            SCORE_CACHE.set(el, node.score)
+            if (cachedScope(el, node.id) === undefined) SCORE_CACHE.get(el).set(node.id, node.score)
             node.score += score
           }
         }

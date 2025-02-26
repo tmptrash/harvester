@@ -1,6 +1,6 @@
-# Harvester
+# Harvester 🚜
 
-Harvester is a lightweight and highly optimized library for parsing pseudo-tree string representations into JSON structures and efficiently extracting matching data from DOM elements. 🚀
+Harvester is a lightweight and highly optimized library for parsing pseudo-tree string representations into JSON structures and efficiently extracting matching data from DOM elements.
 
 ### `harvest(tpl: string, firstEl: Element): [Map, Number, Number, Object[]]`
 

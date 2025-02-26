@@ -1,7 +1,7 @@
 {
   "name": "harvester",
-  "version": "1.0.0",
-  "description": "Harvester is a JavaScript library for \"fuzzy\" HTML data extraction based on templates",
+  "version": "0.1.0",
+  "description": "Harvester is a JavaScript library for \"fuzzy\" HTML data extraction based on pseudo tree-like templates",
   "main": "index.js",
   "scripts": {
     "test": "jest"

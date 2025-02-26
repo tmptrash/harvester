@@ -69,7 +69,7 @@ function parse(lines, l, nodes, level, startSpaces = -1) {
       logErr(line, i, `Wrong attribute format. Should be [attrTag=attrName]`)
       continue
     }
-    const node = {tag : m[2]}
+    const node = {tag : m[2].toUpperCase()}
     m[3] && (node.textTag = m[3])
     m[4] && (node.attrTag = [m[4], m[5]])
     if (curLevel === level) nodes.push(node)
@@ -308,7 +308,7 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
       if (el) {
         node.score = 0
         // here we check tag name, tag text and attribute
-        const correctTag = el.tagName?.toLowerCase() === node.tag
+        const correctTag = el.tagName === node.tag
         if (correctTag) {
           node.score++
           if (node.textTag) {const t = text(el); t && (node.text = t) && node.score++}

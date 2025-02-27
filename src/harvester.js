@@ -17,13 +17,15 @@ const LINE_RE =
  */
 const TEXT_NODE = 3
 /**
- * Cache for recursion. Contains DOM node as a key and score as a value. It's used to optimize
+ * Two dimentional cache for score of the nodes. Contains DOM node as a first key and pseudo
+ * tree-like node unique id as a second key, which contains a score. It's used to optimize
  * recursion process. If score of cached sub-tree is lower than maxScore there is no sense to
- * traverse into this sub-node and we may skip it.
+ * traverse into this sub-node and we may skip it. Ex: const score = SCORE_CACHE.get(el).get(id).
  */
 const SCORE_CACHE = new Map()
 /**
- * Global identifier for pseudo tree-like nodes
+ * Global identifier for pseudo tree-like nodes. Every node obtains id++ as unique identifier.
+ * This variable should be reset before every usege (before toTree() call).
  */
 let id = 0
 /**
@@ -117,7 +119,8 @@ function isObj(val) {
   return typeof val === 'object' && !Array.isArray(val) && val !== null
 }
 /**
- * Returns a cached scope for DOM element and pseudo tree-like node id
+ * Returns a cached scope for DOM element and pseudo tree-like node id. So if we trying to 
+ * calculate a score for the DOM node and all it's sub-nodes we have to check this cache first.
  * @param {Element} el DOM element
  * @param {Number} id Unique id of pseudo tree-like node
  * @returns {Number|undefined} scope or undefined
@@ -143,13 +146,19 @@ function text(el) {
 }
 /**
  * Returns all possible variants of nodes of the one level. Is used to compare all possible
- * nodes variants of pseudo tree and DOM nodes of one level.
- * @param {Node[]} nodes Array of nodes we have create variants from
+ * nodes variants of pseudo tree and DOM nodes of one level. It works in a revert way to obtain
+ * long subsets first and short at the end.
+ * @param {Node[]} nodes Array of nodes we have create variants for
  * @returns {Nodes[][]} Array of arrays of Nodes combinations
  * 
  * @example
- * const nodes = [{tag: 'div'}, {tag: 'span'}]
- * const vars = subsets(nodes) // [[{tag: 'div'}, {tag: 'span'}], [{tag: 'span'}], [{tag: 'div'}]]
+ * const nodes = [{id: 0, tag: 'div'}, {id: 1, tag: 'span'}]
+ * // returns [
+ * //   [{id: 0, tag: 'div'}, {id: 1, tag: 'span'}],
+ * //   [{id: 1, tag: 'span'}],
+ * //   [{id: 0, tag: 'div'}]
+ * // ]
+ * const vars = subsets(nodes)
  */
 function subsets(nodes) {
   if (!nodes) return []
@@ -204,18 +213,18 @@ function walk(obj, cb, skipProps = SKIP) {
 }
 /**
  * Finds all nodes in a DOM tree according to JSON tree. The starting format of one JSON node 
- * is following: {el: Element, tag: str, textTag: str, children: []}, where: el - reference
- * to DOM element, tag - name of the HTML tag we are looking for, score - score of the 
- * current node (+1 if tag exist, +1 if textTag is not empty and HTML element also contains
- * a text in it), text - text from HTML tag, textTag - name of the text alias (will be used
- * later for creating data map), children - an array of the same nodes to support recursion
- * search, attrTag - an array of two elements with name of the attribute tag and name of the
- * attribute of the DOM element. After all nodes will be found "score" and "text" properties 
- * will be added into the result nodes. The minimum node contains only "tag" property. This
- * function uses fuzzy trees comparison and don't violate sequence of nodes on the same level.
- * So if we are looking for span, div, h1 on one level their order is important. It's possible
- * to have tags between them, but div is always stays after span and h1 is always after div 
- * and span.
+ * is following: {id: Number, el: Element, tag: String, textTag: String, children: []}, where:
+ * id - unique identifier of the pseudo node, el - reference to DOM element, tag - name of the
+ * HTML tag we are looking for, score - score of the current node (+1 if tag exist, +1 if 
+ * textTag is not empty and HTML element also contains a text in it), text - text from HTML
+ * tag, textTag - name of the text alias (will be used later for creating data map), children
+ * - an array of the same nodes to support recursion search, attrTag - an array of two elements
+ * with name of the attribute tag and name of the attribute of the DOM element. After all nodes
+ * will be found "score" and "text" properties will be added into the result nodes. The minimum
+ * node contains only "tag" property. This function uses fuzzy trees comparison and don't violate
+ * sequence of nodes on the same level. So if we are looking for span, div, h1 on one level their
+ * order is important. It's possible to have tags between them, but div is always stays after
+ * span and h1 is always after div and span.
  * 
  * @param {Object} parentTpl Parent node of the children we are comparing
  * @param {Element} parentEl Assocoated with parentTpl node element in a DOM

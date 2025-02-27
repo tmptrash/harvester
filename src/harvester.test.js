@@ -1103,6 +1103,8 @@ describe('harvester library tests', () => {
         a[href=href]
           h1
           h1{h1}
+        spun
+          a
       close`, `
       <!DOCTYPE html>
       <html lang="en">
@@ -1140,8 +1142,8 @@ describe('harvester library tests', () => {
       `, 'body > div')
       expect(consoleSpy).not.toHaveBeenCalled()
       expect(ret[0]).toEqual({n1: 'n1', href: 'url', h1: 'H1'})
-      expect(ret[1]).toEqual(14)
-      expect(ret[2]).toEqual(12)
+      expect(ret[1]).toEqual(16)
+      expect(ret[2]).toEqual(13)
     })
   })
 })

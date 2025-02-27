@@ -242,41 +242,7 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
 
   if (level < maxLevel) {
     /**
-     * First, we check similar nodes in a one level deeper without combinations. This variant
-     * is used when DOM tree has extra nodes between current nodes in pseudo tree and DOM tree.
-     * For example (pseudo tree on the left and DOM tree on the right):
-     * 
-     * h1
-     * h1 -> div
-     *         h1
-     *         h1
-     * 
-     * In this example, we have to find two h1 tags inside the div, but div itself should be 
-     * skipped. We also should decrease score with -1 score, because we are skipping one level
-     * in a DOM tree. Every level skip decreases score with 1. So max possible score here === 2,
-     * but algorithm should return 1 (2 - 1: two h1 tags found minus one skipped level).
-     */
-    let el = firstEl
-    while (el) {
-      if (el.firstElementChild) {
-        /**
-         * Optimization logic: we have to skip nodes with lower score, because other node is
-         * better than current.
-         */
-        const score = cachedScope(el, parentTpl.id)
-        if (score === undefined || score > maxScore) {
-          const [deepScore, deepNodes] = match(parentTpl, el, rootEl, level + 1, maxLevel)
-          if (deepScore - 1 > maxScore && deepNodes) {
-            maxScore = deepScore - 1
-            score === undefined && SCORE_CACHE.get(el).set(parentTpl.id, maxScore)
-            maxNodes = deepNodes
-          }
-        }
-      }
-      el = el.nextElementSibling
-    }
-    /**
-     * Second, we check similar nodes in one level upper without combinations. This variant
+     * First, we check similar nodes in one level upper without combinations. This variant
      * is used when DOM tree has a lack of nodes between current nodes in pseudo tree and DOM
      * tree. For example (pseudo tree on the left and DOM tree on the right):
      * 
@@ -308,6 +274,41 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
         }
       }
     }
+    /**
+     * Second, we check similar nodes in a one level deeper without combinations. This variant
+     * is used when DOM tree has extra nodes between current nodes in pseudo tree and DOM tree.
+     * For example (pseudo tree on the left and DOM tree on the right):
+     * 
+     * h1
+     * h1 -> div
+     *         h1
+     *         h1
+     * 
+     * In this example, we have to find two h1 tags inside the div, but div itself should be 
+     * skipped. We also should decrease score with -1 score, because we are skipping one level
+     * in a DOM tree. Every level skip decreases score with 1. So max possible score here === 2,
+     * but algorithm should return 1 (2 - 1: two h1 tags found minus one skipped level).
+     */
+    if (!tplNodes?.length) return [maxScore, maxNodes]
+    let el = firstEl
+    while (el) {
+      if (el.firstElementChild) {
+        /**
+         * Optimization logic: we have to skip nodes with lower score, because other node is
+         * better than current.
+         */
+        const score = cachedScope(el, parentTpl.id)
+        if (score === undefined || score > maxScore) {
+          const [deepScore, deepNodes] = match(parentTpl, el, rootEl, level + 1, maxLevel)
+          if (deepScore - 1 > maxScore && deepNodes) {
+            maxScore = deepScore - 1
+            score === undefined && SCORE_CACHE.get(el).set(parentTpl.id, maxScore)
+            maxNodes = deepNodes
+          }
+        }
+      }
+      el = el.nextElementSibling
+    }
   }
   /**
    * Third, we check similar nodes on the same level with all possible combinations of pseudo
@@ -321,6 +322,7 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
    * It picks every combination of pseudo nodes and try to find it in a DOM tree. The tree with
    * maximized score will be returned as a result.
    */
+  if (!tplNodes?.length) return [maxScore, maxNodes]
   const combinations = copy(subsets(tplNodes))
   for (let c = 0; c < combinations.length; c++) {
     const comb = combinations[c]
@@ -399,11 +401,16 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
 function harvest(tpl, firstEl) {
   const tplNodes = {tag: 'root', children: toTree(tpl)} // add one more level as a root element
   let tplScore = 0
-  walk(tplNodes, d => {d?.tag && tplScore++, d.textTag && tplScore++, d.attrTag && tplScore++})
+  let depth = 0
+  walk(tplNodes, d => {
+    if (d?.tag) tplScore++, depth++
+    d.textTag && tplScore++
+    d.attrTag && tplScore++
+  })
   if (!firstEl) return [{}, tplScore, 0, []]
   const parentNode = firstEl.parentNode
   SCORE_CACHE.clear()
-  const [score, nodes] = match(tplNodes, parentNode, parentNode, 0, tplScore)
+  const [score, nodes] = match(tplNodes, parentNode, parentNode, 0, depth)
   const map = {}
   walk(nodes, d => {
     if (!isObj(d)) return

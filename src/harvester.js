@@ -1,7 +1,12 @@
 /**
  * Properties to skip during deep copy or traversal of arrays/objects.
  */
-const SKIP = {el: true}
+const SKIP_PROPS = {el: true}
+/**
+ * The maximum depth of pseudo tree-like nodes after, which we a warning the user about
+ * possible performance issues
+ */
+const MAX_DEPTH = 10
 /**
  * Number of spaces representing one indentation level.
  */
@@ -182,15 +187,19 @@ function subsets(nodes) {
  * @param {Object} skipProps Map of the properties we have to skip during copy
  * @returns {Object|Array} Copy of object or array
  */
-function copy(obj, skipProps = SKIP) {
+function copy(obj, skipProps = SKIP_PROPS) {
   if (!obj) return obj
   let cpy = obj
   if (Array.isArray(obj)) {
-    cpy = new Array(obj.length)
-    for (let i = 0; i < obj.length; i++) cpy[i] = copy(obj[i], skipProps)
+    const len = obj.length
+    cpy = new Array(len)
+    for (let i = 0; i < len; i++) cpy[i] = copy(obj[i], skipProps)
   } else if (typeof obj === 'object') {
     cpy = {}
-    for (const p in obj) cpy[p] = (skipProps[p] ? obj[p] : copy(obj[p], skipProps))
+    for (const p in obj) {
+      const val = obj[p]
+      cpy[p] = skipProps[p] ? val : (!val || typeof val !== 'object' ? val : copy(val, skipProps))
+    }
   }
   return cpy
 }
@@ -200,7 +209,7 @@ function copy(obj, skipProps = SKIP) {
  * @param {Function} cb Callback function (cb(node, key)) for every node
  * @param {Object} skipProps Properties to skip during traversal.
  */
-function walk(obj, cb, skipProps = SKIP) {
+function walk(obj, cb, skipProps = SKIP_PROPS) {
   if (Array.isArray(obj)) {
     for (let i = 0; i < obj.length; i++) {
       if (!skipProps[i]) cb(obj[i], i), walk(obj[i], cb, skipProps)
@@ -407,6 +416,7 @@ function harvest(tpl, firstEl) {
     d.textTag && tplScore++
     d.attrTag && tplScore++
   })
+  depth > MAX_DEPTH && console.warn(`Max depth ${MAX_DEPTH} is reached. Current depth: ${depth}.`)
   if (!firstEl) return [{}, tplScore, 0, []]
   const parentNode = firstEl.parentNode
   SCORE_CACHE.clear()

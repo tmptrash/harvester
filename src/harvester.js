@@ -1,8 +1,4 @@
 /**
- * Properties to skip during deep copy or traversal of arrays/objects.
- */
-const SKIP_PROPS = {el: true}
-/**
  * The maximum depth of pseudo tree-like nodes after, which we a warning the user about
  * possible performance issues
  */
@@ -192,25 +188,23 @@ function subsets(nodes) {
   return result
 }
 /**
- * Makes a deep copy of the object or an array. skipProps is used to skip some properties
- * and copy them as is. This is your responsibility to pass obj parameter without circular
- * nodes. Use skipProps for that.
+ * Makes a deep copy of the object or an array. This is your responsibility to pass obj 
+ * parameter without circular nodes. Use skipProps for that.
  * @param {Object|Array} obj Object or array to copy
- * @param {Object} skipProps Map of the properties we have to skip during copy
  * @returns {Object|Array} Copy of object or array
  */
-function copy(obj, skipProps = SKIP_PROPS) {
+function copy(obj) {
   if (!obj) return obj
   let cpy = obj
   if (Array.isArray(obj)) {
     const len = obj.length
     cpy = new Array(len)
-    for (let i = 0; i < len; i++) cpy[i] = copy(obj[i], skipProps)
+    for (let i = 0; i < len; i++) cpy[i] = copy(obj[i])
   } else if (typeof obj === 'object') {
     cpy = {}
     for (const p in obj) {
       const val = obj[p]
-      cpy[p] = skipProps[p] ? val : (typeof val !== 'object' ? val : copy(val, skipProps))
+      cpy[p] = p === 'el' ? val : (typeof val !== 'object' ? val : copy(val))
     }
   }
   return cpy
@@ -219,17 +213,12 @@ function copy(obj, skipProps = SKIP_PROPS) {
  * Recursively traverses an object or array, applying a callback to each node.
  * @param {Object|Array} obj Object or array to traverse.
  * @param {Function} cb Callback function (cb(node, key)) for every node
- * @param {Object} skipProps Properties to skip during traversal.
  */
-function walk(obj, cb, skipProps = SKIP_PROPS) {
+function walk(obj, cb) {
   if (Array.isArray(obj)) {
-    for (let i = 0; i < obj.length; i++) {
-      if (!skipProps[i]) cb(obj[i], i), walk(obj[i], cb, skipProps)
-    }
+    for (let i = 0; i < obj.length; i++) cb(obj[i], i), walk(obj[i], cb)
   } else if (typeof obj === 'object') {
-    for (const p in obj) {
-      if (!skipProps[p]) cb(obj[p], p), walk(obj[p], cb, skipProps)
-    }
+    for (const p in obj) if (p !== 'el') cb(obj[p], p), walk(obj[p], cb)
   } else cb(obj)
 }
 /**

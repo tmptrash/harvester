@@ -29,6 +29,10 @@ const TEXT_NODE = 3
  */
 const SCORE_CACHE = new Map()
 /**
+ * Cache for tag names. Uses DOM element as a key and tagName property as a value
+ */
+const TAG_NAME_CACHE = new Map()
+/**
  * Global identifier for pseudo tree-like nodes. Every node obtains id++ as unique identifier.
  * This variable should be reset before every usege (before toTree() call).
  */
@@ -344,7 +348,9 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
       if (el) {
         node.score = 0
         // here we check tag name, tag text and attribute
-        if (el.tagName === node.tag) {
+        let tagName = TAG_NAME_CACHE.get(el)
+        if (tagName === undefined) TAG_NAME_CACHE.set(el, tagName = el.tagName)
+        if (tagName === node.tag) {
           node.score++
           if (node.textTag) {const t = text(el); t && (node.text = t) && node.score++}
           if (node.attrTag) {

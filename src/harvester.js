@@ -195,19 +195,26 @@ function subsets(nodes) {
  */
 function copy(obj) {
   if (!obj) return obj
-  let cpy = obj
   if (Array.isArray(obj)) {
     const len = obj.length
-    cpy = new Array(len)
+    const cpy = new Array(len)
     for (let i = 0; i < len; i++) cpy[i] = copy(obj[i])
+    return cpy
   } else if (typeof obj === 'object') {
-    cpy = {}
-    for (const p in obj) {
-      const val = obj[p]
-      cpy[p] = typeof val !== 'object' ? val : (p === 'el' ? val : copy(val))
+    const cpy = {
+      id: obj.id,
+      tag: obj.tag,
+      textTag: obj.textTag,
+      attr: obj.attr,
+      el: obj.el,
+      score: obj.score,
+      text: obj.text
     }
+    obj.children && (cpy.children = copy(obj.children))
+    obj.attrTag && (cpy.attrTag = [obj.attrTag[0], obj.attrTag[1]])
+    return cpy
   }
-  return cpy
+  return obj
 }
 /**
  * Recursively traverses an object or array, applying a callback to each node.

@@ -91,7 +91,7 @@ function parse(lines, l, nodes, level, startSpaces = -1) {
     if (curLevel === level) {
       const node = {id: id++, tag : m[2].toUpperCase()}
       m[3] && (node.textTag = m[3])
-      m[4] && (node.attrTag = [m[4], m[5]])  
+      m[4] && (node.attrTag = [m[4], m[5]])
       nodes.push(node)
     } else if (curLevel > level) {
       if (!nodes.length) {logErr(line, i, `Wrong left indentation level`); continue}

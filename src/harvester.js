@@ -204,7 +204,7 @@ function copy(obj) {
     cpy = {}
     for (const p in obj) {
       const val = obj[p]
-      cpy[p] = p === 'el' ? val : (typeof val !== 'object' ? val : copy(val))
+      cpy[p] = typeof val !== 'object' ? val : (p === 'el' ? val : copy(val))
     }
   }
   return cpy
@@ -367,7 +367,7 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
         if (firstChild) {
           const score = node.score
           if (node.children) {
-            match(node, el, rootEl, level, maxLevel)
+            match(node, el, rootEl, level + 1, maxLevel)
             if (cachedScope(el, node.id) === undefined) SCORE_CACHE.get(el).set(node.id, node.score)
             node.score += score
           }

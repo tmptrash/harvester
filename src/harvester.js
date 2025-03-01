@@ -2,7 +2,7 @@
  * The maximum depth of pseudo tree-like nodes after, which we a warning the user about
  * possible performance issues
  */
-const MAX_DEPTH = 10
+const MAX_DEPTH = 13
 /**
  * Number of spaces representing one indentation level.
  */

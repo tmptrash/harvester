@@ -210,7 +210,7 @@ function copy(obj, skipProps = SKIP_PROPS) {
     cpy = {}
     for (const p in obj) {
       const val = obj[p]
-      cpy[p] = skipProps[p] ? val : (!val || typeof val !== 'object' ? val : copy(val, skipProps))
+      cpy[p] = skipProps[p] ? val : (typeof val !== 'object' ? val : copy(val, skipProps))
     }
   }
   return cpy

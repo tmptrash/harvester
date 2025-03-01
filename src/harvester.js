@@ -248,8 +248,9 @@ function walk(obj, cb, skipProps = SKIP_PROPS) {
 function match(parentTpl, parentEl, rootEl, level, maxLevel) {
   if (!parentTpl || !parentEl) return [0, undefined]
   const tplNodes = parentTpl.children
+  if (!tplNodes) return [0, undefined]
   const firstEl = parentEl.firstElementChild
-  if (!firstEl || !tplNodes) return [0, undefined]
+  if (!firstEl) return [0, undefined]
   let maxScore = 0
   let maxNodes
 

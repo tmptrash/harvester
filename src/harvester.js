@@ -278,7 +278,7 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
        */
       const score = cachedScope(upParent, parentTpl.id)
       if (score === undefined || score > maxScore) {
-        const [upScore, upNodes] = match(parentTpl, upParent,  rootEl, level + 1, maxLevel)
+        const [upScore, upNodes] = match(parentTpl, upParent,  rootEl, Math.round(level * 1.5) || 1, maxLevel)
         if (upScore - 1 > maxScore && upNodes) {
           maxScore = upScore - 1
           score === undefined && SCORE_CACHE.get(upParent).set(parentTpl.id, maxScore)
@@ -313,7 +313,7 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
          */
         const score = cachedScope(el, parentTpl.id)
         if (score === undefined || score > maxScore) {
-          const [deepScore, deepNodes] = match(parentTpl, el, rootEl, level + 1, maxLevel)
+          const [deepScore, deepNodes] = match(parentTpl, el, rootEl, Math.round(level * 1.5) || 1, maxLevel)
           if (deepScore - 1 > maxScore && deepNodes) {
             maxScore = deepScore - 1
             score === undefined && SCORE_CACHE.get(el).set(parentTpl.id, maxScore)
@@ -367,7 +367,7 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
         if (firstChild) {
           const score = node.score
           if (node.children) {
-            match(node, el, rootEl, level + 1, maxLevel)
+            match(node, el, rootEl, Math.round(level * 1.5) || 1, maxLevel)
             if (cachedScope(el, node.id) === undefined) SCORE_CACHE.get(el).set(node.id, node.score)
             node.score += score
           }

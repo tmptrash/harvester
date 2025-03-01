@@ -1145,5 +1145,64 @@ describe('harvester library tests', () => {
       expect(ret[1]).toEqual(16)
       expect(ret[2]).toEqual(13)
     })
+    it('test a template with deep fuzzy structure (3)', () => {
+      const ret = testHarvester(`
+      div
+        span
+          ban
+           err
+            norm{n1}
+            norm
+          ban[attr=attr]
+           err
+         err
+      span
+        a[href=href]
+          h1
+          h1{h1}
+          h1{h2}
+        spun{spun}
+          a
+           err
+      close`, `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+        <div>
+          <span>
+            <ban>
+              <norm>n1</norm>
+              <norm></norm>
+            </ban>
+            <ban attr="attr"/>
+          </span>
+        </div>
+        <span>
+          <a href="url">
+            <span>
+              <h1></h1>
+              <h1>H1</h1>
+              <section></section>
+              <h1>H2</h1>
+            </span>
+            <spun>SPUN
+              <a>
+                <img/>
+              </a>
+            </spun>
+          </a>
+        </span>
+        <close/>
+      </body>
+      </html>
+      `, 'body')
+      expect(consoleSpy).toHaveBeenCalled()
+      expect(ret[0]).toEqual({attr: 'attr', n1: 'n1', href: 'url', h1: 'H1', h2: 'H2', spun: 'SPUN'})
+      expect(ret[1]).toEqual(20)
+      expect(ret[2]).toEqual(16)
+    })
   })
 })

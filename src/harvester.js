@@ -33,6 +33,14 @@ const SCORE_CACHE = new Map()
  */
 const TAG_NAME_CACHE = new Map()
 /**
+ * Cache for el.firstElementChild elements. Uses element as a key and firstElementChild as a value
+ */
+const FIRST_CHILD_CACHE = new Map()
+/**
+ * Cache for el.nextElementSibling elements. Uses element as a key and nextElementSibling as a value
+ */
+const NEXT_CACHE = new Map()
+/**
  * Global identifier for pseudo tree-like nodes. Every node obtains id++ as unique identifier.
  * This variable should be reset before every usege (before toTree() call).
  */
@@ -249,7 +257,8 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
   if (!parentTpl || !parentEl) return [0, undefined]
   const tplNodes = parentTpl.children
   if (!tplNodes) return [0, undefined]
-  const firstEl = parentEl.firstElementChild
+  let firstEl = FIRST_CHILD_CACHE.get(parentEl)
+  if (firstEl === undefined) FIRST_CHILD_CACHE.set(parentEl, firstEl = parentEl.firstElementChild)
   if (!firstEl) return [0, undefined]
   let maxScore = 0
   let maxNodes
@@ -306,7 +315,9 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
     if (!tplNodes?.length) return [maxScore, maxNodes]
     let el = firstEl
     while (el) {
-      if (el.firstElementChild) {
+      let firstChild = FIRST_CHILD_CACHE.get(el)
+      if (firstChild === undefined) FIRST_CHILD_CACHE.set(el, firstChild = el.firstElementChild)
+      if (firstChild) {
         /**
          * Optimization logic: we have to skip nodes with lower score, because other node is
          * better than current.
@@ -321,7 +332,9 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
           }
         }
       }
-      el = el.nextElementSibling
+      let nextEl = NEXT_CACHE.get(el)
+      if (nextEl === undefined) NEXT_CACHE.set(el, el = el.nextElementSibling)
+      else el = nextEl
     }
   }
   /**
@@ -360,7 +373,9 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
           }
         }
         // Here we go deeper and check inner nodes
-        if (el.firstElementChild) {
+        let firstChild = FIRST_CHILD_CACHE.get(el)
+        if (firstChild === undefined) FIRST_CHILD_CACHE.set(el, firstChild = el.firstElementChild)
+        if (firstChild) {
           const score = node.score
           if (node.children) {
             match(node, el, rootEl, level, maxLevel)
@@ -376,8 +391,11 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
           if (nodesScore > maxScore) maxScore = nodesScore, maxNodes = copy(comb)
         } else i++
       } else if (--i < 0) break
-      // skip all text nodes
-      comb[i].el = (comb[i]?.el || el)?.nextElementSibling
+      // skip all text nodes using nextElementSibling
+      const curEl = comb[i]?.el || el
+      let nextEl = NEXT_CACHE.get(curEl)
+      if (nextEl === undefined) NEXT_CACHE.set(curEl, nextEl = curEl?.nextElementSibling)
+      comb[i].el = nextEl
     }
   }
 
@@ -427,6 +445,9 @@ function harvest(tpl, firstEl) {
   if (!firstEl) return [{}, tplScore, 0, []]
   const parentNode = firstEl.parentNode
   SCORE_CACHE.clear()
+  TAG_NAME_CACHE.clear()
+  FIRST_CHILD_CACHE.clear()
+  NEXT_CACHE.clear()
   const [score, nodes] = match(tplNodes, parentNode, parentNode, 0, depth)
   const map = {}
   walk(nodes, d => {

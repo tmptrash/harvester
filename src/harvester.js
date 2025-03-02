@@ -4,6 +4,12 @@
  */
 const MAX_DEPTH = 20
 /**
+ * Means how complete pseudo tree-like template will be found in a DOM tree. Should be bigger
+ * then 1. For every deeper or upper level we multiply current level into this coefficient. Luke
+ * this: Math.round(level * TREE_COMPLETE_COEF) || 1
+ */
+const TREE_COMPLETE_COEF = 1.6
+/**
  * Number of spaces representing one indentation level.
  */
 const SPACE_AMOUNT = 2
@@ -25,15 +31,19 @@ const TEXT_NODE = 3
  */
 const SCORE_CACHE = new Map()
 /**
- * Cache for tag names. Uses DOM element as a key and tagName property as a value
+ * Cache for tag names. Uses DOM element as a key and tagName property as a value.
  */
 const TAG_NAME_CACHE = new Map()
 /**
- * Cache for el.firstElementChild elements. Uses element as a key and firstElementChild as a value
+ * Cache for tags text. Uses DOM element as a key and tag text as a value.
+ */
+const TEXT_CACHE = new Map()
+/**
+ * Cache for el.firstElementChild elements. Uses element as a key and firstElementChild as a value.
  */
 const FIRST_CHILD_CACHE = new Map()
 /**
- * Cache for el.nextElementSibling elements. Uses element as a key and nextElementSibling as a value
+ * Cache for el.nextElementSibling elements. Uses element as a key and nextElementSibling as a value.
  */
 const NEXT_CACHE = new Map()
 /**
@@ -282,7 +292,8 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
        */
       const score = cachedScope(upParent, parentTpl.id)
       if (score === undefined || score > maxScore) {
-        const [upScore, upNodes] = match(parentTpl, upParent,  rootEl, Math.round(level * 1.5) || 1, maxLevel)
+        const newLevel = Math.round(level * TREE_COMPLETE_COEF) || 1
+        const [upScore, upNodes] = match(parentTpl, upParent,  rootEl, newLevel, maxLevel)
         if (upScore - 1 > maxScore && upNodes) {
           maxScore = upScore - 1
           if (score === undefined && parentTpl.id !== undefined) {
@@ -319,7 +330,8 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
          */
         const score = cachedScope(el, parentTpl.id)
         if (score === undefined || score > maxScore) {
-          const [deepScore, deepNodes] = match(parentTpl, el, rootEl, Math.round(level * 1.5) || 1, maxLevel)
+          const newLevel = Math.round(level * TREE_COMPLETE_COEF) || 1
+          const [deepScore, deepNodes] = match(parentTpl, el, rootEl, newLevel, maxLevel)
           if (deepScore - 1 > maxScore && deepNodes) {
             maxScore = deepScore - 1
             if (score === undefined && parentTpl.id !== undefined) {
@@ -363,7 +375,11 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
         if (tagName === undefined) TAG_NAME_CACHE.set(el, tagName = el.tagName)
         if (tagName === node.tag) {
           node.score++
-          if (node.textTag) {const t = text(el); t && (node.text = t) && node.score++}
+          if (node.textTag) {
+            let t = TEXT_CACHE.get(el)
+            if (t === undefined) TEXT_CACHE.set(el, t = text(el))
+            t && (node.text = t) && node.score++
+          }
           if (node.attrTag) {
             const a = el.getAttribute(node.attrTag[1])
             a && (node.attr = a) && node.score++
@@ -375,7 +391,7 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
         if (firstChild) {
           const score = node.score
           if (node.children) {
-            match(node, el, rootEl, Math.round(level * 1.5) || 1, maxLevel)
+            match(node, el, rootEl, Math.round(level * TREE_COMPLETE_COEF) || 1, maxLevel)
             if (node.id !== undefined && cachedScope(el, node.id) === undefined) {
               SCORE_CACHE.get(el).set(node.id, node.score)
             }
@@ -447,6 +463,7 @@ function harvest(tpl, firstEl) {
   TAG_NAME_CACHE.clear()
   FIRST_CHILD_CACHE.clear()
   NEXT_CACHE.clear()
+  TEXT_CACHE.clear()
   const [score, nodes] = match(tplNodes, parentNode, parentNode, 0, depth)
   const map = {}
   walk(nodes, d => {

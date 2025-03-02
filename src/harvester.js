@@ -201,17 +201,11 @@ function copy(obj) {
     for (let i = 0; i < len; i++) cpy[i] = copy(obj[i])
     return cpy
   } else if (typeof obj === 'object') {
-    const cpy = {
-      id: obj.id,
-      tag: obj.tag,
-      textTag: obj.textTag,
-      attr: obj.attr,
-      el: obj.el,
-      score: obj.score,
-      text: obj.text
+    const cpy = {}
+    for (const p in obj) {
+      const val = obj[p]
+      cpy[p] = typeof val !== 'object' ? val : (p === 'el' ? val : copy(val))
     }
-    obj.children && (cpy.children = copy(obj.children))
-    obj.attrTag && (cpy.attrTag = [obj.attrTag[0], obj.attrTag[1]])
     return cpy
   }
   return obj

@@ -194,18 +194,22 @@ function subsets(nodes) {
  * @returns {Object|Array} Copy of object or array
  */
 function copy(obj) {
-  if (!obj) return obj
   if (Array.isArray(obj)) {
     const len = obj.length
     const cpy = new Array(len)
     for (let i = 0; i < len; i++) cpy[i] = copy(obj[i])
     return cpy
   } else if (typeof obj === 'object') {
-    const cpy = {}
-    for (const p in obj) {
-      const val = obj[p]
-      cpy[p] = typeof val !== 'object' ? val : (p === 'el' ? val : copy(val))
-    }
+    /**
+     * We know that only objects will be copied, so we do it without additional recursion steps
+     * for every object property with simple type like string, number, undefined, ...
+     */
+    const cpy = { id: obj.id, tag: obj.tag, el: obj.el, score: obj.score }
+    // obj.text related to textTag, so we copy them together and if textTag exists
+    obj.textTag && (cpy.textTag = obj.textTag, cpy.text = obj.text)
+    // the same for attrTag and attr props
+    obj.attrTag && (cpy.attrTag = [obj.attrTag[0], obj.attrTag[1]], cpy.attr = obj.attr)
+    obj.children && (cpy.children = copy(obj.children))
     return cpy
   }
   return obj
@@ -252,7 +256,6 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
   if (!firstEl) return [0, undefined]
   let maxScore = 0
   let maxNodes
-
   if (level < maxLevel) {
     /**
      * First, we check similar nodes in one level upper without combinations. This variant

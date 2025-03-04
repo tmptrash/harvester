@@ -1,6 +1,6 @@
 # Harvester 🚜
 
-Harvester is a lightweight and highly optimized library for parsing pseudo-tree string representations into JSON structures and efficiently extracting matching data from DOM elements.
+Harvester is a lightweight and highly optimized library for extracting data from the DOM tree. It supports tag texts and their attributes. To extract data, the user needs to describe a template of the DOM branch structure from which the extraction will be performed, and then call the harvest() function with two parameters: the described template and the parent branch in the DOM where the search will begin.
 
 ### `harvest(tpl, firstEl): [data, maxScore, score, metaTree]`
 
@@ -8,13 +8,25 @@ Finds matches between a pseudo-tree and the DOM structure, extracting text and a
 
 #### Example:
 
+Let's imagine we have a HTML like this:
+```xml
+<div>
+  <div>
+    <span>Some title</span>
+  </div>
+  <h1>Product Name</h1>
+  <span>99.99</span>
+  <img src="https://example.com/image.jpg"></img>
+</div>
+```
+
 ```js
 const { harvest } = require('./harvester')
 const tpl = `
-div
-  h1{title}
-  span{price}
-  img[img=src]
+div            // finds a div tag
+  h1{title}    // finds h1 inside the div with a text in it
+  span{price}  // finds a span inside the div with a text
+  img[img=src] // finds an image tag inside the div with src attribute
 `
 const result = harvest(tpl, document.querySelector('div'))
 console.log(result)
@@ -38,4 +50,3 @@ console.log(result)
 ## License
 
 MIT
-

@@ -24,10 +24,10 @@ So your code may look like this:
 ```js
 const { harvest } = require('./harvester')
 const tpl = `
-div            // finds a div tag
-  h1{title}    // finds h1 inside the div with a text in it
-  span{price}  // finds a span inside the div with a text
-  img[img=src] // finds an image tag inside the div with src attribute
+*              // finds a any tag
+  h1{title}    // finds h1 inside any tag with a text in it
+  span{price}  // finds a span inside any tag with a text
+  img[img=src] // finds an image tag inside any tag with src attribute
 `
 const result = harvest(tpl, document.querySelector('#product'))
 console.log(result)

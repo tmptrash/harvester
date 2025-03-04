@@ -18,7 +18,7 @@ const SPACE_AMOUNT = 2
  * Matches: indentation, tag name, optional text, and optional attribute.
  */
 const LINE_RE =
-  /^( *)?([a-zA-Z0-9_-]+)(?:\{([a-zA-Z0-9_]+)\})?(?:\[([a-zA-Z0-9_-]+)=([a-zA-Z0-9_-]+?)\])? *$/
+  /^( *)?([a-zA-Z0-9_-]+|\*)(?:\{([a-zA-Z0-9_]+)\})?(?:\[([a-zA-Z0-9_-]+)=([a-zA-Z0-9_-]+?)\])? *$/
 /**
  * Special constant for the jsdom emulation. The same like Node.TEXT_NODE under browser
  */
@@ -175,11 +175,11 @@ function text(el) {
  * @returns {Nodes[][]} Array of arrays of Nodes combinations
  * 
  * @example
- * const nodes = [{id: 0, tag: 'div'}, {id: 1, tag: 'span'}]
+ * const nodes = [{id: 0, tag: '*'}, {id: 1, tag: 'span'}]
  * // returns [
- * //   [{id: 0, tag: 'div'}, {id: 1, tag: 'span'}],
+ * //   [{id: 0, tag: '*'}, {id: 1, tag: 'span'}],
  * //   [{id: 1, tag: 'span'}],
- * //   [{id: 0, tag: 'div'}]
+ * //   [{id: 0, tag: '*'}]
  * // ]
  * const vars = subsets(nodes)
  */
@@ -237,11 +237,24 @@ function walk(obj, cb) {
   } else cb(obj)
 }
 /**
+ * Checks if a tag from pseudo tree-like node is similar to DOM element tag name. If a tag in a
+ * pseudo tree is equal to *, then any tag is equal.
+ * @param {Object} node 
+ * @param {Element} el 
+ * @returns {Boolean}
+ */
+function equalTag(node, el) {
+  if (node.tag === '*') return true
+  let tagName = TAG_NAME_CACHE.get(el)
+  if (tagName === undefined) TAG_NAME_CACHE.set(el, tagName = el.tagName)
+  return tagName === node.tag
+}
+/**
  * Finds all nodes in a DOM tree according to JSON tree. The starting format of one JSON node 
  * is following: {id: Number, el: Element, tag: String, textTag: String, children: []}, where:
  * id - unique identifier of the pseudo node, el - reference to DOM element, tag - name of the
- * HTML tag we are looking for, score - score of the current node (+1 if tag exist, +1 if 
- * textTag is not empty and HTML element also contains a text in it), text - text from HTML
+ * HTML tag we are looking for or *, score - score of the current node (+1 if tag exist or *, +1 
+ * if textTag is not empty and HTML element also contains a text in it), text - text from HTML
  * tag, textTag - name of the text alias (will be used later for creating data map), children
  * - an array of the same nodes to support recursion search, attrTag - an array of two elements
  * with name of the attribute tag and name of the attribute of the DOM element. After all nodes
@@ -371,9 +384,7 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
       if (el) {
         node.score = 0
         // here we check tag name, tag text and attribute
-        let tagName = TAG_NAME_CACHE.get(el)
-        if (tagName === undefined) TAG_NAME_CACHE.set(el, tagName = el.tagName)
-        if (tagName === node.tag) {
+        if (equalTag(node, el)) {
           node.score++
           if (node.textTag) {
             let t = TEXT_CACHE.get(el)

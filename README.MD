@@ -8,6 +8,19 @@ Finds matches between a pseudo-tree and the DOM structure, extracting text and a
 
 #### Example:
 
+Let's imagine we have a HTML like this:
+```xml
+<div>
+  <div>
+    <span>Some title</span>
+  </div>
+  <h1>Product Name</h1>
+  <span>99.99</span>
+  <img src="https://example.com/image.jpg"></img>
+</div>
+```
+
+So your code may look like this:
 ```js
 const { harvest } = require('./harvester')
 const tpl = `

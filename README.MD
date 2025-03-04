@@ -27,7 +27,7 @@ const tpl = `
 *              // finds a any tag
   h1{title}    // finds h1 inside any tag with a text in it
   span{price}  // finds a span inside any tag with a text
-  img[img=src] // finds an image tag inside any tag with src attribute
+  *[img=src]   // finds any tag with src attribute
 `
 const result = harvest(tpl, document.querySelector('#product'))
 console.log(result)

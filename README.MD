@@ -10,7 +10,7 @@ Finds matches between a pseudo-tree and the DOM structure, extracting text and a
 
 Let's imagine we have a HTML like this:
 ```xml
-<div>
+<div id="product">
   <div>
     <span>Some title</span>
   </div>
@@ -29,7 +29,7 @@ div            // finds a div tag
   span{price}  // finds a span inside the div with a text
   img[img=src] // finds an image tag inside the div with src attribute
 `
-const result = harvest(tpl, document.querySelector('div'))
+const result = harvest(tpl, document.querySelector('#product'))
 console.log(result)
 ```
 

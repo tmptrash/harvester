@@ -1250,5 +1250,81 @@ describe('harvester library tests', () => {
       expect(ret[1]).toEqual(3)
       expect(ret[2]).toEqual(3)
     })
+    it('test a template with * instead of a tag (3)', () => {
+      const ret = testHarvester(`
+      *
+        *
+          *`, `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+        <div>
+          <span>
+            <ban></ban>
+          </span>
+        </div>
+      </body>
+      </html>
+      `, 'body > div')
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(ret[0]).toEqual({})
+      expect(ret[1]).toEqual(3)
+      expect(ret[2]).toEqual(3)
+    })
+    it('test a template with * instead of a tag (4)', () => {
+      const ret = testHarvester(`
+      *
+        *
+          *
+        div{text}`, `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+        <div>
+          <span>
+            <ban></ban>
+          </span>
+          <div>TEXT</div>
+        </div>
+      </body>
+      </html>
+      `, 'body > div')
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(ret[0]).toEqual({text: 'TEXT'})
+      expect(ret[1]).toEqual(5)
+      expect(ret[2]).toEqual(5)
+    })
+    it('test a template with * instead of a tag (4)', () => {
+      const ret = testHarvester(`
+      *
+        *
+          *
+        *{text}`, `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+        <div>
+          <span>
+            <ban></ban>
+          </span>
+          <div>TEXT</div>
+        </div>
+      </body>
+      </html>
+      `, 'body > div')
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(ret[0]).toEqual({text: 'TEXT'})
+      expect(ret[1]).toEqual(5)
+      expect(ret[2]).toEqual(5)
+    })
   })
 })

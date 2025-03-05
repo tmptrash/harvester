@@ -494,4 +494,4 @@ function harvest(tpl, firstEl) {
   return [map, tplScore, score, nodes]
 }
 
-module.exports = {toTree, harvest}
+if (typeof module === 'object' && typeof module.exports === 'object') module.exports = {toTree, harvest}

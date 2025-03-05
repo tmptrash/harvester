@@ -48,6 +48,12 @@ console.log(result)
 ]
 ```
 
+## Run test
+```
+npm i
+npm test
+```
+
 ## License
 
 MIT

@@ -48,7 +48,7 @@ console.log(result)
 ]
 ```
 
-## Run test
+## Run tests
 ```
 npm i
 npm test

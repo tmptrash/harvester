@@ -24,7 +24,7 @@ So your code may look like this:
 ```js
 const { harvest } = require('./harvester')
 const tpl = `
-*              // finds a any tag
+*              // finds any tag
   h1{title}    // finds h1 inside any tag with a text in it
   span{price}  // finds a span inside any tag with a text
   *[img=src]   // finds any tag with src attribute

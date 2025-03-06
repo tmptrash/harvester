@@ -1378,5 +1378,32 @@ describe('harvester library tests', () => {
       expect(ret[1]).toEqual(12)
       expect(ret[2]).toEqual(12)
     })
+    it('test a template with * and wrong padding', () => {
+      const ret = testHarvester(`
+      *{l0}[a0=a0]
+       *
+        *{l1}[a1=a1]
+          *{l2}[a2=a2]
+        *{l3}[a3=a3]`, `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+        <div a0="A0">L0
+          <span a1="A1">L1
+            <ban a2="A2">L2</ban>
+          </span>
+          <div a3="A3">L3</div>
+        </div>
+      </body>
+      </html>
+      `, 'body > div')
+      expect(consoleSpy).toHaveBeenCalled()
+      expect(ret[0]).toEqual({l0: 'L0', l1: 'L1', l2: 'L2', l3: 'L3', a0:'A0', a1: 'A1', a2: 'A2', a3: 'A3'})
+      expect(ret[1]).toEqual(12)
+      expect(ret[2]).toEqual(12)
+    })
   })
 })

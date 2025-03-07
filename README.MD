@@ -42,8 +42,8 @@ console.log(result)
     price: '99.99',
     img: 'https://example.com/image.jpg'
   },    // Extracted data
-  11,    // Maximum possible score
-  11,    // Matched score
+  11,   // Maximum possible score
+  11,   // Matched score
   [...] // Extracted tree with metadata
 ]
 ```

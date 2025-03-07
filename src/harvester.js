@@ -153,7 +153,7 @@ function isObj(val) {
  */
 function isFloat(str) {
   const num = +str
-  return !Number.isNaN(num) && !Number.isInteger(num)
+  return str !== '' && !Number.isNaN(num) && !Number.isInteger(num)
 }
 /**
  * Checks if a string is an integer number after type cast
@@ -161,7 +161,7 @@ function isFloat(str) {
  * @returns {Boolean}
  */
 function isInt(str) {
-  return Number.isInteger(+str) && !str.includes('.')
+  return str !== '' && Number.isInteger(+str) && !str.includes('.')
 }
 /**
  * Returns a cached scope for DOM element and pseudo tree-like node id. So if we trying to 

@@ -18,7 +18,7 @@ const SPACE_AMOUNT = 2
  * Matches: indentation, tag name, optional text, and optional attribute.
  */
 const LINE_RE =
-  /^( *)?([a-zA-Z0-9_-]+|\*)(?:\{([a-zA-Z0-9_]+)\})?(?:\[([a-zA-Z0-9_-]+)=([a-zA-Z0-9_-]+?)\])? *$/
+  /^( *)?([a-zA-Z0-9_-]+|\*)(?:\{([a-z0-9_]+)(?::([a-z]+)(?::(.*))?)?\})?(?:\[([a-z0-9_-]+)=([a-z0-9_-]+?)\])? *$/
 /**
  * Special constant for the jsdom emulation. The same like Node.TEXT_NODE under browser
  */
@@ -94,14 +94,16 @@ function parse(lines, l, nodes, level, startSpaces = -1) {
       logErr(line, i, `Wrong left indentation level`)
       continue
     }
-    if (m[4] && !m[5]) {
+    if (m[6] && !m[7]) {
       logErr(line, i, `Wrong attribute format. Should be [attrTag=attrName]`)
       continue
     }
     if (curLevel === level) {
       const node = {id: id++, tag : m[2].toUpperCase()}
       m[3] && (node.textTag = m[3])
-      m[4] && (node.attrTag = [m[4], m[5]])
+      m[4] && (node.textType = m[4])
+      m[5] && (node.textVal = m[5])
+      m[6] && (node.attrTag = [m[6], m[7]])
       nodes.push(node)
     } else if (curLevel > level) {
       if (!nodes.length) {logErr(line, i, `Wrong left indentation level`); continue}
@@ -142,6 +144,23 @@ function isObj(val) {
   return typeof val === 'object' && !Array.isArray(val) && val !== null
 }
 /**
+ * Checks if a string is a float number after type cast
+ * @param {String} str String to check
+ * @returns {Boolean}
+ */
+function isFloat(str) {
+  const num = +str
+  return !Number.isNaN(num) && !Number.isInteger(num)
+}
+/**
+ * Checks if a string is an integer number after type cast
+ * @param {String} str String to check
+ * @returns {Boolean}
+ */
+function isInt(str) {
+  return Number.isInteger(+str) && !str.includes('.')
+}
+/**
  * Returns a cached scope for DOM element and pseudo tree-like node id. So if we trying to 
  * calculate a score for the DOM node and all it's sub-nodes we have to check this cache first.
  * @param {Element} el DOM element
@@ -165,7 +184,7 @@ function text(el) {
       if (t) return t
     }
   }
-  return undefined
+  return ''
 }
 /**
  * Returns all possible variants of nodes of the one level. Is used to compare all possible
@@ -216,7 +235,12 @@ function copy(obj) {
      */
     const cpy = { id: obj.id, tag: obj.tag, el: obj.el, score: obj.score }
     // obj.text related to textTag, so we copy them together and if textTag exists
-    obj.textTag && (cpy.textTag = obj.textTag, cpy.text = obj.text)
+    if (obj.textTag) {
+      cpy.textTag = obj.textTag
+      cpy.text = obj.text
+      obj.textType && (cpy.textType = obj.textType)
+      obj.textVal && (cpy.textVal = obj.textVal)
+    }
     // the same for attrTag and attr props
     obj.attrTag && (cpy.attrTag = [obj.attrTag[0], obj.attrTag[1]], cpy.attr = obj.attr)
     obj.children && (cpy.children = copy(obj.children))
@@ -243,11 +267,31 @@ function walk(obj, cb) {
  * @param {Element} el 
  * @returns {Boolean}
  */
-function equalTag(node, el) {
+function sameTag(node, el) {
   if (node.tag === '*') return true
   let tagName = TAG_NAME_CACHE.get(el)
   if (tagName === undefined) TAG_NAME_CACHE.set(el, tagName = el.tagName)
   return tagName === node.tag
+}
+/**
+ * Checks if the value text has a type "type" and a value "val". Is used for checking tag's text
+ * for the specified type. For example: str, int, float, date,...
+ * @param {String} text Text we a checking
+ * @param {String} type str, int, float, date,... 
+ * @param {String} val Additional parameter for type. For exa,ple for the func type we provide 
+ * custom function name to call or for regex we provide regex itself
+ * @returns {Boolean}
+ */
+function sameType(text, type, val) {
+  switch (type) {
+    case 'str'   : return true
+    case 'int'   : return isInt(text)
+    case 'float' : return isFloat(text)
+    case 'inside': return text.includes(val)
+    case 'func'  : return !!(typeof global === undefined ? self : global)?.[val]?.(text)
+    case 'empty' : return text.trim() === ''
+  }
+  return false
 }
 /**
  * Finds all nodes in a DOM tree according to JSON tree. The starting format of one JSON node 
@@ -384,12 +428,16 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
       if (el) {
         node.score = 0
         // here we check tag name, tag text and attribute
-        if (equalTag(node, el)) {
+        if (sameTag(node, el)) {
           node.score++
           if (node.textTag) {
             let t = TEXT_CACHE.get(el)
             if (t === undefined) TEXT_CACHE.set(el, t = text(el))
-            t && (node.text = t) && node.score++
+            t && (node.text = t, node.score++)
+            if (node.textType && sameType(t, node.textType, node.textVal)) {
+              node.score += 2
+              node.text = t
+            }
           }
           if (node.attrTag) {
             const a = el.getAttribute(node.attrTag[1])
@@ -463,8 +511,9 @@ function harvest(tpl, firstEl) {
   let tplScore = 0
   let depth = 0
   walk(tplNodes, d => {
-    if (d?.tag) tplScore++, depth++
+    if (d?.tag) tplScore++, depth++ 
     d.textTag && tplScore++
+    d.textType && (tplScore += 2)
     d.attrTag && tplScore++
   })
   depth > MAX_DEPTH && console.warn(`Max depth ${MAX_DEPTH} is reached. Current depth: ${depth}.`)
@@ -479,7 +528,7 @@ function harvest(tpl, firstEl) {
   const map = {}
   walk(nodes, d => {
     if (!isObj(d)) return
-    if (d.textTag && d.text) {
+    if (d.textTag && d.text !== undefined) {
       const tag = d.textTag
       map[tag] && console.error(`Two or more equal text tags were found. Text tag: "${tag}"`)
       map[tag] = d.text

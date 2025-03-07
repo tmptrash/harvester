@@ -1405,5 +1405,145 @@ describe('harvester library tests', () => {
       expect(ret[1]).toEqual(12)
       expect(ret[2]).toEqual(12)
     })
+    it('test a template tag text type (1)', () => {
+      const ret = testHarvester(`
+      *{num:int}`, `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+        <div>123
+          <span>123.4
+            <ban>12.45</ban>
+          </span>
+          <div>33.545</div>
+        </div>
+      </body>
+      </html>
+      `, 'body > div')
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(ret[0]).toEqual({num: '123'})
+      expect(ret[1]).toEqual(4)
+      expect(ret[2]).toEqual(4)
+    })
+    it('test a template tag text type (2)', () => {
+      const ret = testHarvester(`
+      *{num:float}`, `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+        <div>123
+          <span>123.4
+            <ban>12.45</ban>
+          </span>
+          <div>33.545</div>
+        </div>
+      </body>
+      </html>
+      `, 'body > div')
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(ret[0]).toEqual({num: '123.4'})
+      expect(ret[1]).toEqual(4)
+      expect(ret[2]).toEqual(3)
+    })
+    it('test a template tag text type (3)', () => {
+      const ret = testHarvester(`
+      *{num:str}`, `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+        <div>123
+          <span>123.4
+            <ban>12.45</ban>
+          </span>
+          <div>33.545</div>
+        </div>
+      </body>
+      </html>
+      `, 'body > div')
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(ret[0]).toEqual({num: '123'})
+      expect(ret[1]).toEqual(4)
+      expect(ret[2]).toEqual(4)
+    })
+    it('test a template tag text type (4)', () => {
+      const ret = testHarvester(`
+      *{num:inside:23}`, `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+        <div>123
+          <span>12.4
+            <ban>12.45</ban>
+          </span>
+          <div>33.545</div>
+        </div>
+      </body>
+      </html>
+      `, 'body > div')
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(ret[0]).toEqual({num: '123'})
+      expect(ret[1]).toEqual(4)
+      expect(ret[2]).toEqual(4)
+    })
+    it('test a template tag text type (5)', () => {
+      global.check = function check(v) {return v === '33.545'}
+      const ret = testHarvester(`
+      *{num:func:check}`, `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+        <div>123
+          <span>123.4
+            <ban>12.45</ban>
+          </span>
+          <div>33.545</div>
+        </div>
+      </body>
+      </html>
+      `, 'body > div')
+      delete global.check
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(ret[0]).toEqual({num: '33.545'})
+      expect(ret[1]).toEqual(4)
+      expect(ret[2]).toEqual(3)
+    })
+    it('test a template tag text type (6)', () => {
+      const ret = testHarvester(`
+      *{num:empty}`, `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+        <div>123
+          <span>123.4
+            <ban>12.45</ban>
+          </span>
+          <div></div>
+        </div>
+      </body>
+      </html>
+      `, 'body > div')
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(ret[0]).toEqual({num: ''})
+      expect(ret[1]).toEqual(4)
+      expect(ret[2]).toEqual(2)
+    })
   })
 })

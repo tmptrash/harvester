@@ -1476,7 +1476,7 @@ describe('harvester library tests', () => {
     })
     it('test a template tag text type (4)', () => {
       const ret = testHarvester(`
-      *{num:inside:23}`, `
+      *{num:with:23}`, `
       <!DOCTYPE html>
       <html lang="en">
       <head>

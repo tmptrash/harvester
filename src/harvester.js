@@ -289,12 +289,12 @@ function sameTag(node, el) {
  */
 function sameType(text, type, val) {
   switch (type) {
-    case 'str'   : return true
-    case 'int'   : return isInt(text)
-    case 'float' : return isFloat(text)
-    case 'inside': return text.includes(val)
-    case 'func'  : return !!(typeof global === undefined ? self : global)?.[val]?.(text)
-    case 'empty' : return text.trim() === ''
+    case 'str'  : return true
+    case 'int'  : return isInt(text)
+    case 'float': return isFloat(text)
+    case 'with' : return text.includes(val)
+    case 'func' : return !!(typeof global === undefined ? self : global)?.[val]?.(text)
+    case 'empty': return text.trim() === ''
   }
   return false
 }

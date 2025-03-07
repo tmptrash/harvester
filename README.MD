@@ -1,6 +1,6 @@
 # Harvester 🚜
 
-Harvester is a lightweight and highly optimized library for extracting data from the DOM tree. It supports tag texts and their attributes. To extract data, the user needs to describe a template of the DOM branch structure from which the extraction will be performed, and then call the harvest() function with two parameters: the described template and the parent branch in the DOM where the search will begin. This library can be used both in the browser and in web scraping tools such as Puppeteer.
+Harvester is a lightweight and highly optimized library for extracting data from the DOM tree. It supports tag texts with specified types and attributes. To extract data, the user needs to describe a template of the DOM branch structure from which the extraction will be performed, and then call the harvest() function with two parameters: the described template and the parent branch in the DOM where the search will begin. This library can be used both in the browser and in web scraping tools such as Puppeteer.
 
 ### `harvest(tpl, firstEl): [data, maxScore, score, metaTree]`
 
@@ -24,10 +24,10 @@ So your code may look like this:
 ```js
 const { harvest } = require('./harvester')
 const tpl = `
-*              // finds any tag
-  h1{title}    // finds h1 inside any tag with a text in it
-  span{price}  // finds a span inside any tag with a text
-  *[img=src]   // finds any tag with src attribute
+*                    // finds any tag
+  h1{title}          // finds h1 inside any tag with a text in it
+  span{price:float}  // finds a span inside any tag with a float number
+  *[img=src]         // finds any tag with src attribute
 `
 const result = harvest(tpl, document.querySelector('#product'))
 console.log(result)

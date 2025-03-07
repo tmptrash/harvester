@@ -15,7 +15,8 @@ const TREE_COMPLETE_COEF = 1.6
 const SPACE_AMOUNT = 2
 /**
  * Regular expression to parse a single line of the pseudo tree-like string.
- * Matches: indentation, tag name, optional text, and optional attribute.
+ * Matches: indentation, tag name, optional text, optional text type, optional text value and
+ * optional attribute. Full string may look like: "  div{price:float}[id=id]".
  */
 const LINE_RE =
   /^( *)?([a-zA-Z0-9_-]+|\*)(?:\{([a-z0-9_]+)(?::([a-z]+)(?::(.*))?)?\})?(?:\[([a-z0-9_-]+)=([a-z0-9_-]+?)\])? *$/
@@ -63,7 +64,7 @@ function logErr(line, l, msg) {
 /**
  * Recursively converts a pseudo tree-like string into an array of nodes.
  * Invalid nodes are skipped and only valid lines will be in final JSON tree.
- * Full format of one line is: "  tag[textTag]{attrTag=attrName}".
+ * Full format of one line is: "  tag[textTag:type:val]{attrTag=attrName}".
  * 
  * @param {String[]} lines The pseudo tree-like string split into lines.
  * @param {Number} l Current line index.
@@ -76,7 +77,8 @@ function parse(lines, l, nodes, level, startSpaces = -1) {
   for (let i = l; i < lines.length; i++) {
     const line = lines[i]
     if (!line || line.trim() === '') continue
-    const m = line.match(LINE_RE) // 1: spaces, 2: tag, 3: textTag
+    // 1: spaces, 2: tag, 3: textTag, 4: text type, 5: text value, 6: attrTag, 7: attrName
+    const m = line.match(LINE_RE)
     if (!m) {logErr(line, i, `Wrong line format`); continue}
     const spaces = m[1]?.length || 0
     if (spaces % SPACE_AMOUNT !== 0) {
@@ -303,10 +305,12 @@ function sameType(text, type, val) {
  * - an array of the same nodes to support recursion search, attrTag - an array of two elements
  * with name of the attribute tag and name of the attribute of the DOM element. After all nodes
  * will be found "score" and "text" properties will be added into the result nodes. The minimum
- * node contains only "tag" property. This function uses fuzzy trees comparison and don't violate
- * sequence of nodes on the same level. So if we are looking for span, div, h1 on one level their
- * order is important. It's possible to have tags between them, but div is always stays after
- * span and h1 is always after div and span.
+ * node contains only "tag" property. Also, there are optional properties: textType and textVal.
+ * They are used if we need to specify concrete type of the data we are looking for. For example
+ * it may be a float number or integer or even an empty string. This function uses fuzzy trees
+ * comparison and don't violate sequence of nodes on the same level. So if we are looking for
+ * span, div, h1 on one level their order is important. It's possible to have tags between them,
+ * but div is always stays after span and h1 is always after div and span.
  * 
  * @param {Object} parentTpl Parent node of the children we are comparing
  * @param {Element} parentEl Assocoated with parentTpl node element in a DOM

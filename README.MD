@@ -20,7 +20,7 @@ Let's imagine we have a HTML like this:
 </div>
 ```
 
-So your code may look like this:
+So your pseudo tree template may look like this:
 ```js
 const { harvest } = require('./harvester')
 const tpl = `

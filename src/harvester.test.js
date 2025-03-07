@@ -1545,5 +1545,28 @@ describe('harvester library tests', () => {
       expect(ret[1]).toEqual(4)
       expect(ret[2]).toEqual(2)
     })
+    it('test a template tag text type (7)', () => {
+      const ret = testHarvester(`
+      *{num:int}`, `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+        <div>123.12
+          <span>123.4
+            <ban>12.45</ban>
+          </span>
+          <div>67</div>
+        </div>
+      </body>
+      </html>
+      `, 'body > div')
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(ret[0]).toEqual({num: '67'})
+      expect(ret[1]).toEqual(4)
+      expect(ret[2]).toEqual(3)
+    })
   })
 })

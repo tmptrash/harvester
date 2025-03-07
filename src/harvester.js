@@ -14,8 +14,8 @@ const TREE_COMPLETE_COEF = 1.6
  */
 const SPACE_AMOUNT = 2
 /**
- * Regular expression to parse a single line of the pseudo tree-like string.
- * Matches: indentation, tag name, optional text, optional text type, optional text value and
+ * Regular expression to parse a single line of the pseudo tree-like string. Matches:
+ * indentation, tag name, optional text, optional text type, optional text value and
  * optional attribute. Full string may look like: "  div{price:float}[id=id]".
  */
 const LINE_RE =
@@ -64,7 +64,8 @@ function logErr(line, l, msg) {
 /**
  * Recursively converts a pseudo tree-like string into an array of nodes.
  * Invalid nodes are skipped and only valid lines will be in final JSON tree.
- * Full format of one line is: "  tag[textTag:type:val]{attrTag=attrName}".
+ * Full format of one line is: "  tag[textTag:textType:textVal]{attrTag=attrName}".
+ * Example: "  img{text:func:checkText}[attr=href]"
  * 
  * @param {String[]} lines The pseudo tree-like string split into lines.
  * @param {Number} l Current line index.
@@ -125,7 +126,7 @@ function parse(lines, l, nodes, level, startSpaces = -1) {
  * 
  * div
  *   span
- *     h1{h1}
+ *     *{h1}
  *     img{text}[src=src]
  * 
  * @returns {Object[]} Parsed tree structure.
@@ -276,12 +277,14 @@ function sameTag(node, el) {
   return tagName === node.tag
 }
 /**
- * Checks if the value text has a type "type" and a value "val". Is used for checking tag's text
- * for the specified type. For example: str, int, float, date,...
- * @param {String} text Text we a checking
- * @param {String} type str, int, float, date,... 
- * @param {String} val Additional parameter for type. For exa,ple for the func type we provide 
- * custom function name to call or for regex we provide regex itself
+ * Checks if the tag's text has a type "type" and value "val". Is used for checking tag's text
+ * for the specified type. For example: str, int, float, func,... If user sets "func" type it 
+ * means this function should be defined in a global context (window under browser and self
+ * under Node.js).
+ * @param {String} text Text we are checking
+ * @param {String} type str, int, float,... 
+ * @param {String} val Additional parameter for type. For example for the func type we provide 
+ * custom function name to call
  * @returns {Boolean}
  */
 function sameType(text, type, val) {

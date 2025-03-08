@@ -103,10 +103,10 @@ Finds matches between a pseudo-tree and the DOM structure, extracting text and a
 - score - The actual score obtained based on the search for template elements.
 - metaTree - A metadata tree for debugging.
 
-#### Example:
+## Example:
 
 Let's imagine we have a HTML like this:
-```xml
+```html
 <div id="product">
   <div>
     <span>Some title</span>
@@ -117,14 +117,14 @@ Let's imagine we have a HTML like this:
 </div>
 ```
 
-And you need to grab a product title, price and an it's image. For this, your pseudo tree template may look like this:
+And you need to grab a product title (you know that it has a "Name" in a title), price and an it's image. For this, your pseudo tree template may look like this:
 ```js
-const { harvest } = require('./harvester')
+const { harvest } = import('harvester')
 const tpl = `
-*                     // finds any tag
-  h1{title:with:Name} // finds h1 inside any tag with a substring "Name"
-  span{price:float}   // finds a span inside any tag with a float number
-  *[img=src]          // finds any tag with src attribute
+*                     // finds any tag as a parent
+  h1{title:with:Name} // finds h1 inside parent tag with a substring "Name" in a text
+  span{price:float}   // finds a span inside parent tag with a float number as a text
+  *[img=src]          // finds any tag in a perent with src attribute
 `
 const result = harvest(tpl, document.querySelector('#product'))
 console.log(result)

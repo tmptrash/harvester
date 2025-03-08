@@ -19,7 +19,7 @@ const SPACE_AMOUNT = 2
  * optional attribute. Full string may look like: "  div{price:float}[id=id]".
  */
 const LINE_RE =
-  /^( *)?([a-zA-Z0-9_-]+|\*)(?:\{([a-z0-9_]+)(?::([a-z]+)(?::(.*))?)?\})?(?:\[([a-z0-9_-]+)=([a-z0-9_-]+?)\])? *$/
+  /^( *)?([a-zA-Z0-9_-]+|\*)(?:\{([a-zA-Z0-9_]+)(?::([a-z]+)(?::(.*))?)?\})?(?:\[([a-zA-Z0-9_-]+)=([a-zA-Z0-9_-]+?)\])? *$/
 /**
  * Special constant for the jsdom emulation. The same like Node.TEXT_NODE under browser
  */

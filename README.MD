@@ -27,18 +27,18 @@ In this example, we defined a template consisting of two tags - `img` and `div`,
 ### Understanding the format of a single line  
 As you may have noticed, every two spaces before a tag are interpreted as a "nested element." This is how we determine that the `div` tag is inside the `img` tag - since it has two more leading spaces. If you make a mistake and add more spaces than necessary, the parser will throw an error, and the current line will not be included in the final tree.  
 
-After the spaces, there is a required element—the tag. If we don't remember which specific tag should be in that place, we can use the special `*` symbol, which means "any tag". So in this case our template may look like this: `  *{title}[src=href]`.
+After the spaces, there is a required element - the tag. If we don't remember which specific tag should be in that place, we can use the special `*` symbol, which means "any tag". So in this case our template may look like this: `  *{title}[src=href]`.
 
 Next, there is an optional block for extracting text from the current tag. In the example above, we specified `{title}`. Curly brackets indicate that we are looking for text inside the `img` tag, which will be stored under the key `"title"` in the object returned by the `harvest()` function.  
 
 Once again, this parameter is optional, and we can omit it if we don’t need the text of the current tag. If we know the type of data contained within the current tag, `harvester` supports several basic types:  
 
-- `int` – an integer  
-- `float` – a floating-point number  
-- `with` – a substring search  
-- `func` – a custom function for text validation  
-- `str` – a string  
-- `empty` – an empty text  
+- `int` - an integer  
+- `float` - a floating-point number  
+- `with` - a substring search  
+- `func` - a custom function for text validation  
+- `str` - a string  
+- `empty` - an empty text  
 
 Let's look at an example of using these types. Suppose we want to find a title that contains the word "Big." The template line will look like this:  
 

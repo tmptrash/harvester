@@ -10,14 +10,14 @@ To extract data, the user needs to describe a template of the DOM branch structu
 To describe the structure of a data template, we need to understand its format. A template consists of lines. For example:  
 
 ```js
-var tpl = "  img{title}[src=href]"
+var tpl = "  img{title}[attr=src]"
 ```  
 
 Each line corresponds to a branch in the DOM tree. Lines can be nested within each other using spaces at the beginning of the line. In our example, there are two spaces before the `img` tag. If this tag is the first one, the initial number of spaces is interpreted as "no spaces" and is ignored. If we need to describe a nested branch, we do it like this:  
 
 ```js
 var tpl = `
-  img{title}[src=href]
+  img{title}[attr=src]
     div{text}
 `
 ```  

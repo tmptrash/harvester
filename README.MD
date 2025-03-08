@@ -20,7 +20,7 @@ Let's imagine we have a HTML like this:
 </div>
 ```
 
-So your pseudo tree template may look like this:
+And you need to grab a product title, price and an it's image. For this, your pseudo tree template may look like this:
 ```js
 const { harvest } = require('./harvester')
 const tpl = `

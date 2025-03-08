@@ -119,7 +119,7 @@ Let's imagine we have a HTML like this:
 
 And you need to grab a product title (you know that it has a "Name" in a title), price and an it's image. For this, your pseudo tree template may look like this:
 ```js
-const { harvest } = import('harvester')
+import { harvest } from 'harvester'
 const tpl = `
 *                     // finds any tag as a parent
   h1{title:with:Name} // finds h1 inside parent tag with a substring "Name" in a text

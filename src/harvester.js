@@ -293,7 +293,7 @@ function sameType(text, type, val) {
     case 'int'  : return isInt(text)
     case 'float': return isFloat(text)
     case 'with' : return text.includes(val)
-    case 'func' : return !!(typeof global === undefined ? self : global)?.[val]?.(text)
+    case 'func' : return !!(typeof global === 'undefined' ? self : global)?.[val]?.(text)
     case 'str'  : return true
     case 'empty': return text.trim() === ''
   }

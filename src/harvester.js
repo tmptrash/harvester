@@ -181,13 +181,14 @@ function cachedScope(el, id) {
  */
 function text(el) {
   if (!el) return undefined
+  const texts = []
   for (const child of el.childNodes) {
     if (child.nodeType === TEXT_NODE) {
       const t = child.textContent.trim()
-      if (t) return t
+      t && texts.push(t)
     }
   }
-  return ''
+  return texts.length === 1 ? texts[0] : (!texts.length ? '' : texts)
 }
 /**
  * Returns all possible variants of nodes of the one level. Is used to compare all possible

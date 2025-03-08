@@ -66,6 +66,15 @@ var tpl = "  img{title:func:checkTitle}"
 
 In this example, `checkTitle` must exist in the global scope before calling the `harvest()` function. Like this `function checkTitle() {...}`
 
+#### attributes
+The next optional parameter is the search for a tag’s attribute value. For example, the `img` tag may have an `src` attribute, and to extract its value, we need to create the following template:  
+
+```js
+var tpl = "  img[attr=src]"
+```  
+
+In this example, the value of the `src` attribute of the `img` tag will be extracted and stored under the key `"attr"` in the object returned by the `harvest()` function.
+
 ## API
 
 `harvest(tpl, firstEl): [data, maxScore, score, metaTree]`

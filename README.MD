@@ -7,6 +7,29 @@ The main idea of this library is that the data you need to extract from an HTML 
 To extract data, the user needs to describe a template of the DOM branch structure from which the extraction will be performed, and then call the harvest() function with two parameters: the described template and the parent branch in the DOM where the search will begin. This library can be used both in the browser and in web scraping tools such as [Puppeteer](https://pptr.dev).
 
 ## Main concepts
+
+### Fuzzy search
+The **Harvester** library implements the concept of **"fuzzy tree matching."** This means that when searching for all branches of our template in the DOM tree, some of them **might not be found** and/or **might not be in their expected positions.** Despite this, the library will attempt to find the **best possible match.**  
+
+#### Example Scenario  
+Imagine we are looking for two tags with the following template:  
+```js
+var tpl = `
+div{title}
+  span{price:float}
+`
+```
+The DOM tree **does not have to match exactly.** For example, if the DOM structure looks like this:  
+```html
+<div>
+  Some title
+  <a href="...">Link is here</a>
+  <span>123.46</span>
+</div>
+```
+The values **title** and **price** will **still be found,** even though the structure is not an exact match.
+
+### Template format
 To describe the structure of a data template, we need to understand its format. A template consists of lines. For example:  
 
 ```js

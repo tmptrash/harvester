@@ -75,6 +75,24 @@ var tpl = "  img[attr=src]"
 
 In this example, the value of the `src` attribute of the `img` tag will be extracted and stored under the key `"attr"` in the object returned by the `harvest()` function.
 
+### Score
+The next concept to understand is **scores**. Scores are how this library determines how well the extracted data matches our template.  
+
+What does this mean?  
+- For each found tag in the DOM tree, the program assigns **1 point**.  
+- If the required text is found, **another point** is added.  
+- If the text type matches the specified type (e.g., `int` or `float`), an **extra 2 points** are given.  
+- Finally, **1 more point** is awarded if the required attribute is found on the current tag.  
+
+During the search, not everything may match exactly. For example, the tag might be different, but the text type matches, or the text might be present, but the required attribute is missing. **Harvester** will try to find the match that **accumulates the highest score**, meaning it is the closest match to our template. Essentially, **maximizing the score increases the accuracy** of finding the required information in the DOM tree.  
+
+How does this affect `harvest()`?  
+The `harvest()` function returns two types of scores:  
+- **maxScore** – the maximum possible score calculated based on the given template (i.e., the best-case scenario if everything matches perfectly).  
+- **score** – the actual score obtained during data extraction.  
+
+If `score` matches `maxScore`, then we have found everything we were looking for. However, in real - world scenarios, `score` will almost always be **lower** than `maxScore`.
+
 ## API
 
 `harvest(tpl, firstEl): [data, maxScore, score, metaTree]`

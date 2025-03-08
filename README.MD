@@ -16,8 +16,10 @@ var tpl = "  img{title}[src=href]"
 Each line corresponds to a branch in the DOM tree. Lines can be nested within each other using spaces at the beginning of the line. In our example, there are two spaces before the `div` tag. If this tag is the first one, the initial number of spaces is interpreted as "no spaces" and is ignored. If we need to describe a nested branch, we do it like this:  
 
 ```js
-var tpl = `  img{title}[src=href]
-    div{text}`
+var tpl = `
+  img{title}[src=href]
+    div{text}
+`
 ```  
 
 In this example, we defined a template consisting of two tags—`img` and `div`, where `div` is inside `img`. It's important to note that if `div` is nested inside `img`, it doesn't necessarily mean it is its first child. This library implements a fuzzy data search, meaning that `div` may be deeper in the DOM tree.  

@@ -441,11 +441,12 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
           if (node.textTag) {
             let t = TEXT_CACHE.get(el)
             if (t === undefined) TEXT_CACHE.set(el, t = text(el))
-            t && (node.text = t, node.score++)
-            if (node.textType && sameType(t, node.textType, node.textVal)) {
-              node.score += 2
-              node.text = t
-            }
+            if (node.textType) {
+              if (sameType(t, node.textType, node.textVal)) {
+                node.score += 2
+                node.text = t
+              } else node.score -= 2, delete node.text
+            } else t && (node.text = t, node.score++)
           }
           if (node.attrTag) {
             const a = el.getAttribute(node.attrTag[1])
@@ -520,7 +521,7 @@ function harvest(tpl, firstEl) {
   let depth = 0
   walk(tplNodes, d => {
     if (d?.tag) tplScore++, depth++ 
-    d.textTag && tplScore++
+    d.textTag && !d.textType && tplScore++
     d.textType && (tplScore += 2)
     d.attrTag && tplScore++
   })

@@ -10,7 +10,11 @@ To extract data, the user needs to describe a template of the DOM branch structu
 
 `harvest(tpl, firstEl): [data, maxScore, score, metaTree]`
 
-Finds matches between a pseudo-tree and the DOM structure, extracting text and attributes.
+Finds matches between a pseudo-tree and the DOM structure, extracting text and attributes. The only function you will use to retrieve data is harvest(). It takes two parameters: a text-based template describing the structure of the data and a DOM element corresponding to the first specified tag. The function returns an array of four elements:
+- data -  A hash map containing all the extracted data, organized by the keys specified in the template.
+- maxScore - The maximum possible score based on the given template.
+- score - The actual score obtained based on the search for template elements.
+- metaTree - A metadata tree for debugging.
 
 #### Example:
 

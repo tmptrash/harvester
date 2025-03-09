@@ -9,7 +9,7 @@ To extract data, the user needs to describe a template of the DOM branch structu
 ## Main concepts
 
 ### Fuzzy search
-The **Harvester** library implements the concept of **"fuzzy tree matching."** This means that when searching for all branches of our template in the DOM tree, some of them **might not be found** and/or **might not be in their expected positions.** Despite this, the library will attempt to find the **best possible match.**  
+The **Harvester** library implements the concept of **"fuzzy tree matching."** This means that when searching for all branches of our template in the DOM tree, some of them **might not be found** and/or **might not be in their expected positions.** Despite this, the library will attempt to find the best possible match.
 
 #### Example Scenario  
 Imagine we are looking for two tags with the following template:  

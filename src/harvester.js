@@ -293,7 +293,19 @@ function sameType(text, type, val) {
     case 'int'  : return isInt(text)
     case 'float': return isFloat(text)
     case 'with' : return text.includes(val)
-    case 'func' : return !!(typeof global === 'undefined' ? self : global)?.[val]?.(text)
+    case 'func' : {
+      const obj = typeof global === 'undefined' ? self : global
+      if (!obj) {
+        console.warn(`Unknown environment. Impossible to find global or self objects`)
+        return false
+      }
+      const fn = obj[val]
+      if (!fn) {
+        console.warn(`Function ${val} is not found in a global context`)
+        return false
+      }
+      return !!fn(text)
+    }
     case 'str'  : return true
     case 'empty': return text.trim() === ''
   }

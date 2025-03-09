@@ -43,6 +43,24 @@ The next concept to understand is **score**. Score is how this library determine
 - If the text type matches the specified type (e.g., `int` or `float`), an **extra 2 points** are given.  
 - Finally, **1 more point** is awarded if the required attribute is found on the current tag.  
 
+#### Example
+Let's assume we have the following template:  
+
+```js
+var tpl = `
+div{title}
+  *{price:float}
+`
+```
+
+Here, we are looking for a **title** inside the text of the `div` tag and a **price** inside the text of **any** tag within the `div`, where the value must be of type `float`. To calculate the **maximum score** (`maxScore`), we need to go through all the lines of the template and sum up the points for each element:
+1. If the `div` tag matches: **+1 point**  
+2. If the `div` tag has text: **+1 point**  
+3. If there is **any** tag inside the `div`: **+1 point**  
+4. If this tag contains text of type `float`: **+2 points**  
+
+In total, that gives **5 points**. So, `maxScore = 5`.
+
 During the search, not everything may match exactly. For example, the tag might be different, but the text type matches, or the text might be present, but the required attribute is missing. **Harvester** will try to find the match that **accumulates the highest score**, meaning it is the closest match to our template. Essentially, **maximizing the score increases the accuracy** of finding the required information in the DOM tree.  
 
 How does this affect `harvest()` function? The `harvest()` returns two types of scores:  

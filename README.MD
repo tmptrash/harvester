@@ -24,7 +24,9 @@ The DOM tree **does not have to match exactly.** For example, if the DOM structu
 <div>
   Some title
   <a href="...">Link is here</a>
-  <span>123.46</span>
+  <div>
+    <span>123.46</span>
+  </div>
 </div>
 ```
 The values **title** and **price** will **still be found,** even though the structure is not an exact match.

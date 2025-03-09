@@ -29,7 +29,12 @@ The DOM tree **does not have to match exactly.** For example, if the DOM structu
   </div>
 </div>
 ```
-The values **title** and **price** will **still be found,** even though the structure is not an exact match.
+The values **title** and **price** will **still be found,** even though the structure is not an exact match. You might ask: **What about performance?** If the DOM tree is large, the program could get stuck in deeply nested branches while trying to find the required data. To solve this problem, the **score calculation algorithm** was introduced. A DOM tree can indeed be **very large**, and if **Harvester** were to check every single branch, the process could take a long time.  
+
+#### The Key Idea  
+The **further we deviate** from the tree structure defined in our **template**, the **fewer points** we accumulate. In other words, at a certain depth, continuing the search **no longer makes sense** because the potential score **will be lower** than what we achieved in the higher levels of the DOM tree. To put it simply:  
+- The **deeper** we search from the entry point, the **fewer points** we collect.  
+- The **lower the score**, the **less likely** the data will be found.
 
 ### 2. Score
 The next concept to understand is **scores**. Scores are how this library determines how well the extracted data matches our template.  

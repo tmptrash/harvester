@@ -42,8 +42,7 @@ What does this mean?
 
 During the search, not everything may match exactly. For example, the tag might be different, but the text type matches, or the text might be present, but the required attribute is missing. **Harvester** will try to find the match that **accumulates the highest score**, meaning it is the closest match to our template. Essentially, **maximizing the score increases the accuracy** of finding the required information in the DOM tree.  
 
-How does this affect `harvest()`?  
-The `harvest()` function returns two types of scores:  
+How does this affect `harvest()` function? The `harvest()` returns two types of scores:  
 - **maxScore** – the maximum possible score calculated based on the given template (i.e., the best-case scenario if everything matches perfectly).  
 - **score** – the actual score obtained during data extraction.  
 

@@ -37,9 +37,7 @@ The **further we deviate** from the tree structure defined in our **template**, 
 - The **lower the score**, the **less likely** the data will be found.
 
 ### 2. Score
-The next concept to understand is **scores**. Scores are how this library determines how well the extracted data matches our template.  
-
-What does this mean?  
+The next concept to understand is **scores**. Scores are how this library determines how well the extracted data matches our template. What does this mean?  
 - For each found tag in the DOM tree, the program assigns **1 point**.  
 - If the required text is found, **another point** is added.  
 - If the text type matches the specified type (e.g., `int` or `float`), an **extra 2 points** are given.  

@@ -32,7 +32,7 @@ The DOM tree **does not have to match exactly.** For example, if the DOM structu
 The values **title** and **price** will **still be found,** even though the structure is not an exact match.
 
 ### Template format
-To describe the structure of a data template, we need to understand its format. A template consists of lines. For example:  
+To describe the structure of a data template, we need to understand its format. A template consists of **lines**. For example:  
 
 ```js
 var tpl = "  img{title}[attr=src]"

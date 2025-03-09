@@ -8,7 +8,7 @@ To extract data, the user needs to describe a template of the DOM branch structu
 
 ## Main concepts
 
-### Fuzzy search
+### 1. Fuzzy search
 The **Harvester** library implements the concept of **"fuzzy tree matching."** This means that when searching for all branches of our template in the DOM tree, some of them **might not be found** and/or **might not be in their expected positions.** Despite this, the library will attempt to find the best possible match.
 
 #### Example Scenario  
@@ -31,7 +31,7 @@ The DOM tree **does not have to match exactly.** For example, if the DOM structu
 ```
 The values **title** and **price** will **still be found,** even though the structure is not an exact match.
 
-### Score
+### 2. Score
 The next concept to understand is **scores**. Scores are how this library determines how well the extracted data matches our template.  
 
 What does this mean?  
@@ -49,7 +49,7 @@ The `harvest()` function returns two types of scores:
 
 If `score` matches `maxScore`, then we have found everything we were looking for. However, in real - world scenarios, `score` will almost always be **lower** than `maxScore`.
 
-### Template format
+### 3. Template format
 To describe the structure of a data template, we need to understand its format. A template consists of **lines**. For example:  
 
 ```js
@@ -67,7 +67,7 @@ var tpl = `
 
 In this example, we defined a template consisting of two tags - `img` and `div`, where `div` is inside `img`. It's important to note that if `div` is nested inside `img`, it doesn't necessarily mean it is its first child. This library implements a fuzzy data search, meaning that `div` may be deeper in the DOM tree. Also, please take a look that we are using multiline string here. The parser understands this type of string and gets only two lines instead of four. 
 
-### Understanding the format of a single line
+### 4. Understanding the format of a single line
 #### spaces
 As you may have noticed, every two spaces before a tag are interpreted as a "nested element." This is how we determine that the `div` tag is inside the `img` tag - since it has two more leading spaces. If you make a mistake and add more spaces than necessary, the parser will throw an error, and the current line will not be included in the final tree.  
 

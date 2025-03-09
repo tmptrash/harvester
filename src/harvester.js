@@ -296,7 +296,7 @@ function sameType(text, type, val) {
     case 'func' : {
       const obj = typeof global === 'undefined' ? self : global
       if (!obj) {
-        console.warn(`Unknown environment. Impossible to find global or self objects`)
+        console.warn(`Unknown environment. Impossible to find global or self objects to run ${val} function`)
         return false
       }
       const fn = obj[val]

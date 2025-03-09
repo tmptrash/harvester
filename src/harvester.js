@@ -424,9 +424,9 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
    * maximized score will be returned as a result.
    */
   if (!tplNodes?.length) return [maxScore, maxNodes]
-  const combinations = copy(subsets(tplNodes))
+  const combinations = subsets(tplNodes)
   for (let c = 0; c < combinations.length; c++) {
-    const comb = combinations[c]
+    const comb = copy(combinations[c])
     let i = 0
     comb[0].el = firstEl
     for (let i = 1; i < comb.length; i++) comb[i].el = undefined
@@ -466,12 +466,20 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
             node.score += score
           }
         }
-
+        // all nodes found let's check if it's a best score
         if (i >= comb.length - 1) {
           i = comb.length - 1
-          // all nodes found let's check if it's a best score
           const nodesScore = comb.reduce((acc, cur) => acc + cur.score || 0, 0)
           if (nodesScore > maxScore) maxScore = nodesScore, maxNodes = copy(comb)
+          /**
+           * Here we reset all children of current combination, because it's structure may
+           * change. Every time we compare a new set of nodes in a current level we have to 
+           * start with original combination childrens. Otherwise there is a possible issue,
+           * where previous comparison may affect future compare.
+           */
+          for (let j = 0; j < comb.length; j++) {
+            comb[j].children && (comb[j].children = copy(combinations[c][j].children))
+          }
         } else i++
       } else if (--i < 0) break
       // skip all text nodes using nextElementSibling

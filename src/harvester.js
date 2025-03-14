@@ -274,7 +274,7 @@ function walk(obj, cb) {
 function sameTag(node, el) {
   if (node.tag === '*') return true
   let tagName = TAG_NAME_CACHE.get(el)
-  if (tagName === undefined) TAG_NAME_CACHE.set(el, tagName = el.tagName)
+  if (tagName === undefined) TAG_NAME_CACHE.set(el, tagName = el.tagName.toUpperCase())
   return tagName === node.tag
 }
 /**

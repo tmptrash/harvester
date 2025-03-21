@@ -40,6 +40,10 @@ const TAG_NAME_CACHE = new Map()
  */
 const TEXT_CACHE = new Map()
 /**
+ * Cahe for parentNode elements. Uses DOM elements as a key and parent elements as a value.
+ */
+const PARENT_CACHE = new Map()
+/**
  * Cache for el.firstElementChild elements. Uses element as a key and firstElementChild as a value.
  */
 const FIRST_CHILD_CACHE = new Map()
@@ -361,7 +365,9 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
      * decreases score with 1. Max possible score here is 3, but algorithm returns 1 (2 - 1:
      * 2 h1 tags found minus one level skipped).
      */
-    const upParent = parentEl?.parentNode
+    
+    let upParent = PARENT_CACHE.get(parentEl)
+    if (upParent === undefined) PARENT_CACHE.set(upParent = parentEl?.parentNode)
     if (upParent && parentEl !== rootEl) {
       /**
        * Optimization logic: we have to skip nodes with lower score, because other node is
@@ -550,9 +556,11 @@ function harvest(tpl, firstEl) {
   const parentNode = firstEl.parentNode
   SCORE_CACHE.clear()
   TAG_NAME_CACHE.clear()
+  PARENT_CACHE.clear()
   FIRST_CHILD_CACHE.clear()
   NEXT_CACHE.clear()
   TEXT_CACHE.clear()
+  PARENT_CACHE.set(firstEl, parentNode)
   const [score, nodes] = match(tplNodes, parentNode, parentNode, 0, depth)
   const map = {}
   walk(nodes, d => {

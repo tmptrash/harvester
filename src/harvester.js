@@ -164,13 +164,13 @@ function isInt(str) {
   return str !== '' && Number.isInteger(+str) && !str.includes('.')
 }
 /**
- * Returns a cached scope for DOM element and pseudo tree-like node id. So if we trying to 
+ * Returns a cached score for DOM element and pseudo tree-like node id. So if we trying to 
  * calculate a score for the DOM node and all it's sub-nodes we have to check this cache first.
  * @param {Element} el DOM element
  * @param {Number} id Unique id of pseudo tree-like node
- * @returns {Number|undefined} scope or undefined
+ * @returns {Number|undefined} score or undefined
  */
-function cachedScope(el, id) {
+function cachedScore(el, id) {
   if (SCORE_CACHE.get(el) === undefined) SCORE_CACHE.set(el, new Map())
   return SCORE_CACHE.get(el).get(id)
 }
@@ -367,7 +367,7 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
        * Optimization logic: we have to skip nodes with lower score, because other node is
        * better than current.
        */
-      const score = cachedScope(upParent, parentTpl.id)
+      const score = cachedScore(upParent, parentTpl.id)
       if (score === undefined || score > maxScore) {
         const newLevel = Math.round(level * TREE_COMPLETE_COEF) || 1
         const [upScore, upNodes] = match(parentTpl, upParent,  rootEl, newLevel, maxLevel)
@@ -405,7 +405,7 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
          * Optimization logic: we have to skip nodes with lower score, because other node is
          * better than current.
          */
-        const score = cachedScope(el, parentTpl.id)
+        const score = cachedScore(el, parentTpl.id)
         if (score === undefined || score > maxScore) {
           const newLevel = Math.round(level * TREE_COMPLETE_COEF) || 1
           const [deepScore, deepNodes] = match(parentTpl, el, rootEl, newLevel, maxLevel)
@@ -472,7 +472,7 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
           const score = node.score
           if (node.children) {
             match(node, el, rootEl, Math.round(level * TREE_COMPLETE_COEF) || 1, maxLevel)
-            if (node.id !== undefined && cachedScope(el, node.id) === undefined) {
+            if (node.id !== undefined && cachedScore(el, node.id) === undefined) {
               SCORE_CACHE.get(el).set(node.id, node.score)
             }
             node.score += score

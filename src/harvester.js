@@ -375,7 +375,7 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
       const score = cachedScore(upParent, parentTpl.id)
       if (score === undefined || score > maxScore) {
         const newLevel = Math.round(level * TREE_COMPLETE_COEF) || 1
-        const [upScore, upNodes] = match(parentTpl, upParent,  rootEl, newLevel, maxLevel)
+        const [upScore, upNodes] = match(parentTpl, upParent, rootEl, newLevel, maxLevel)
         if (upScore - 1 > maxScore && upNodes) {
           maxScore = upScore - 1
           if (score === undefined && parentTpl.id !== undefined) {

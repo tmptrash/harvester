@@ -365,7 +365,6 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
      * decreases score with 1. Max possible score here is 3, but algorithm returns 1 (2 - 1:
      * 2 h1 tags found minus one level skipped).
      */
-    
     let upParent = PARENT_CACHE.get(parentEl)
     if (upParent === undefined) PARENT_CACHE.set(upParent = parentEl?.parentNode)
     if (upParent && parentEl !== rootEl) {
@@ -561,7 +560,7 @@ function harvest(tpl, firstEl) {
   NEXT_CACHE.clear()
   TEXT_CACHE.clear()
   PARENT_CACHE.set(firstEl, parentNode)
-  const [score, nodes] = match(tplNodes, parentNode, parentNode, 0, depth)
+  const [score, nodes] = match(tplNodes, parentNode, parentNode, 0, depth + 1)
   const map = {}
   walk(nodes, d => {
     if (!isObj(d)) return

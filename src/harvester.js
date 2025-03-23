@@ -68,7 +68,7 @@ function logErr(line, l, msg) {
 /**
  * Recursively converts a pseudo tree-like string into an array of nodes.
  * Invalid nodes are skipped and only valid lines will be in final JSON tree.
- * Full format of one line is: "  tag[textTag:textType:textVal]{attrTag=attrName}".
+ * Full format of one line is: "  tag{textTag:textType:textVal}[attrTag=attrName]".
  * Example: "  img{text:func:checkText}[attr=href]"
  * 
  * @param {String[]} lines The pseudo tree-like string split into lines.

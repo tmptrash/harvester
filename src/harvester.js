@@ -106,7 +106,7 @@ function parse(lines, l, nodes, level, startSpaces = -1) {
       continue
     }
     if (curLevel === level) {
-      const node = {id: id++, tag : m[2].toUpperCase()}
+      const node = {id: id++, tag: m[2].toUpperCase(), sc: 0}
       m[3] && (node.textTag = m[3])
       m[4] && (node.textType = m[4])
       m[5] && (node.textVal = m[5])
@@ -241,7 +241,7 @@ function copy(obj) {
      * We know that only objects will be copied, so we do it without additional recursion steps
      * for every object property with simple type like string, number, undefined, ...
      */
-    const cpy = { id: obj.id, tag: obj.tag, el: obj.el, score: obj.score }
+    const cpy = { id: obj.id, tag: obj.tag, el: obj.el, score: obj.score, sc: obj.sc }
     // obj.text related to textTag, so we copy them together and if textTag exists
     if (obj.textTag) {
       cpy.textTag = obj.textTag
@@ -259,13 +259,15 @@ function copy(obj) {
 /**
  * Recursively traverses an object or array, applying a callback to each node.
  * @param {Object|Array} obj Object or array to traverse.
- * @param {Function} cb Callback function (cb(node, key)) for every node
+ * @param {Function} cb Callback function (cb(node, key)) for every node.
+ * @param {Function} endCb Callback, which is called at the end of walking on an object
  */
-function walk(obj, cb) {
+function walk(obj, cb, endCb) {
   if (Array.isArray(obj)) {
-    for (let i = 0; i < obj.length; i++) cb(obj[i], i), walk(obj[i], cb)
+    for (let i = 0; i < obj.length; i++) cb(obj[i], i), walk(obj[i], cb, endCb)
   } else if (typeof obj === 'object') {
-    for (const p in obj) if (p !== 'el') cb(obj[p], p), walk(obj[p], cb)
+    for (const p in obj) if (p !== 'el') cb(obj[p], p), walk(obj[p], cb, endCb)
+    endCb?.(obj)
   } else cb(obj)
 }
 /**
@@ -443,7 +445,14 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
   if (!tplNodes?.length) return [maxScore, maxNodes]
   const combinations = subsets(tplNodes)
   for (let c = 0; c < combinations.length; c++) {
-    const comb = copy(combinations[c])
+    /**
+     * If current maxScore is bigger than score of the next combination, it means searching
+     * next combination has no sense. We have to skip it to make this matching faster.
+     */
+    const combRef = combinations[c]
+    const combScore = combRef.reduce((pre, cur) => pre + cur.sc, 0)
+    if (maxScore >= combScore) continue
+    const comb = copy(combRef)
     let i = 0
     comb[0].el = firstEl
     for (let i = 1; i < comb.length; i++) comb[i].el = undefined
@@ -541,15 +550,17 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
  * harvest(tpl, $('div')) // [{title: 'Title', price: '12.34', img: 'http://...'}, 7, 6, [...]]
  */
 function harvest(tpl, firstEl) {
-  const tplNodes = {tag: 'root', children: toTree(tpl)} // add one more level as a root element
+  const tplNodes = {tag: 'root', children: toTree(tpl), sc: 0} // add one more level as a root element
   let tplScore = 0
   let depth = 0
   walk(tplNodes, d => {
-    if (d?.tag) tplScore++, depth++ 
-    d.textTag && !d.textType && tplScore++
-    d.textType && (tplScore += 2)
-    d.attrTag && tplScore++
-  })
+    if (!isObj(d)) return
+    if (d?.tag) d.sc++, depth++ 
+    d.textTag && !d.textType && d.sc++
+    d.textType && (d.sc += 2)
+    d.attrTag && d.sc++
+    tplScore += d.sc
+  }, o => o?.children && (o.sc = o.children.reduce((pre, cur) => pre + cur.sc, o.sc || 0)))
   depth > MAX_DEPTH && console.warn(`Max depth ${MAX_DEPTH} is reached. Current depth: ${depth}.`)
   if (!firstEl) return [{}, tplScore, 0, []]
   const parentNode = firstEl.parentNode

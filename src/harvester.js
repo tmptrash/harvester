@@ -14,6 +14,11 @@ const TREE_COMPLETE_COEF = 1.6
  */
 const SPACE_AMOUNT = 2
 /**
+ * Amount of milliseconds harvest() function may searching for the data in a DOM. When this timeout
+ * is reached execution will be stopped and only found data will be returned in a map
+ */
+const EXECUTION_TIME = 15000
+/**
  * Regular expression to parse a single line of the pseudo tree-like string. Matches:
  * indentation, tag name, optional text, optional text type, optional text value and
  * optional attribute. Full string may look like: "  div{price:float}[id=id]".
@@ -57,12 +62,37 @@ const NEXT_CACHE = new Map()
  */
 let id = 0
 /**
+ * Harvester options.
+ *   maxDepth - see MAX_DEPTH
+ *   completeCoef - see TREE_COMPLETE_COEF
+ *   spaceAmount - see SPACE_AMOUNT
+ *   executionTime - see EXECUTION_TIME
+ */
+let options = {}
+/**
+ * Timestamp, when harvest() function was started to work. Is used with executionTime option
+ * to calculate if we have to stop searching, becaue of executionTime timeout is reached
+ */
+let startTime = performance.now()
+/**
+ * Creates all properties of harvester options object and set them into global "options"
+ * @param {Object} opt Options obtained from harvest() function as a parameter
+ * @returns {Object} Full options object
+ */
+function buildOptions(opt = {}) {
+  !opt.maxDepth && (opt.maxDepth = MAX_DEPTH)
+  !opt.completeCoef && (opt.completeCoef = TREE_COMPLETE_COEF)
+  !opt.spaceAmount && (opt.spaceAmount = SPACE_AMOUNT)
+  !opt.executionTime && (opt.executionTime = EXECUTION_TIME)
+  options = opt
+}
+/**
  * Displays an error message during parsing of the pseudo tree-like string.
  * @param {String} line The current line being parsed.
  * @param {Number} l Line number.
  * @param {String} msg Error message.
  */
-function logErr(line, l, msg) {
+function err(line, l, msg) {
   console.error(`Error in line '${line}' #:${l}. ${msg}.`)
 }
 /**
@@ -84,25 +114,25 @@ function parse(lines, l, nodes, level, startSpaces = -1) {
     if (!line || line.trim() === '') continue
     // 1: spaces, 2: tag, 3: textTag, 4: text type, 5: text value, 6: attrTag, 7: attrName
     const m = line.match(LINE_RE)
-    if (!m) {logErr(line, i, `Wrong line format`); continue}
+    if (!m) {err(line, i, `Wrong line format`); continue}
     const spaces = m[1]?.length || 0
-    if (spaces % SPACE_AMOUNT !== 0) {
-      logErr(line, i, `Wrong left indentation. Must be a multiple of ${SPACE_AMOUNT}`)
+    if (spaces % options.spaceAmount !== 0) {
+      err(line, i, `Wrong left indentation. Must be a multiple of ${options.spaceAmount}`)
       continue
     }
     if (startSpaces < 0) startSpaces = spaces
-    if ((spaces - startSpaces) % SPACE_AMOUNT !== 0) {
-      logErr(line, i, `Wrong left indentation. Must be a multiple of ${SPACE_AMOUNT}`)
+    if ((spaces - startSpaces) % options.spaceAmount !== 0) {
+      err(line, i, `Wrong left indentation. Must be a multiple of ${options.spaceAmount}`)
       continue
     }
-    const curLevel = (spaces - startSpaces) / SPACE_AMOUNT
-    if (curLevel < 0) {logErr(line, i, `Wrong left indentation level`); continue}
+    const curLevel = (spaces - startSpaces) / options.spaceAmount
+    if (curLevel < 0) {err(line, i, `Wrong left indentation level`); continue}
     if (curLevel > level && curLevel - level > 1) {
-      logErr(line, i, `Wrong left indentation level`)
+      err(line, i, `Wrong left indentation level`)
       continue
     }
     if (m[6] && !m[7]) {
-      logErr(line, i, `Wrong attribute format. Should be [attrTag=attrName]`)
+      err(line, i, `Wrong attribute format. Should be [attrTag=attrName]`)
       continue
     }
     if (curLevel === level) {
@@ -113,7 +143,7 @@ function parse(lines, l, nodes, level, startSpaces = -1) {
       m[6] && (node.attrTag = [m[6], m[7]])
       nodes.push(node)
     } else if (curLevel > level) {
-      if (!nodes.length) {logErr(line, i, `Wrong left indentation level`); continue}
+      if (!nodes.length) {err(line, i, `Wrong left indentation level`); continue}
       nodes[nodes.length - 1].children = []
       let ret
       [i, ret] = parse(lines, i, nodes[nodes.length - 1].children, level + 1, startSpaces)
@@ -346,7 +376,7 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
   if (!tplNodes) return [0, undefined]
   let firstEl = FIRST_CHILD_CACHE.get(parentEl)
   if (firstEl === undefined) FIRST_CHILD_CACHE.set(parentEl, firstEl = parentEl.firstElementChild)
-  if (!firstEl) return [0, undefined]
+  if (!firstEl || performance.now() - startTime > options.executionTime) return [0, undefined]
   let maxScore = 0
   let maxNodes
   if (level < maxLevel) {
@@ -376,7 +406,7 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
        */
       const score = cachedScore(upParent, parentTpl.id)
       if (score === undefined || score > maxScore) {
-        const newLevel = Math.round(level * TREE_COMPLETE_COEF) || 1
+        const newLevel = Math.round(level * options.completeCoef) || 1
         const [upScore, upNodes] = match(parentTpl, upParent, rootEl, newLevel, maxLevel)
         if (upScore - 1 > maxScore && upNodes) {
           maxScore = upScore - 1
@@ -414,7 +444,7 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
          */
         const score = cachedScore(el, parentTpl.id)
         if (score === undefined || score > maxScore) {
-          const newLevel = Math.round(level * TREE_COMPLETE_COEF) || 1
+          const newLevel = Math.round(level * options.completeCoef) || 1
           const [deepScore, deepNodes] = match(parentTpl, el, rootEl, newLevel, maxLevel)
           if (deepScore - 1 > maxScore && deepNodes) {
             maxScore = deepScore - 1
@@ -485,7 +515,7 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
         if (firstChild) {
           const score = node.score
           if (node.children) {
-            match(node, el, rootEl, Math.round(level * TREE_COMPLETE_COEF) || 1, maxLevel)
+            match(node, el, rootEl, Math.round(level * options.completeCoef) || 1, maxLevel)
             if (node.id !== undefined && cachedScore(el, node.id) === undefined) {
               SCORE_CACHE.get(el).set(node.id, node.score)
             }
@@ -535,6 +565,7 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
  * 
  * @param {String} tpl template of pseudo tree-like string
  * @param {Element} firstEl Reference to the first DOM element for nodes[0]
+ * @param {Object|undefined} opt Harvester options
  * @returns {[maxScore: Number, foundScore: Number, map: Object, foundNodes: Array]} maxScore - 
  * maximum score. It means that found tree is identical to your pseudo tree-like template; 
  * foundScore - score of found tree may be between [0..maxScore]. Shows similarity between 
@@ -549,7 +580,8 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
  *   img[img=href]`
  * harvest(tpl, $('div')) // [{title: 'Title', price: '12.34', img: 'http://...'}, 7, 6, [...]]
  */
-function harvest(tpl, firstEl) {
+function harvest(tpl, firstEl, opt = {}) {
+  buildOptions(opt)
   const tplNodes = {tag: 'root', children: toTree(tpl), sc: 0} // add one more level as a root element
   let tplScore = 0
   let depth = 0
@@ -561,7 +593,7 @@ function harvest(tpl, firstEl) {
     d.attrTag && d.sc++
     tplScore += d.sc
   }, o => o?.children && (o.sc = o.children.reduce((pre, cur) => pre + cur.sc, o.sc || 0)))
-  depth > MAX_DEPTH && console.warn(`Max depth ${MAX_DEPTH} is reached. Current depth: ${depth}.`)
+  depth > options.maxDepth && console.warn(`Max depth ${options.maxDepth} is reached. Current depth: ${depth}.`)
   if (!firstEl) return [{}, tplScore, 0, []]
   const parentNode = firstEl.parentNode
   SCORE_CACHE.clear()
@@ -571,6 +603,7 @@ function harvest(tpl, firstEl) {
   NEXT_CACHE.clear()
   TEXT_CACHE.clear()
   PARENT_CACHE.set(firstEl, parentNode)
+  startTime = performance.now()
   const [score, nodes] = match(tplNodes, parentNode, parentNode, 0, depth + 1)
   const map = {}
   walk(nodes, d => {
@@ -590,4 +623,4 @@ function harvest(tpl, firstEl) {
   return [map, tplScore, score, nodes]
 }
 
-if (typeof module === 'object' && typeof module.exports === 'object') module.exports = {toTree, harvest}
+if (typeof module === 'object' && typeof module.exports === 'object') module.exports = {toTree, harvest, buildOptions}

@@ -1,5 +1,5 @@
 const { JSDOM } = require('jsdom')
-const { toTree, harvest } = require('./harvester')
+const { toTree, harvest, buildOptions } = require('./harvester')
 
 function testHarvester(tpl, html, query) {
   const dom = new JSDOM(html)
@@ -12,6 +12,8 @@ describe('harvester library tests', () => {
   afterEach(() => consoleSpy.mockRestore())
   
   describe('test toTree() function', () => {
+    beforeEach(() => buildOptions())
+
     it('parse an empty template (1)', () => {
       const tpl = ``
       const tree = toTree(tpl)

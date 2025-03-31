@@ -485,7 +485,7 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
     const comb = copy(combRef)
     let i = 0
     comb[0].el = firstEl
-    for (let i = 1; i < comb.length; i++) comb[i].el = undefined
+    for (let j = 1; j < comb.length; j++) comb[j].el = undefined
     while (true) {
       const node = comb[i]
       const el = node.el
@@ -516,10 +516,10 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
           const score = node.score
           if (node.children) {
             match(node, el, rootEl, Math.round(level * options.completeCoef) || 1, maxLevel)
+            node.score += score
             if (node.id !== undefined && cachedScore(el, node.id) === undefined) {
               SCORE_CACHE.get(el).set(node.id, node.score)
             }
-            node.score += score
           }
         }
         // all nodes found let's check if it's a best score
@@ -527,15 +527,16 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
           i = comb.length - 1
           const nodesScore = comb.reduce((acc, cur) => acc + cur.score || 0, 0)
           if (nodesScore > maxScore) maxScore = nodesScore, maxNodes = copy(comb)
-          /**
+          /**sc
            * Here we reset all children of current combination, because it's structure may
            * change. Every time we compare a new set of nodes in a current level we have to 
            * start with original combination childrens. Otherwise there is a possible issue,
            * where previous comparison may affect future compare.
            */
-          for (let j = 0; j < comb.length; j++) {
-            comb[j].children && (comb[j].children = copy(combinations[c][j].children))
-          }
+          //for (let j = 0; j < comb.length; j++) {
+          const last = comb.length - 1
+          comb[last].children && (comb[last].children = copy(combinations[c][last].children))
+          //}
         } else i++
       } else if (--i < 0) break
       // skip all text nodes using nextElementSibling

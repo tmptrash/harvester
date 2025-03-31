@@ -527,18 +527,18 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
           i = comb.length - 1
           const nodesScore = comb.reduce((acc, cur) => acc + cur.score || 0, 0)
           if (nodesScore > maxScore) maxScore = nodesScore, maxNodes = copy(comb)
-          /**sc
-           * Here we reset all children of current combination, because it's structure may
-           * change. Every time we compare a new set of nodes in a current level we have to 
-           * start with original combination childrens. Otherwise there is a possible issue,
-           * where previous comparison may affect future compare.
-           */
-          //for (let j = 0; j < comb.length; j++) {
-          const last = comb.length - 1
-          comb[last].children && (comb[last].children = copy(combinations[c][last].children))
-          //}
         } else i++
-      } else if (--i < 0) break
+      } else {
+        /**
+         * Here we reset all children of current combination, because it's structure may
+         * change. Every time we compare a new set of nodes in a current level we have to
+         * start with original combination childrens. Otherwise there is a possible issue,
+         * where previous comparison may affect future compare.
+         */
+        comb[i].children && (comb[i].children = copy(combinations[c][i].children))
+        i--
+        if (i < 0) break
+      }
       // skip all text nodes using nextElementSibling
       const curEl = comb[i]?.el || el
       let nextEl = NEXT_CACHE.get(curEl)

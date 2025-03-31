@@ -583,10 +583,12 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
  */
 function harvest(tpl, firstEl, opt = {}) {
   buildOptions(opt)
-  const tplNodes = {tag: 'root', children: toTree(tpl), sc: 0} // add one more level as a root element
+  const tplNodes = toTree(tpl)
+  // add one more level as a root element
+  const rootNode = tplNodes.length < 2 ? tplNodes[0] : {tag: 'root', children: tplNodes, sc: 0}
   let tplScore = 0
   let depth = 0
-  walk(tplNodes, d => {
+  walk(rootNode, d => {
     if (!isObj(d)) return
     if (d?.tag) d.sc++, depth++ 
     d.textTag && !d.textType && d.sc++
@@ -596,7 +598,7 @@ function harvest(tpl, firstEl, opt = {}) {
   }, o => o?.children && (o.sc = o.children.reduce((pre, cur) => pre + cur.sc, o.sc || 0)))
   depth > options.maxDepth && console.warn(`Max depth ${options.maxDepth} is reached. Current depth: ${depth}.`)
   if (!firstEl) return [{}, tplScore, 0, []]
-  const parentNode = firstEl.parentNode
+  const parentNode = tplNodes.length < 2 ? firstEl : firstEl.parentNode
   SCORE_CACHE.clear()
   TAG_NAME_CACHE.clear()
   PARENT_CACHE.clear()
@@ -605,7 +607,7 @@ function harvest(tpl, firstEl, opt = {}) {
   TEXT_CACHE.clear()
   PARENT_CACHE.set(firstEl, parentNode)
   startTime = performance.now()
-  const [score, nodes] = match(tplNodes, parentNode, parentNode, 0, depth + 1)
+  const [score, nodes] = match(rootNode, parentNode, parentNode, 0, depth + 1)
   const map = {}
   walk(nodes, d => {
     if (!isObj(d)) return

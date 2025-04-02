@@ -366,11 +366,12 @@ function sameType(text, type, val) {
  * 
  * @param {Object} parentTpl Parent node of the children we are comparing
  * @param {Element} parentEl Assocoated with parentTpl node element in a DOM
+ * @param {Element} startEl Element we starting the search in a DOM
  * @param {Number} level Current level during compare
  * @param {Number} maxLevel Max level we may go to
  * @returns [score, Nodes[]|undefined]
  */
-function match(parentTpl, parentEl, rootEl, level, maxLevel) {
+function match(parentTpl, parentEl, rootEl, startEl, level, maxLevel) {
   if (!parentTpl || !parentEl) return [0, undefined]
   const tplNodes = parentTpl.children
   if (!tplNodes) return [0, undefined]
@@ -407,7 +408,7 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
       const score = cachedScore(upParent, parentTpl.id)
       if (score === undefined || score > maxScore) {
         const newLevel = Math.round(level * options.completeCoef) || 1
-        const [upScore, upNodes] = match(parentTpl, upParent, rootEl, newLevel, maxLevel)
+        const [upScore, upNodes] = match(parentTpl, upParent, rootEl, startEl, newLevel, maxLevel)
         if (upScore - 1 > maxScore && upNodes) {
           maxScore = upScore - 1
           if (score === undefined && parentTpl.id !== undefined) {
@@ -445,7 +446,7 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
         const score = cachedScore(el, parentTpl.id)
         if (score === undefined || score > maxScore) {
           const newLevel = Math.round(level * options.completeCoef) || 1
-          const [deepScore, deepNodes] = match(parentTpl, el, rootEl, newLevel, maxLevel)
+          const [deepScore, deepNodes] = match(parentTpl, el, rootEl, startEl, newLevel, maxLevel)
           if (deepScore - 1 > maxScore && deepNodes) {
             maxScore = deepScore - 1
             if (score === undefined && parentTpl.id !== undefined) {
@@ -515,7 +516,7 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
         if (firstChild) {
           const score = node.score
           if (node.children) {
-            match(node, el, rootEl, Math.round(level * options.completeCoef) || 1, maxLevel)
+            match(node, el, rootEl, startEl, Math.round(level * options.completeCoef) || 1, maxLevel)
             node.score += score
             if (node.id !== undefined && cachedScore(el, node.id) === undefined) {
               SCORE_CACHE.get(el).set(node.id, node.score)
@@ -539,9 +540,10 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
         i--
         if (i < 0) break
       }
-      // skip all text nodes using nextElementSibling
       const curEl = comb[i]?.el || el
-      let nextEl = NEXT_CACHE.get(curEl)
+      // if this is a root element we have to skip all siblings on a root level
+      let nextEl = tplNodes?.[0]?.root && curEl === startEl ? null : NEXT_CACHE.get(curEl)
+      // skip all text nodes using nextElementSibling
       if (nextEl === undefined) NEXT_CACHE.set(curEl, nextEl = curEl?.nextElementSibling)
       comb[i].el = nextEl
     }
@@ -583,12 +585,16 @@ function match(parentTpl, parentEl, rootEl, level, maxLevel) {
  */
 function harvest(tpl, firstEl, opt = {}) {
   buildOptions(opt)
-  const tplNodes = toTree(tpl)
   // add one more level as a root element
-  const rootNode = tplNodes.length < 2 ? tplNodes[0] : {tag: 'root', children: tplNodes, sc: 0}
+  const tplNodes = {tag: 'root', children: toTree(tpl), sc: 0}
+  /**
+   * Marks first element as a root if it's only one. It is used for optimization. We don't need
+   * to walk through other nodes on the same root level to prevent long search in other nodes.
+   */
+  if (tplNodes.children.length === 1) tplNodes.children[0].root = true
   let tplScore = 0
   let depth = 0
-  walk(rootNode, d => {
+  walk(tplNodes, d => {
     if (!isObj(d)) return
     if (d?.tag) d.sc++, depth++ 
     d.textTag && !d.textType && d.sc++
@@ -598,7 +604,7 @@ function harvest(tpl, firstEl, opt = {}) {
   }, o => o?.children && (o.sc = o.children.reduce((pre, cur) => pre + cur.sc, o.sc || 0)))
   depth > options.maxDepth && console.warn(`Max depth ${options.maxDepth} is reached. Current depth: ${depth}.`)
   if (!firstEl) return [{}, tplScore, 0, []]
-  const parentNode = tplNodes.length < 2 ? firstEl : firstEl.parentNode
+  const parentNode = firstEl.parentNode
   SCORE_CACHE.clear()
   TAG_NAME_CACHE.clear()
   PARENT_CACHE.clear()
@@ -607,7 +613,7 @@ function harvest(tpl, firstEl, opt = {}) {
   TEXT_CACHE.clear()
   PARENT_CACHE.set(firstEl, parentNode)
   startTime = performance.now()
-  const [score, nodes] = match(rootNode, parentNode, parentNode, 0, depth + 1)
+  const [score, nodes] = match(tplNodes, parentNode, parentNode, firstEl, 0, depth + 1)
   const map = {}
   walk(nodes, d => {
     if (!isObj(d)) return

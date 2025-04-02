@@ -811,19 +811,19 @@ describe('harvester library tests', () => {
         <meta charset="UTF-8">
       </head>
       <body>
-      <section>
-        <h1>H1</h1>
-        <h1>
-          <div></div>H2
-        </h1>
-      </section>
-    </body>
+        <section>
+          <h1>H1</h1>
+          <h1>
+            <div></div>H2
+          </h1>
+        </section>
+      </body>
       </html>
-      `, 'body > section > h1')
+      `, 'body > section')
       expect(consoleSpy).not.toHaveBeenCalled()
       expect(ret[0]).toEqual({h1: 'H1', h2: 'H2'})
       expect(ret[1]).toEqual(5)
-      expect(ret[2]).toEqual(3)
+      expect(ret[2]).toEqual(4)
     })
     it('test complex template and the DOM (1)', () => {
       const ret = testHarvester(`

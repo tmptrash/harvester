@@ -141,9 +141,23 @@ In this example, the value of the `src` attribute of the `img` tag will be extra
 
 ## API
 
-`harvest(tpl, firstEl): [data, maxScore, score, metaTree]`
+`harvest(tpl, firstEl, options = {}): [data, maxScore, score, metaTree]`
 
-Finds matches between a pseudo-tree and the DOM structure, extracting text and attributes. The only function you will use to retrieve data is harvest(). It takes two parameters: a text-based template describing the structure of the data and a DOM element corresponding to the first specified tag. The function returns an array of four elements:
+Finds matches between a pseudo-tree and the DOM structure, extracting text and attributes. The only function you will use to retrieve data is harvest(). It takes three parameters: a text-based template describing the structure of the data, DOM element corresponding to the first specified tag and options. The options have this format:
+```js
+const options = {
+  // After this depth a warning will be printed to the user
+  maxDepth: 20,
+  // The acceleration factor at which points will decrease when descending or ascending one level in the DOM tree. It affects the search speed and accuracy (lower value = more accuracy)
+  completeCoef: 1.6,
+  // Default amount of spaces ina template between parent and child     
+  spaceAmount: 2,
+  // Maximum search time. The search will be automatically stopped when the time runs out
+  executionTime: 15000
+}
+```
+
+The function returns an array of four elements:
 - data -  A hash map containing all the extracted data, organized by the keys specified in the template.
 - maxScore - The maximum possible score based on the given template.
 - score - The actual score obtained based on the search for template elements.

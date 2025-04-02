@@ -146,7 +146,6 @@ In this example, the value of the `src` attribute of the `img` tag will be extra
 Finds matches between a pseudo-tree and the DOM structure, extracting text and attributes. The only function you will use to retrieve data is harvest(). It takes three parameters: a text-based template describing the structure of the data, DOM element corresponding to the first specified tag and options. The options have this format:
 ```js
 const options = {
-  maxDepth: 20,        // After this depth a warning will be printed to the user
   completeCoef: 1.6,   // The acceleration factor at which points will decrease when descending or ascending one level in the DOM tree. It affects the search speed and accuracy (lower value = more accuracy) 
   spaceAmount: 2,      // Default amount of spaces ina template between parent and child
   executionTime: 15000 // Maximum search time. The search will be automatically stopped when the time runs out

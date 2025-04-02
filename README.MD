@@ -41,7 +41,8 @@ The next concept to understand is **score**. Score is how this library determine
 - For each found tag in the DOM tree, the program assigns **1 point**.  
 - If the required text is found, **another point** is added.  
 - If the text type matches the specified type (e.g., `int` or `float`), an **extra 2 points** are given.  
-- Finally, **1 more point** is awarded if the required attribute is found on the current tag.  
+- Finally, **1 more point** is awarded if the required attribute is found on the current tag.
+- If we go one level down or move one level up when nothing is found at the current level, **we take 1 point**.
 
 #### Example
 Let's assume we have the following template:  

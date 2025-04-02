@@ -1,9 +1,4 @@
 /**
- * The maximum depth of pseudo tree-like nodes after, which we a warning the user about
- * possible performance issues
- */
-const MAX_DEPTH = 20
-/**
  * Means how complete pseudo tree-like template will be found in a DOM tree. Should be bigger
  * then 1. For every deeper or upper level we multiply current level into this coefficient. Luke
  * this: Math.round(level * TREE_COMPLETE_COEF) || 1
@@ -63,7 +58,6 @@ const NEXT_CACHE = new Map()
 let id = 0
 /**
  * Harvester options.
- *   maxDepth - see MAX_DEPTH
  *   completeCoef - see TREE_COMPLETE_COEF
  *   spaceAmount - see SPACE_AMOUNT
  *   executionTime - see EXECUTION_TIME
@@ -80,7 +74,6 @@ let startTime = performance.now()
  * @returns {Object} Full options object
  */
 function buildOptions(opt = {}) {
-  !opt.maxDepth && (opt.maxDepth = MAX_DEPTH)
   !opt.completeCoef && (opt.completeCoef = TREE_COMPLETE_COEF)
   !opt.spaceAmount && (opt.spaceAmount = SPACE_AMOUNT)
   !opt.executionTime && (opt.executionTime = EXECUTION_TIME)

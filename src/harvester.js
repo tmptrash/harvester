@@ -275,6 +275,8 @@ function copy(obj) {
     // the same for attrTag and attr props
     obj.attrTag && (cpy.attrTag = [obj.attrTag[0], obj.attrTag[1]], cpy.attr = obj.attr)
     obj.children && (cpy.children = copy(obj.children))
+    // "root" prop exists only in the root node
+    obj.root && (cpy.root = obj.root)
     return cpy
   }
   return obj

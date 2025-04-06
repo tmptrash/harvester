@@ -605,7 +605,6 @@ function harvest(tpl, firstEl, opt = {}) {
     d.attrTag && d.sc++
     tplScore += d.sc
   }, o => o?.children && (o.sc = o.children.reduce((pre, cur) => pre + cur.sc, o.sc || 0)))
-  depth > options.maxDepth && console.warn(`Max depth ${options.maxDepth} is reached. Current depth: ${depth}.`)
   if (!firstEl) return [{}, tplScore, 0, []]
   const parentNode = firstEl.parentNode
   SCORE_CACHE.clear()

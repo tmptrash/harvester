@@ -1163,8 +1163,8 @@ describe('harvester library tests', () => {
           h1
           h1{h1}
           h1{h2}
-        spun{spun}
-          a
+        div{spun}
+          h1
            err
       close`, `
       <!DOCTYPE html>
@@ -1190,21 +1190,20 @@ describe('harvester library tests', () => {
               <section></section>
               <h1>H2</h1>
             </span>
-            <spun>SPUN
-              <a>
-                <img/>
-              </a>
-            </spun>
           </a>
+          <div>SPUN1
+            <h1 href="test">
+            </h1>
+          </div>
         </span>
         <close/>
       </body>
       </html>
       `, 'body')
       expect(consoleSpy).toHaveBeenCalled()
-      expect(ret[0]).toEqual({attr: 'attr', n1: 'n1', href: 'url', h1: 'H1', h2: 'H2', spun: 'SPUN'})
+      expect(ret[0]).toEqual({attr: 'attr', n1: 'n1', href: 'url', h1: 'H1', h2: 'H2', spun: 'SPUN1'})
       expect(ret[1]).toEqual(20)
-      expect(ret[2]).toEqual(16)
+      expect(ret[2]).toEqual(18)
     })
     it('test a template with * instead of a tag (1)', () => {
       const ret = testHarvester(`

@@ -1592,5 +1592,28 @@ describe('harvester library tests', () => {
       expect(ret[1]).toEqual(3)
       expect(ret[2]).toEqual(0)
     })
+
+    it('test for search a node mutch deeper than in a template', () => {
+      const ret = testHarvester(`
+        h1{h1}`, `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+        <div>
+          <span>
+            <h1>H1</h1>
+          </span>
+        </div>
+      </body>
+      </html>
+      `, 'body > div > span')
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(ret[0]).toEqual({h1: 'H1'})
+      expect(ret[1]).toEqual(2)    
+      expect(ret[2]).toEqual(1)
+    })
   })
 })

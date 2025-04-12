@@ -384,22 +384,23 @@ function match(tplNodesId, tplNodes, firstEl, level, maxLevel) {
   let maxScore = 0
   let maxNodes
   if (level < maxLevel) {
-    /** TODO: update this comment
-     * First, we check similar nodes in one level upper without combinations. This variant
+    /**
+     * First, we check current nodes array in one level upper without combinations. This variant
      * is used when DOM tree has a lack of nodes between current nodes in pseudo tree and DOM
      * tree. For example (pseudo tree on the left and DOM tree on the right):
      * 
      *         h1
-     * div  -> h1
-     *   h1      div
+     *         h1
+     *   h1 ->   div
      *   h1
      * 
-     * In this example, we have to find two h1 tags of a div in a pseudo tree in a DOM tree.
-     * Please pay attention on the fact that two h1 tags in a DOM tree are on the root level
-     * and we have to skip div tag in a pseudo tree. In this case we also should decrease score
-     * with 1, because we skip one level in a pseudo tree. And again every level skipping
-     * decreases score with 1. Max possible score here is 3, but algorithm returns 1 (2 - 1:
-     * 2 h1 tags found minus one level skipped).
+     * In this example, we have to find two h1 tags of a pseudo tree in a DOM tree. Please pay
+     * attention on the fact that two h1 tags in a DOM tree are on the root level and we have
+     * to skip div tag in a DOM tree during search. In this case we also should decrease score
+     * with 1, because we skip one level in a DOM and go further from the original pseudo tree
+     * in a template. And again every level skipping (up or down) decreases score with 1. Max
+     * possible score here is 2, but algorithm returns 1 (2 - 1: 2 h1 tags found minus one level
+     * skipped).
      */
     let upEl = PARENT_CACHE.get(firstEl)
     if (upEl === undefined) PARENT_CACHE.set(firstEl, upEl = firstEl?.parentNode)
@@ -429,8 +430,8 @@ function match(tplNodesId, tplNodes, firstEl, level, maxLevel) {
     }
     /**
      * Second, we check similar nodes in a one level deeper without combinations. This variant
-     * is used when DOM tree has extra nodes between current nodes in pseudo tree and DOM tree.
-     * For example (pseudo tree on the left and DOM tree on the right):
+     * is used when DOM tree has extra nodes between current nodes in pseudo tree. For example
+     * (pseudo tree on the left and DOM tree on the right):
      * 
      * h1
      * h1 -> div
@@ -438,9 +439,10 @@ function match(tplNodesId, tplNodes, firstEl, level, maxLevel) {
      *         h1
      * 
      * In this example, we have to find two h1 tags inside the div, but div itself should be 
-     * skipped. We also should decrease score with -1 score, because we are skipping one level
-     * in a DOM tree. Every level skip decreases score with 1. So max possible score here === 2,
-     * but algorithm should return 1 (2 - 1: two h1 tags found minus one skipped level).
+     * skipped. We also should decrease score with -1, because we are skipping one level in a
+     * DOM tree and go away from original pseudo tree in a template. Every level skip decreases
+     * score with 1. So max possible score here === 2, but algorithm should return 1 (2 - 1: two
+     * h1 tags found minus one skipped level).
      */
     let el = firstEl
     while (el) {
@@ -474,9 +476,9 @@ function match(tplNodesId, tplNodes, firstEl, level, maxLevel) {
    * tree. For example if we have 2 nodes: [{tag: 'div'}, {tag: 'span'}], we will have 3
    * possible combinations with different max scores:
    * 
-   * 1. [{tag: 'div'}]                 // max score 1
+   * 1. [{tag: 'div'}, {tag: 'span'}]  // max score 2
    * 2. [{tag: 'span'}]                // max score 1
-   * 3. [{tag: 'div'}, {tag: 'span'}]  // max score 2
+   * 3. [{tag: 'div'}]                 // max score 1
    * 
    * It picks every combination of pseudo nodes and try to find it in a DOM tree. The tree with
    * maximized score will be returned as a result.
@@ -550,7 +552,6 @@ function match(tplNodesId, tplNodes, firstEl, level, maxLevel) {
       }
       const curEl = comb[i]?.el || el
       let nextEl = NEXT_CACHE.get(curEl)
-      // skip all text nodes using nextElementSibling
       if (nextEl === undefined) NEXT_CACHE.set(curEl, nextEl = curEl?.nextElementSibling)
       comb[i].el = nextEl
     }
@@ -565,25 +566,25 @@ function match(tplNodesId, tplNodes, firstEl, level, maxLevel) {
  * where found text|attribute will be placed. 2 spaces before tags - are nesting level. 
  * Difference between parent and child nodes may be only 2 spaces if we go from up to down. 
  * If we go from bottom to up it may be different. This template should pass as a first 
- * parameter to harvest() function. Second, firstNodeEl - should point to the first element 
- * in out tpl in a DOM.
+ * parameter to harvest() function. Second, firstEl - should point to the first element 
+ * in a DOM.
  * 
  * @param {String} tpl template of pseudo tree-like string
  * @param {Element} firstEl Reference to the first DOM element for nodes[0]
  * @param {Object|undefined} opt Harvester options
- * @returns {[maxScore: Number, foundScore: Number, map: Object, foundNodes: Array]} maxScore - 
- * maximum score. It means that found tree is identical to your pseudo tree-like template; 
- * foundScore - score of found tree may be between [0..maxScore]. Shows similarity between 
- * maximum score and found; map - JavaScript object with all text tags and attribute tags in
- * it; foundNodes - found Array based tree with all metadata in it;
+ * @returns {[map: Object, maxScore: Number, foundScore: Number, foundNodes: Array]} map -
+ * JavaScript object with all text tags and attribute tags in it;maxScore - maximum score.
+ * It means that found tree is identical to your pseudo tree-like template; foundScore -
+ * score of found tree may be between [0..maxScore]. Shows similarity between maximum score
+ * and found; foundNodes - found Array based tree with all metadata in it;
  * 
  * @example
  * const tpl = `
  * div
  *   h1{title}
- *   span{price}
+ *   span{price:float}
  *   img[img=href]`
- * harvest(tpl, $('div')) // [{title: 'Title', price: '12.34', img: 'http://...'}, 7, 6, [...]]
+ * harvest(tpl, $('div')) // [{title: 'Title', price: '12.34', img: 'http://...'}, 8, 7, [...]]
  */
 function harvest(tpl, firstEl, opt = {}) {
   buildOptions(opt)

@@ -493,8 +493,6 @@ function match(tplNodesId, tplNodes, firstEl, level, maxLevel) {
     const comb = copy(combRef)
     let i = 0
     comb[0].el = firstEl
-    // TODO: do we need this?
-    for (let j = 1; j < comb.length; j++) comb[j].el = undefined
     while (true) {
       const node = comb[i]
       const el = node.el
@@ -557,11 +555,6 @@ function match(tplNodesId, tplNodes, firstEl, level, maxLevel) {
       comb[i].el = nextEl
     }
   }
-  // TODO: why do we need this?
-  // if (maxNodes?.length) {
-  //   parentTpl.children = maxNodes
-  //   parentTpl.score = maxScore
-  // }
 
   return [maxScore, maxNodes]
 }

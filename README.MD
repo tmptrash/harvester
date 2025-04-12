@@ -135,7 +135,7 @@ The next optional parameter is the search for a tag’s attribute value. For exa
 
 ```js
 var tpl = "  img[attr=src]"
-```  
+```
 
 In this example, the value of the `src` attribute of the `img` tag will be extracted and stored under the key `"attr"` in the object returned by the `harvest()` function.
 
@@ -143,11 +143,11 @@ In this example, the value of the `src` attribute of the `img` tag will be extra
 
 `harvest(tpl, firstEl, options = {}): [data, maxScore, score, metaTree]`
 
-Finds matches between a pseudo-tree and the DOM structure, extracting text and attributes. The only function you will use to retrieve data is harvest(). It takes three parameters: a text-based template describing the structure of the data, DOM element corresponding to the first specified tag and options. The options have this format:
+Finds matches between a pseudo-tree and the DOM structure, extracting text and attributes. The only function you will use to retrieve data is harvest(). It takes three parameters: a text-based template describing the structure of the data, DOM element corresponding to the first specified tag and options. The options have this format (with default values):
 ```js
 const options = {
   completeCoef: 1.6,   // The acceleration factor at which points will decrease when descending or ascending one level in the DOM tree. It affects the search speed and accuracy (lower value = more accuracy) 
-  spaceAmount: 2,      // Default amount of spaces ina template between parent and child
+  spaceAmount: 2,      // Default amount of spaces in a template between parent and child
   executionTime: 15000 // Maximum search time. The search will be automatically stopped when the time runs out
 }
 ```

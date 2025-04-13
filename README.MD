@@ -201,7 +201,7 @@ console.log(result)
 ```
 
 ## Use with puppeteer
-This library works perfectly in combination with [Puppeteer](https://pptr.dev). Here's an example where we extract all today's news from the Ukrainska Pravda website.
+This library works perfectly in combination with [Puppeteer](https://pptr.dev). Here's a minimal example where we extract all today's news from the Ukrainska Pravda website.
 
 ```javascript
 import { harvest } from 'js-harvester'

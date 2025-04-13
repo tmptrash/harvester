@@ -242,6 +242,26 @@ const news = await page.evaluate(tpl => {
 console.log(news)
 console.log('\nPress Ctrl-C to stop...')
 ```
+### Output:
+```
+[
+  {
+    time: '13:04',
+    title: '"Не зможу жити, якщо не поїду разом з ними". Історія сімох рідних братів, які служать у 3 ОШБр'
+  },
+  {
+    time: '12:44',
+    title: 'Ракетний удар по Сумах: кількість поранених зросла до 83, з них 7 дітей'
+  },
+  { time: '12:30', title: 'Партизани спалили танк на Донеччині' },
+  {
+    time: '12:23',
+    title: '"Б’є всі вікові рекорди": найстарішій у світі горилі виповнилося 68 років'
+  },
+  ...
+]
+```
+
 P.S. If you want to see more examples of how this library is used, take a look at the [harvester.test.js](https://github.com/tmptrash/harvester/blob/main/src/harvester.test.js) file. There you'll find various template examples and the corresponding search results extracted from HTML.
 
 ## Run tests

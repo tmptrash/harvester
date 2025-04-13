@@ -200,6 +200,48 @@ console.log(result)
 ]
 ```
 
+## Use with puppeteer
+This library works perfectly in combination with [Puppeteer](https://pptr.dev). Here's an example where we extract all today's news from the Ukrainska Pravda website.
+
+```javascript
+import { harvest } from 'js-harvester'
+import { connect } from 'puppeteer-real-browser'
+
+const HARVESTER_PATH = './node_modules/js-harvester/index.js'
+const TPL = `
+  div{time}
+  div
+    a{title}`
+
+async function goto(page, fn) {
+  return Promise.all([
+    page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle2']}),
+    fn?.()
+  ])
+}
+async function open() {
+  const { page } = await connect({headless: false, args: ["--start-maximized"]})
+  await page.setViewport(null)
+  return page
+}
+
+const page = await open()
+await goto(page, async () => page.goto('https://www.pravda.com.ua/news/'))
+await page.addScriptTag({path: HARVESTER_PATH})
+
+const news = await page.evaluate(tpl => {
+  const newsEls = document.querySelectorAll('.container_sub_news_list div.article_news_list')
+  const newsData = []
+  for (let i = 0; i < newsEls.length; i++) {
+    const n = harvest(tpl, newsEls[i])
+    n?.[0]?.title && newsData.push(n[0])
+  }
+  return newsData
+}, TPL)
+
+console.log(news)
+console.log('\nPress Ctrl-C to stop...')
+```
 P.S. If you want to see more examples of how this library is used, take a look at the [harvester.test.js](https://github.com/tmptrash/harvester/blob/main/src/harvester.test.js) file. There you'll find various template examples and the corresponding search results extracted from HTML.
 
 ## Run tests

@@ -262,7 +262,7 @@ console.log('\nPress Ctrl-C to stop...')
 ]
 ```
 
-P.S. If you want to see more examples of how this library is used, take a look at the [harvester.test.js](https://github.com/tmptrash/harvester/blob/main/src/harvester.test.js) file. There you'll find various template examples and the corresponding search results extracted from HTML.
+P.S. If you want to see more examples of how this library is used, take a look at the [harvester.test.js](https://github.com/tmptrash/harvester/blob/main/harvester.test.js) file. There you'll find various template examples and the corresponding search results extracted from HTML.
 
 ## Run tests
 ```

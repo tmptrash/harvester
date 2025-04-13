@@ -1,5 +1,5 @@
 const { JSDOM } = require('jsdom')
-const { toTree, harvest, buildOptions } = require('./harvester')
+const { toTree, harvest, buildOptions } = require('.')
 
 function testHarvester(tpl, html, query) {
   const dom = new JSDOM(html)

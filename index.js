@@ -57,7 +57,7 @@ const NEXT_CACHE = new Map()
  */
 let id = -1
 /**
- * Reference to the root DOM element we start searching from. Shoould be set once before matching 
+ * Reference to the root DOM element we start searching from. Shoould be set once before matching
  * process is started
  */
 let rootEl
@@ -78,7 +78,7 @@ let startTime = performance.now()
  * @param {Object} opt Options obtained from harvest() function as a parameter
  * @returns {Object} Full options object
  */
-function buildOptions(opt = {}) {
+function buildOptions (opt = {}) {
   !opt.completeCoef && (opt.completeCoef = TREE_COMPLETE_COEF)
   !opt.spaceAmount && (opt.spaceAmount = SPACE_AMOUNT)
   !opt.executionTime && (opt.executionTime = EXECUTION_TIME)
@@ -90,7 +90,7 @@ function buildOptions(opt = {}) {
  * @param {Number} l Line number.
  * @param {String} msg Error message.
  */
-function err(line, l, msg) {
+function err (line, l, msg) {
   console.error(`Error in line '${line}' #:${l}. ${msg}.`)
 }
 /**
@@ -98,7 +98,7 @@ function err(line, l, msg) {
  * Invalid nodes are skipped and only valid lines will be in final JSON tree.
  * Full format of one line is: "  tag{textTag:textType:textVal}[attrTag=attrName]".
  * Example: "  img{text:func:checkText}[attr=href]"
- * 
+ *
  * @param {String[]} lines The pseudo tree-like string split into lines.
  * @param {Number} l Current line index.
  * @param {Object[]} nodes Array to store parsed nodes.
@@ -106,13 +106,13 @@ function err(line, l, msg) {
  * @param {Number} startSpaces Left padding of the first not empty tag in a tree
  * @returns {[Number, Number]} The updated line index and level difference.
  */
-function parse(lines, l, nodes, level, startSpaces = -1) {
+function parse (lines, l, nodes, level, startSpaces = -1) {
   for (let i = l; i < lines.length; i++) {
     const line = lines[i]
     if (!line || line.trim() === '') continue
     // 1: spaces, 2: tag, 3: textTag, 4: text type, 5: text value, 6: attrTag, 7: attrName
     const m = line.match(LINE_RE)
-    if (!m) {err(line, i, `Wrong line format`); continue}
+    if (!m) { err(line, i, 'Wrong line format'); continue }
     const spaces = m[1]?.length || 0
     if (spaces % options.spaceAmount !== 0) {
       err(line, i, `Wrong left indentation. Must be a multiple of ${options.spaceAmount}`)
@@ -124,46 +124,45 @@ function parse(lines, l, nodes, level, startSpaces = -1) {
       continue
     }
     const curLevel = (spaces - startSpaces) / options.spaceAmount
-    if (curLevel < 0) {err(line, i, `Wrong left indentation level`); continue}
+    if (curLevel < 0) { err(line, i, 'Wrong left indentation level'); continue }
     if (curLevel > level && curLevel - level > 1) {
-      err(line, i, `Wrong left indentation level`)
+      err(line, i, 'Wrong left indentation level')
       continue
     }
     if (m[6] && !m[7]) {
-      err(line, i, `Wrong attribute format. Should be [attrTag=attrName]`)
+      err(line, i, 'Wrong attribute format. Should be [attrTag=attrName]')
       continue
     }
     if (curLevel === level) {
-      const node = {id: id++, tag: m[2].toUpperCase(), sc: 0}
+      const node = { id: id++, tag: m[2].toUpperCase(), sc: 0 }
       m[3] && (node.textTag = m[3])
       m[4] && (node.textType = m[4])
       m[5] && (node.textVal = m[5])
       m[6] && (node.attrTag = [m[6], m[7]])
       nodes.push(node)
     } else if (curLevel > level) {
-      if (!nodes.length) {err(line, i, `Wrong left indentation level`); continue}
+      if (!nodes.length) { err(line, i, 'Wrong left indentation level'); continue }
       nodes[nodes.length - 1].children = []
       let ret
       [i, ret] = parse(lines, i, nodes[nodes.length - 1].children, level + 1, startSpaces)
       if (ret) return [i, ret - 1]
-    }
-    else return [i - 1, level - curLevel - 1]
+    } else return [i - 1, level - curLevel - 1]
   }
-  
+
   return [lines.length, 0]
 }
 /**
  * Converts a pseudo tree-like string into a JSON tree. Only valid nodes will be parsed.
  * @param {String} tpl The pseudo tree-like string in format:
- * 
+ *
  * div
  *   span
  *     *{h1}
  *     img{text}[src=src]
- * 
+ *
  * @returns {Object[]} Parsed tree structure.
  */
-function toTree(tpl) {
+function toTree (tpl) {
   const lines = tpl.split('\n')
   const nodes = []
   id = 0
@@ -175,7 +174,7 @@ function toTree(tpl) {
  * @param {*} val Value to check.
  * @returns {Boolean} True if val is an object, false otherwise.
  */
-function isObj(val) {
+function isObj (val) {
   return typeof val === 'object' && !Array.isArray(val) && val !== null
 }
 /**
@@ -183,7 +182,7 @@ function isObj(val) {
  * @param {String} str String to check
  * @returns {Boolean}
  */
-function isFloat(str) {
+function isFloat (str) {
   const num = +str
   return str !== '' && !Number.isNaN(num) && !Number.isInteger(num)
 }
@@ -192,17 +191,17 @@ function isFloat(str) {
  * @param {String} str String to check
  * @returns {Boolean}
  */
-function isInt(str) {
+function isInt (str) {
   return str !== '' && Number.isInteger(+str) && !str.includes('.')
 }
 /**
- * Returns a cached score for DOM element and pseudo tree-like node id. So if we trying to 
+ * Returns a cached score for DOM element and pseudo tree-like node id. So if we trying to
  * calculate a score for the DOM node and all it's sub-nodes we have to check this cache first.
  * @param {Element} el DOM element
  * @param {Number} id Unique id of pseudo tree-like node
  * @returns {Number|undefined} score or undefined
  */
-function cachedScore(el, id) {
+function cachedScore (el, id) {
   if (SCORE_CACHE.get(el) === undefined) SCORE_CACHE.set(el, new Map())
   return SCORE_CACHE.get(el).get(id)
 }
@@ -211,7 +210,7 @@ function cachedScore(el, id) {
  * @param {Element} el The DOM element.
  * @returns {String|undefined} The text content or undefined if none found.
  */
-function text(el) {
+function text (el) {
   if (!el) return undefined
   const texts = []
   for (const child of el.childNodes) {
@@ -223,13 +222,13 @@ function text(el) {
   return texts.length === 1 ? texts[0] : (!texts.length ? '' : texts)
 }
 /**
- * Returns unique id for the array of nodes combining their ids. It takes only the nodes of up
+ * Returns unique id for the array of nodes combining their ids. It takes only the nodes of one
  * level without children.
- * @param {Node[]} nodes 
+ * @param {Node[]} nodes Array of nodes
  * @returns {String} Unique id string
  */
-function getNodesId(nodes) {
-  return nodes.reduce((pre, cur) => pre += ((pre && '-') + cur.id), '')
+function getNodesId (nodes) {
+  return nodes.reduce((pre, cur) => pre + ((pre && '-') + cur.id), '')
 }
 /**
  * Returns all possible variants of nodes of the one level. Is used to compare all possible
@@ -237,7 +236,7 @@ function getNodesId(nodes) {
  * long subsets first and short at the end.
  * @param {Node[]} nodes Array of nodes we have create variants for
  * @returns {Nodes[][]} Array of arrays of Nodes combinations
- * 
+ *
  * @example
  * const nodes = [{id: 0, tag: '*'}, {id: 1, tag: 'span'}]
  * // returns [
@@ -247,7 +246,7 @@ function getNodesId(nodes) {
  * // ]
  * const vars = subsets(nodes)
  */
-function subsets(nodes) {
+function subsets (nodes) {
   if (!nodes) return []
   const len = nodes.length
   const size = 1 << len
@@ -262,13 +261,13 @@ function subsets(nodes) {
   return result
 }
 /**
- * Makes a deep copy of the object or an array. This is your responsibility to pass obj 
+ * Makes a deep copy of the object or an array. This is your responsibility to pass obj
  * parameter without circular nodes. We know exactly the type of object we pass, so we do
  * optimizations (decrease recursion calls) if it's an object.
  * @param {Object|Array} obj Object or array to copy
  * @returns {Object|Array} Copy of object or array
  */
-function copy(obj) {
+function copy (obj) {
   if (Array.isArray(obj)) {
     const len = obj.length
     const cpy = new Array(len)
@@ -288,7 +287,7 @@ function copy(obj) {
       obj.textVal && (cpy.textVal = obj.textVal)
     }
     // the same for attrTag and attr props
-    obj.attrTag && (cpy.attrTag = [obj.attrTag[0], obj.attrTag[1]], cpy.attr = obj.attr)
+    if (obj.attrTag) { cpy.attrTag = [obj.attrTag[0], obj.attrTag[1]]; cpy.attr = obj.attr }
     obj.children && (cpy.children = copy(obj.children))
     return cpy
   }
@@ -301,22 +300,22 @@ function copy(obj) {
  * @param {Function} cb Callback function (cb(node, key)) for every node.
  * @param {Function} endCb Callback, which is called at the end of walking on an object
  */
-function walk(obj, cb, endCb) {
+function walk (obj, cb, endCb) {
   if (Array.isArray(obj)) {
-    for (let i = 0; i < obj.length; i++) cb(obj[i], i), walk(obj[i], cb, endCb)
+    for (let i = 0; i < obj.length; i++) { cb(obj[i], i); walk(obj[i], cb, endCb) }
   } else if (typeof obj === 'object') {
-    for (const p in obj) if (p !== 'el') cb(obj[p], p), walk(obj[p], cb, endCb)
+    for (const p in obj) if (p !== 'el') { cb(obj[p], p); walk(obj[p], cb, endCb) }
     endCb?.(obj)
   } else cb(obj)
 }
 /**
  * Checks if a tag from pseudo tree-like node is similar to DOM element tag name. If a tag in a
  * pseudo tree is equal to *, then any tag is equal. It uses cache for the tag name.
- * @param {Object} node 
- * @param {Element} el 
+ * @param {Object} node Pseudo tree like template's node
+ * @param {Element} el DOM element
  * @returns {Boolean}
  */
-function sameTag(node, el) {
+function sameTag (node, el) {
   if (node.tag === '*') return true
   let tagName = TAG_NAME_CACHE.get(el)
   if (tagName === undefined) TAG_NAME_CACHE.set(el, tagName = el.tagName.toUpperCase())
@@ -324,22 +323,23 @@ function sameTag(node, el) {
 }
 /**
  * Checks if the tag's text has a type "type" and value "val". Is used for checking tag's text
- * for the specified type. For example: str, int, float, func,... If user sets "func" type it 
+ * for the specified type. For example: str, int, float, func,... If user sets "func" type it
  * means this function should be defined in a global context (window under browser and self
  * under Node.js).
  * @param {String} text Text we are checking
- * @param {String} type str, int, float,... 
- * @param {String} val Additional parameter for type. For example for the func type we provide 
+ * @param {String} type str, int, float,...
+ * @param {String} val Additional parameter for type. For example for the func type we provide
  * custom function name to call
  * @returns {Boolean}
  */
-function sameType(text, type, val) {
+function sameType (text, type, val) {
   switch (type) {
+    /* eslint-disable no-multi-spaces */
     case 'int'  : return isInt(text)
     case 'float': return isFloat(text)
     case 'with' : return text.includes(val)
     case 'func' : {
-      const obj = typeof global === 'undefined' ? self : global
+      const obj = typeof global === 'undefined' ? self : global // eslint-disable-line no-undef
       if (!obj) {
         console.warn(`Unknown environment. Impossible to find global or self objects to run ${val} function`)
         return false
@@ -354,13 +354,14 @@ function sameType(text, type, val) {
     case 'str'  : return true
     case 'empty': return text.trim() === ''
   }
+  /* eslint-enable no-multi-spaces */
   return false
 }
 /**
- * Finds all nodes in a DOM tree according to JSON tree. The starting format of one JSON node 
+ * Finds all nodes in a DOM tree according to JSON tree. The starting format of one JSON node
  * is following: {id: Number, el: Element, tag: String, textTag: String, children: []}, where:
  * id - unique identifier of the pseudo node, el - reference to DOM element, tag - name of the
- * HTML tag we are looking for or *, score - score of the current node (+1 if tag exist or *, +1 
+ * HTML tag we are looking for or *, score - score of the current node (+1 if tag exist or *, +1
  * if textTag is not empty and HTML element also contains a text in it), text - text from HTML
  * tag, textTag - name of the text alias (will be used later for creating data map), children
  * - an array of the same nodes to support recursion search, attrTag - an array of two elements
@@ -372,7 +373,7 @@ function sameType(text, type, val) {
  * comparison and don't violate sequence of nodes on the same level. So if we are looking for
  * span, div, h1 on one level their order is important. It's possible to have tags between them,
  * but div is always stays after span and h1 is always after div and span.
- * 
+ *
  * @param {String} tplNodesId Unique id of an array of nodes in tplNodes parameter
  * @param {Node[]} tplNodes Array of tpl nodes we have to match
  * @param {Element} firstEl First element in a DOM associated with tplNodes[0]
@@ -380,7 +381,7 @@ function sameType(text, type, val) {
  * @param {Number} maxLevel Max level we may go to through search
  * @returns {[score, Nodes[]|undefined]}
  */
-function match(tplNodesId, tplNodes, firstEl, level, maxLevel) {
+function match (tplNodesId, tplNodes, firstEl, level, maxLevel) {
   if (!tplNodes?.length || !firstEl || performance.now() - startTime > options.executionTime) {
     return [0, undefined]
   }
@@ -391,12 +392,12 @@ function match(tplNodesId, tplNodes, firstEl, level, maxLevel) {
      * First, we check current nodes array in one level upper without combinations. This variant
      * is used when DOM tree has a lack of nodes between current nodes in pseudo tree and DOM
      * tree. For example (pseudo tree on the left and DOM tree on the right):
-     * 
+     *
      *         h1
      *         h1
      *   h1 ->   div
      *   h1
-     * 
+     *
      * In this example, we have to find two h1 tags of a pseudo tree in a DOM tree. Please pay
      * attention on the fact that two h1 tags in a DOM tree are on the root level and we have
      * to skip div tag in a DOM tree during search. In this case we also should decrease score
@@ -435,13 +436,13 @@ function match(tplNodesId, tplNodes, firstEl, level, maxLevel) {
      * Second, we check similar nodes in a one level deeper without combinations. This variant
      * is used when DOM tree has extra nodes between current nodes in pseudo tree. For example
      * (pseudo tree on the left and DOM tree on the right):
-     * 
+     *
      * h1
      * h1 -> div
      *         h1
      *         h1
-     * 
-     * In this example, we have to find two h1 tags inside the div, but div itself should be 
+     *
+     * In this example, we have to find two h1 tags inside the div, but div itself should be
      * skipped. We also should decrease score with -1, because we are skipping one level in a
      * DOM tree and go away from original pseudo tree in a template. Every level skip decreases
      * score with 1. So max possible score here === 2, but algorithm should return 1 (2 - 1: two
@@ -469,7 +470,7 @@ function match(tplNodesId, tplNodes, firstEl, level, maxLevel) {
           }
         }
       }
-      let nextEl = NEXT_CACHE.get(el)
+      const nextEl = NEXT_CACHE.get(el)
       if (nextEl === undefined) NEXT_CACHE.set(el, el = el.nextElementSibling)
       else el = nextEl
     }
@@ -478,11 +479,11 @@ function match(tplNodesId, tplNodes, firstEl, level, maxLevel) {
    * Third, we check similar nodes on the same level with all possible combinations of pseudo
    * tree. For example if we have 2 nodes: [{tag: 'div'}, {tag: 'span'}], we will have 3
    * possible combinations with different max scores:
-   * 
+   *
    * 1. [{tag: 'div'}, {tag: 'span'}]  // max score 2
    * 2. [{tag: 'span'}]                // max score 1
    * 3. [{tag: 'div'}]                 // max score 1
-   * 
+   *
    * It picks every combination of pseudo nodes and try to find it in a DOM tree. The tree with
    * maximized score will be returned as a result.
    */
@@ -513,8 +514,8 @@ function match(tplNodesId, tplNodes, firstEl, level, maxLevel) {
               if (sameType(t, node.textType, node.textVal)) {
                 node.score += 2
                 node.text = t
-              } else node.score -= 2, delete node.text
-            } else t && (node.text = t, node.score++)
+              } else { node.score -= 2; delete node.text }
+            } else if (t) { node.text = t; node.score++ }
           }
           if (node.attrTag) {
             const a = el.getAttribute(node.attrTag[1])
@@ -540,7 +541,7 @@ function match(tplNodesId, tplNodes, firstEl, level, maxLevel) {
         if (i >= comb.length - 1) {
           i = comb.length - 1
           const nodesScore = comb.reduce((acc, cur) => acc + cur.score || 0, 0)
-          if (nodesScore > maxScore) maxScore = nodesScore, maxNodes = copy(comb)
+          if (nodesScore > maxScore) { maxScore = nodesScore; maxNodes = copy(comb) }
         } else i++
       } else {
         /**
@@ -564,14 +565,14 @@ function match(tplNodesId, tplNodes, firstEl, level, maxLevel) {
 }
 /**
  * Main function you should call to harvest the data from an DOM tree by template. First,
- * create a pseudo tree template like in example below. div, h1, span, img - are tag names 
+ * create a pseudo tree template like in example below. div, h1, span, img - are tag names
  * you are looking for. title, price, img - optional names of properties in a returned map,
- * where found text|attribute will be placed. 2 spaces before tags - are nesting level. 
- * Difference between parent and child nodes may be only 2 spaces if we go from up to down. 
- * If we go from bottom to up it may be different. This template should pass as a first 
- * parameter to harvest() function. Second, firstEl - should point to the first element 
+ * where found text|attribute will be placed. 2 spaces before tags - are nesting level.
+ * Difference between parent and child nodes may be only 2 spaces if we go from up to down.
+ * If we go from bottom to up it may be different. This template should pass as a first
+ * parameter to harvest() function. Second, firstEl - should point to the first element
  * in a DOM.
- * 
+ *
  * @param {String} tpl template of pseudo tree-like string
  * @param {Element} firstEl Reference to the first DOM element for nodes[0]
  * @param {Object|undefined} opt Harvester options
@@ -580,7 +581,7 @@ function match(tplNodesId, tplNodes, firstEl, level, maxLevel) {
  * It means that found tree is identical to your pseudo tree-like template; foundScore -
  * score of found tree may be between [0..maxScore]. Shows similarity between maximum score
  * and found; foundNodes - found Array based tree with all metadata in it;
- * 
+ *
  * @example
  * const tpl = `
  * div
@@ -589,7 +590,7 @@ function match(tplNodesId, tplNodes, firstEl, level, maxLevel) {
  *   img[img=href]`
  * harvest(tpl, $('div')) // [{title: 'Title', price: '12.34', img: 'http://...'}, 8, 7, [...]]
  */
-function harvest(tpl, firstEl, opt = {}) {
+function harvest (tpl, firstEl, opt = {}) {
   buildOptions(opt)
   const tplNodes = toTree(tpl)
   const tplNodesId = getNodesId(tplNodes)
@@ -597,12 +598,12 @@ function harvest(tpl, firstEl, opt = {}) {
   let depth = 0
   /**
    * This peace calculates total maxScore and maxScore for every node to use it during matching
-   * later to skip nodes with lower score for optimization. maxScore - it's a global score, sc 
+   * later to skip nodes with lower score for optimization. maxScore - it's a global score, sc
    * - it's a maxScore for every node.
    */
   walk(tplNodes, d => {
     if (!isObj(d)) return
-    if (d?.tag) d.sc++, depth++ 
+    if (d?.tag) { d.sc++; depth++ }
     d.textTag && !d.textType && d.sc++
     d.textType && (d.sc += 2)
     d.attrTag && d.sc++
@@ -641,4 +642,4 @@ function harvest(tpl, firstEl, opt = {}) {
   return [map, maxScore, score, nodes]
 }
 
-if (typeof module === 'object' && typeof module.exports === 'object') module.exports = {toTree, harvest, buildOptions}
+if (typeof module === 'object' && typeof module.exports === 'object') module.exports = { toTree, harvest, buildOptions }

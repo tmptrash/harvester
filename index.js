@@ -1,6 +1,6 @@
 /**
  * Means how complete pseudo tree-like template will be found in a DOM tree. Should be bigger
- * then 1. For every deeper or upper level we multiply current level into this coefficient. Luke
+ * then 1. For every deeper or upper level we multiply current level into this coefficient. Like
  * this: Math.round(level * TREE_COMPLETE_COEF) || 1
  */
 const TREE_COMPLETE_COEF = 1.6
@@ -223,7 +223,8 @@ function text(el) {
   return texts.length === 1 ? texts[0] : (!texts.length ? '' : texts)
 }
 /**
- * Returns unique id for the array of nodes combining their ids
+ * Returns unique id for the array of nodes combining their ids. It takes only the nodes of up
+ * level without children.
  * @param {Node[]} nodes 
  * @returns {String} Unique id string
  */
@@ -262,7 +263,8 @@ function subsets(nodes) {
 }
 /**
  * Makes a deep copy of the object or an array. This is your responsibility to pass obj 
- * parameter without circular nodes. Use skipProps for that.
+ * parameter without circular nodes. We know exactly the type of object we pass, so we do
+ * optimizations (decrease recursion calls) if it's an object.
  * @param {Object|Array} obj Object or array to copy
  * @returns {Object|Array} Copy of object or array
  */
@@ -293,7 +295,8 @@ function copy(obj) {
   return obj
 }
 /**
- * Recursively traverses an object or array, applying a callback to each node.
+ * Recursively traverses an object or array, applying a callback to each node. The speed here is
+ * not so important, so we call itself more times.
  * @param {Object|Array} obj Object or array to traverse.
  * @param {Function} cb Callback function (cb(node, key)) for every node.
  * @param {Function} endCb Callback, which is called at the end of walking on an object
@@ -308,7 +311,7 @@ function walk(obj, cb, endCb) {
 }
 /**
  * Checks if a tag from pseudo tree-like node is similar to DOM element tag name. If a tag in a
- * pseudo tree is equal to *, then any tag is equal.
+ * pseudo tree is equal to *, then any tag is equal. It uses cache for the tag name.
  * @param {Object} node 
  * @param {Element} el 
  * @returns {Boolean}

@@ -727,7 +727,7 @@ describe('harvester library tests', () => {
       expect(consoleSpy).not.toHaveBeenCalled()
       expect(ret[0]).toEqual({ h1: 'H1' })
       expect(ret[1]).toEqual(4)
-      expect(ret[2]).toEqual(2)
+      expect(ret[2]).toEqual(3)
     })
     it('test of pseudo tree template which is partly equal to DOM tree (3)', () => {
       const ret = testHarvester(`
@@ -752,7 +752,7 @@ describe('harvester library tests', () => {
       expect(consoleSpy).not.toHaveBeenCalled()
       expect(ret[0]).toEqual({ h1: 'H1' })
       expect(ret[1]).toEqual(4)
-      expect(ret[2]).toEqual(2)
+      expect(ret[2]).toEqual(3)
     })
     it('test of pseudo tree template which is partly equal to DOM tree (4)', () => {
       const ret = testHarvester(`
@@ -779,7 +779,7 @@ describe('harvester library tests', () => {
       expect(consoleSpy).not.toHaveBeenCalled()
       expect(ret[0]).toEqual({ h1: 'H1' })
       expect(ret[1]).toEqual(4)
-      expect(ret[2]).toEqual(2)
+      expect(ret[2]).toEqual(3)
     })
     it('test of pseudo tree template which is partly equal to DOM tree (5)', () => {
       const ret = testHarvester(`
@@ -806,7 +806,7 @@ describe('harvester library tests', () => {
       expect(consoleSpy).not.toHaveBeenCalled()
       expect(ret[0]).toEqual({ h1: 'H1' })
       expect(ret[1]).toEqual(4)
-      expect(ret[2]).toEqual(2)
+      expect(ret[2]).toEqual(3)
     })
     it('test of pseudo tree template which is partly equal to DOM tree (6)', () => {
       const ret = testHarvester(`
@@ -831,7 +831,7 @@ describe('harvester library tests', () => {
       expect(consoleSpy).not.toHaveBeenCalled()
       expect(ret[0]).toEqual({ h1: 'H1', h2: 'H2' })
       expect(ret[1]).toEqual(5)
-      expect(ret[2]).toEqual(4)
+      expect(ret[2]).toEqual(5)
     })
     it('test complex template and the DOM (1)', () => {
       const ret = testHarvester(`
@@ -861,7 +861,7 @@ describe('harvester library tests', () => {
       expect(consoleSpy).not.toHaveBeenCalled()
       expect(ret[0]).toEqual({ h1: 'H1', h2: 'H2' })
       expect(ret[1]).toEqual(5)
-      expect(ret[2]).toEqual(3)
+      expect(ret[2]).toEqual(5)
     })
     it('test complex template and the DOM (2)', () => {
       const ret = testHarvester(`
@@ -1061,7 +1061,7 @@ describe('harvester library tests', () => {
         a[href=href]
           h1
           h1{h1}
-      close`, `
+      table`, `
       <!DOCTYPE html>
       <html lang="en">
       <head>
@@ -1071,7 +1071,7 @@ describe('harvester library tests', () => {
         <div>
           <span>
             <ban>
-              <norm/>
+              <norm></norm>
               <norm/>
             </ban>
             <ban/>
@@ -1082,7 +1082,7 @@ describe('harvester library tests', () => {
             <span>
               <h1></h1>
               <h1>H1</h1>
-              <section/>
+              <section></section>
               <h1></h1>
             </span>
             <spun>
@@ -1092,14 +1092,14 @@ describe('harvester library tests', () => {
             </spun>
           </a>
         </span>
-        <close/>
+        <table></table>
       </body>
       </html>
       `, 'body > div')
       expect(consoleSpy).toHaveBeenCalled()
       expect(ret[0]).toEqual({ href: 'url', h1: 'H1' })
       expect(ret[1]).toEqual(13)
-      expect(ret[2]).toEqual(10)
+      expect(ret[2]).toEqual(13)
     })
     it('test a template with deep structure (2)', () => {
       const ret = testHarvester(`
@@ -1153,7 +1153,7 @@ describe('harvester library tests', () => {
       expect(consoleSpy).not.toHaveBeenCalled()
       expect(ret[0]).toEqual({ n1: 'n1', href: 'url', h1: 'H1' })
       expect(ret[1]).toEqual(16)
-      expect(ret[2]).toEqual(13)
+      expect(ret[2]).toEqual(14)
     })
     it('test a template with deep fuzzy structure (3)', () => {
       const ret = testHarvester(`
@@ -1211,7 +1211,7 @@ describe('harvester library tests', () => {
       expect(consoleSpy).toHaveBeenCalled()
       expect(ret[0]).toEqual({ attr: 'attr', n1: 'n1', href: 'url', h1: 'H1', h2: 'H2', spun: 'SPUN1' })
       expect(ret[1]).toEqual(20)
-      expect(ret[2]).toEqual(18)
+      expect(ret[2]).toEqual(20)
     })
     it('test a template with * instead of a tag (1)', () => {
       const ret = testHarvester(`
@@ -1337,7 +1337,7 @@ describe('harvester library tests', () => {
     })
     it('test a template with * instead of a tag (6)', () => {
       const ret = testHarvester(`
-      *{l0}
+      *{l0:with:L0}
         *{l1}
           *{l2}
         *{l3}`, `
@@ -1358,8 +1358,8 @@ describe('harvester library tests', () => {
       `, 'body > div')
       expect(consoleSpy).not.toHaveBeenCalled()
       expect(ret[0]).toEqual({ l0: 'L0', l1: 'L1', l2: 'L2', l3: 'TEXT' })
-      expect(ret[1]).toEqual(8)
-      expect(ret[2]).toEqual(8)
+      expect(ret[1]).toEqual(9)
+      expect(ret[2]).toEqual(9)
     })
     it('test a template with * instead of a tag (7)', () => {
       const ret = testHarvester(`
@@ -1456,9 +1456,9 @@ describe('harvester library tests', () => {
       </html>
       `, 'body > div')
       expect(consoleSpy).not.toHaveBeenCalled()
-      expect(ret[0]).toEqual({ num: '123.4' })
+      expect(ret[0]).toEqual({ num: '12.45' })
       expect(ret[1]).toEqual(3)
-      expect(ret[2]).toEqual(2)
+      expect(ret[2]).toEqual(3)
     })
     it('test a template tag text type (3)', () => {
       const ret = testHarvester(`
@@ -1479,7 +1479,7 @@ describe('harvester library tests', () => {
       </html>
       `, 'body > div')
       expect(consoleSpy).not.toHaveBeenCalled()
-      expect(ret[0]).toEqual({ num: '123' })
+      expect(ret[0]).toEqual({ num: '12.45' })
       expect(ret[1]).toEqual(3)
       expect(ret[2]).toEqual(3)
     })
@@ -1529,7 +1529,7 @@ describe('harvester library tests', () => {
       expect(consoleSpy).not.toHaveBeenCalled()
       expect(ret[0]).toEqual({ num: '33.545' })
       expect(ret[1]).toEqual(3)
-      expect(ret[2]).toEqual(2)
+      expect(ret[2]).toEqual(3)
     })
     it('test a template tag text type (6)', () => {
       const ret = testHarvester(`
@@ -1552,7 +1552,7 @@ describe('harvester library tests', () => {
       expect(consoleSpy).not.toHaveBeenCalled()
       expect(ret[0]).toEqual({ num: '' })
       expect(ret[1]).toEqual(3)
-      expect(ret[2]).toEqual(2)
+      expect(ret[2]).toEqual(3)
     })
     it('test a template tag text type (7)', () => {
       const ret = testHarvester(`
@@ -1575,7 +1575,7 @@ describe('harvester library tests', () => {
       expect(consoleSpy).not.toHaveBeenCalled()
       expect(ret[0]).toEqual({ num: '67' })
       expect(ret[1]).toEqual(3)
-      expect(ret[2]).toEqual(2)
+      expect(ret[2]).toEqual(3)
     })
     it('test a template tag text type (8)', () => {
       const ret = testHarvester(`
@@ -1600,7 +1600,6 @@ describe('harvester library tests', () => {
       expect(ret[1]).toEqual(3)
       expect(ret[2]).toEqual(0)
     })
-
     it('test for search a node mutch deeper than in a template', () => {
       const ret = testHarvester(`
         h1{h1}`, `
@@ -1621,7 +1620,32 @@ describe('harvester library tests', () => {
       expect(consoleSpy).not.toHaveBeenCalled()
       expect(ret[0]).toEqual({ h1: 'H1' })
       expect(ret[1]).toEqual(2)
-      expect(ret[2]).toEqual(1)
+      expect(ret[2]).toEqual(2)
+    })
+    it('test for search of inverted nodes structure', () => {
+      const ret = testHarvester(`
+        h1{h1}
+          span{s0}
+          span{s1}`, `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+        <div>
+          <span>SPAN0</span>
+          <span>SPAN1
+            <h1>H1</h1>
+          </span>
+        </div>
+      </body>
+      </html>
+      `, 'body > div')
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(ret[0]).toEqual({ h1: 'H1', s0: 'SPAN0', s1: 'SPAN1' })
+      expect(ret[1]).toEqual(6)
+      expect(ret[2]).toEqual(6)
     })
   })
 })

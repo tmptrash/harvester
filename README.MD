@@ -149,6 +149,7 @@ const options = {
   completeCoef: 1.6,   // The acceleration factor at which points will decrease when descending or ascending one level in the DOM tree. It affects the search speed and accuracy (lower value = more accuracy) 
   spaceAmount: 2,      // Default amount of spaces in a template between parent and child
   executionTime: 15000 // Maximum search time. The search will be automatically stopped when the time runs out
+  minDepth: 3          // Minimum depth we are doing search. This value is used to be more robust to the changed DOM structure, adding new and removing nodes
 }
 ```
 

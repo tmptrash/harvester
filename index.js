@@ -14,6 +14,11 @@ const SPACE_AMOUNT = 2
  */
 const EXECUTION_TIME = 15000
 /**
+ * Minimum depth we are doing search. This value is used to be more robust to the changed DOM
+ * structure, adding new and removing nodes
+ */
+const MIN_DEPTH = 3
+/**
  * Regular expression to parse a single line of the pseudo tree-like string. Matches:
  * indentation, tag name, optional text, optional text type, optional text value and
  * optional attribute. Full string may look like: "  div{price:float}[id=id]".
@@ -66,6 +71,7 @@ let rootEl
  *   completeCoef - see TREE_COMPLETE_COEF
  *   spaceAmount - see SPACE_AMOUNT
  *   executionTime - see EXECUTION_TIME
+ *   minDepth - see MIN_DEPTH
  */
 let options = {}
 /**
@@ -73,6 +79,66 @@ let options = {}
  * to calculate if we have to stop searching, becaue of executionTime timeout is reached
  */
 let startTime = performance.now()
+/**
+ * Returns a cached score for DOM element and pseudo tree-like node id. So if we trying to
+ * calculate a score for the DOM node and all it's sub-nodes we have to check this cache first.
+ * @param {Element} el DOM element
+ * @param {Number} id Unique id of pseudo tree-like node
+ * @returns {Number|undefined} score or undefined
+ */
+SCORE_CACHE.getScore = function getScore (el, id) {
+  if (this.get(el) === undefined) this.set(el, new Map())
+  return this.get(el).get(id)
+}
+/**
+ * Sets score value into the cache. Score is related to DOM element and template node(s) id
+ * @param {Element} el DOM element
+ * @param {String} id Unique node(s) id
+ * @param {Number} score Score
+ */
+SCORE_CACHE.setScore = function setScore (el, id, score) {
+  this.get(el).set(id, score)
+}
+/**
+ * Returns cached text of the DOM element
+ * @param {Element} el DOM element
+ * @returns {String|undefined}
+ */
+TEXT_CACHE.getText = function getText (el) {
+  let t = this.get(el)
+  if (t === undefined) this.set(el, t = text(el))
+  return t
+}
+/**
+ * Returns cached parent node for DOM element "el"
+ * @param {Element} el DOM element whose parent we need to get
+ * @returns {Element|null}
+ */
+PARENT_CACHE.getParent = function getParent (el) {
+  let parentEl = this.get(el)
+  if (parentEl === undefined) this.set(el, parentEl = el?.parentNode)
+  return parentEl
+}
+/**
+ * Returns cached first child of DOM element "el"
+ * @param {Element} el Element whose first child we need to get
+ * @returns {Element|null}
+ */
+FIRST_CHILD_CACHE.getFirstChild = function getFirstChild (el) {
+  let firstChildEl = this.get(el)
+  if (firstChildEl === undefined) this.set(el, firstChildEl = el.firstElementChild)
+  return firstChildEl
+}
+/**
+ * Returns cached next sibling DOM element for "el"
+ * @param {Element} el DOM Element, whose next sibling we need to get
+ * @returns {Element|null}
+ */
+NEXT_CACHE.getNext = function getNext (el) {
+  let nextEl = this.get(el)
+  if (nextEl === undefined) this.set(el, nextEl = el?.nextElementSibling)
+  return nextEl
+}
 /**
  * Creates all properties of harvester options object. Sets default values if not set
  * @param {Object} opt Options obtained from harvest() function as a parameter
@@ -82,6 +148,7 @@ function buildOptions (opt = {}) {
   !opt.completeCoef && (opt.completeCoef = TREE_COMPLETE_COEF)
   !opt.spaceAmount && (opt.spaceAmount = SPACE_AMOUNT)
   !opt.executionTime && (opt.executionTime = EXECUTION_TIME)
+  !opt.minDepth && (opt.minDepth = MIN_DEPTH)
   options = opt
 }
 /**
@@ -193,17 +260,6 @@ function isFloat (str) {
  */
 function isInt (str) {
   return str !== '' && Number.isInteger(+str) && !str.includes('.')
-}
-/**
- * Returns a cached score for DOM element and pseudo tree-like node id. So if we trying to
- * calculate a score for the DOM node and all it's sub-nodes we have to check this cache first.
- * @param {Element} el DOM element
- * @param {Number} id Unique id of pseudo tree-like node
- * @returns {Number|undefined} score or undefined
- */
-function cachedScore (el, id) {
-  if (SCORE_CACHE.get(el) === undefined) SCORE_CACHE.set(el, new Map())
-  return SCORE_CACHE.get(el).get(id)
 }
 /**
  * Retrieves the first direct trimmed text content of an element, skipping nested elements.
@@ -379,10 +435,12 @@ function sameType (text, type, val) {
  * @param {Element} firstEl First element in a DOM associated with tplNodes[0]
  * @param {Number} level Current up or down level we are searching on
  * @param {Number} maxLevel Max level we may go to through search
+ * @param {Element} extraParentEl If firstEl === null, only first recursion (going upper) has sense
+ * so we put the parent into separate parameter
  * @returns {[score, Nodes[]|undefined]}
  */
-function match (tplNodesId, tplNodes, firstEl, level, maxLevel) {
-  if (!tplNodes?.length || !firstEl || performance.now() - startTime > options.executionTime) {
+function match (tplNodesId, tplNodes, firstEl, level, maxLevel, extraParentEl = null) {
+  if (!tplNodes?.length || performance.now() - startTime > options.executionTime) {
     return [0, undefined]
   }
   let maxScore = 0
@@ -406,26 +464,23 @@ function match (tplNodesId, tplNodes, firstEl, level, maxLevel) {
      * possible score here is 2, but algorithm returns 1 (2 - 1: 2 h1 tags found minus one level
      * skipped).
      */
-    let upEl = PARENT_CACHE.get(firstEl)
-    if (upEl === undefined) PARENT_CACHE.set(firstEl, upEl = firstEl?.parentNode)
+    const upEl = PARENT_CACHE.getParent(firstEl) || extraParentEl
     if (upEl !== rootEl) {
-      let parentEl = PARENT_CACHE.get(upEl)
-      if (parentEl === undefined) PARENT_CACHE.set(upEl, parentEl = upEl?.parentNode)
+      const parentEl = PARENT_CACHE.getParent(upEl)
       if (parentEl !== rootEl) {
         /**
          * Optimization logic: we have to skip nodes with lower score, because other node is
          * better than current.
          */
-        const score = cachedScore(parentEl, tplNodesId)
+        const score = SCORE_CACHE.getScore(parentEl, tplNodesId)
         if (score === undefined || score > maxScore) {
           const newLevel = Math.round(level * options.completeCoef) || 1
-          let firstChildEl = FIRST_CHILD_CACHE.get(parentEl)
-          if (firstChildEl === undefined) FIRST_CHILD_CACHE.set(parentEl, firstChildEl = parentEl.firstElementChild)
+          const firstChildEl = FIRST_CHILD_CACHE.getFirstChild(parentEl)
           const [upScore, upNodes] = match(tplNodesId, tplNodes, firstChildEl, newLevel, maxLevel)
-          if (upScore - 1 > maxScore && upNodes) {
-            maxScore = upScore - 1
+          if (upScore > maxScore && upNodes) {
+            maxScore = upScore
             if (score === undefined && tplNodesId !== undefined) {
-              SCORE_CACHE.get(parentEl).set(tplNodesId, maxScore)
+              SCORE_CACHE.setScore(parentEl, tplNodesId, maxScore)
             }
             maxNodes = upNodes
           }
@@ -450,31 +505,30 @@ function match (tplNodesId, tplNodes, firstEl, level, maxLevel) {
      */
     let el = firstEl
     while (el) {
-      let firstChild = FIRST_CHILD_CACHE.get(el)
-      if (firstChild === undefined) FIRST_CHILD_CACHE.set(el, firstChild = el.firstElementChild)
+      const firstChild = FIRST_CHILD_CACHE.getFirstChild(el)
       if (firstChild) {
         /**
          * Optimization logic: we have to skip nodes with lower score, because other node is
          * better than current.
          */
-        const score = cachedScore(el, tplNodesId)
+        const score = SCORE_CACHE.getScore(el, tplNodesId)
         if (score === undefined || score > maxScore) {
           const newLevel = Math.round(level * options.completeCoef) || 1
           const [deepScore, deepNodes] = match(tplNodesId, tplNodes, firstChild, newLevel, maxLevel)
-          if (deepScore - 1 > maxScore && deepNodes) {
-            maxScore = deepScore - 1
+          if (deepScore > maxScore && deepNodes) {
+            maxScore = deepScore
             if (score === undefined && tplNodesId !== undefined) {
-              SCORE_CACHE.get(el).set(tplNodesId, maxScore)
+              SCORE_CACHE.setScore(el, tplNodesId, maxScore)
             }
             maxNodes = deepNodes
           }
         }
       }
-      const nextEl = NEXT_CACHE.get(el)
-      if (nextEl === undefined) NEXT_CACHE.set(el, el = el.nextElementSibling)
-      else el = nextEl
+      el = NEXT_CACHE.getNext(el)
     }
   }
+  // No children in a current DOM node. No sense to search deeper
+  if (!firstEl) return [maxScore, maxNodes]
   /**
    * Third, we check similar nodes on the same level with all possible combinations of pseudo
    * tree. For example if we have 2 nodes: [{tag: 'div'}, {tag: 'span'}], we will have 3
@@ -508,8 +562,7 @@ function match (tplNodesId, tplNodes, firstEl, level, maxLevel) {
         if (sameTag(node, el)) {
           node.score++
           if (node.textTag) {
-            let t = TEXT_CACHE.get(el)
-            if (t === undefined) TEXT_CACHE.set(el, t = text(el))
+            const t = TEXT_CACHE.getText(el)
             if (node.textType) {
               if (sameType(t, node.textType, node.textVal)) {
                 node.score += 2
@@ -525,15 +578,14 @@ function match (tplNodesId, tplNodes, firstEl, level, maxLevel) {
         // Here we go deeper and check inner nodes
         const subNodes = node.children
         if (subNodes?.length) {
-          let firstChild = FIRST_CHILD_CACHE.get(el)
-          if (firstChild === undefined) FIRST_CHILD_CACHE.set(el, firstChild = el.firstElementChild)
+          const firstChild = FIRST_CHILD_CACHE.getFirstChild(el)
           const newLevel = Math.round(level * options.completeCoef) || 1
-          const [score, nodes] = match(getNodesId(subNodes), subNodes, firstChild, newLevel, maxLevel)
+          const [score, nodes] = match(getNodesId(subNodes), subNodes, firstChild, newLevel, maxLevel, !firstChild ? el : null)
           node.score += score
           nodes?.length && (node.children = nodes)
           const nodeId = `${node.id}`
-          if (node.id !== undefined && cachedScore(el, nodeId) === undefined) {
-            SCORE_CACHE.get(el).set(nodeId, node.score)
+          if (node.id !== undefined && SCORE_CACHE.getScore(el, nodeId) === undefined) {
+            SCORE_CACHE.setScore(el, nodeId, node.score)
           }
         }
 
@@ -550,14 +602,11 @@ function match (tplNodesId, tplNodes, firstEl, level, maxLevel) {
          * start with original combination childrens. Otherwise there is a possible issue,
          * where previous comparison may affect future compare.
          */
-        comb[i].children && (comb[i].children = copy(combinations[c][i].children))
+        i && comb[i].children && (comb[i].children = copy(combinations[c][i].children))
         i--
         if (i < 0) break
       }
-      const curEl = comb[i]?.el || el
-      let nextEl = NEXT_CACHE.get(curEl)
-      if (nextEl === undefined) NEXT_CACHE.set(curEl, nextEl = curEl?.nextElementSibling)
-      comb[i].el = nextEl
+      comb[i].el = NEXT_CACHE.getNext(comb[i]?.el || el)
     }
   }
 
@@ -595,7 +644,7 @@ function harvest (tpl, firstEl, opt = {}) {
   const tplNodes = toTree(tpl)
   const tplNodesId = getNodesId(tplNodes)
   let maxScore = 0
-  let depth = 0
+  let depth = opt.minDepth
   /**
    * This peace calculates total maxScore and maxScore for every node to use it during matching
    * later to skip nodes with lower score for optimization. maxScore - it's a global score, sc
@@ -619,7 +668,7 @@ function harvest (tpl, firstEl, opt = {}) {
   NEXT_CACHE.clear()
   TEXT_CACHE.clear()
   PARENT_CACHE.set(firstEl, rootEl)
-  const [score, nodes] = match(tplNodesId, tplNodes, firstEl, 0, depth + 1)
+  const [score, nodes] = match(tplNodesId, tplNodes, firstEl, 0, depth)
   /**
    * This peace collects final data map, which consists of text and attribute values
    * and checks if there are errors in it

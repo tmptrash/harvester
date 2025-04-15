@@ -893,7 +893,7 @@ describe('harvester library tests', () => {
       expect(consoleSpy).not.toHaveBeenCalled()
       expect(ret[0]).toEqual({ span: 'span1', h1: 'H1', div: 'div' })
       expect(ret[1]).toEqual(7)
-      expect(ret[2]).toEqual(6)
+      expect(ret[2]).toEqual(7)
     })
     it('test complex template and the DOM (3)', () => {
       const ret = testHarvester(`
@@ -925,7 +925,7 @@ describe('harvester library tests', () => {
       expect(consoleSpy).not.toHaveBeenCalled()
       expect(ret[0]).toEqual({ span: 'span1', h1: 'H1', attr: 'test', div: 'div' })
       expect(ret[1]).toEqual(8)
-      expect(ret[2]).toEqual(7)
+      expect(ret[2]).toEqual(8)
     })
     it('test complex template and the DOM (3)', () => {
       const ret = testHarvester(`

@@ -594,6 +594,13 @@ function match (tplNodesId, tplNodes, firstEl, level, maxLevel, extraParentEl = 
           i = comb.length - 1
           const nodesScore = comb.reduce((acc, cur) => acc + cur.score || 0, 0)
           if (nodesScore > maxScore) { maxScore = nodesScore; maxNodes = copy(comb) }
+          /**
+           * Here we reset all children of current combination, because it's structure may
+           * change. Every time we compare a new set of nodes in a current level we have to
+           * start with original combination childrens. Otherwise there is a possible issue,
+           * where previous comparison may affect future compare.
+           */
+          comb[i].children && (comb[i].children = copy(combinations[c][i].children))
         } else i++
       } else {
         /**
@@ -602,7 +609,7 @@ function match (tplNodesId, tplNodes, firstEl, level, maxLevel, extraParentEl = 
          * start with original combination childrens. Otherwise there is a possible issue,
          * where previous comparison may affect future compare.
          */
-        i && comb[i].children && (comb[i].children = copy(combinations[c][i].children))
+        i && comb.length > 1 && comb[i].children && (comb[i].children = copy(combinations[c][i].children))
         i--
         if (i < 0) break
       }

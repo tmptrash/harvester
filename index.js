@@ -597,8 +597,8 @@ function match (tplNodesId, tplNodes, firstEl, level, maxLevel, extraParentEl = 
           /**
            * Here we reset all children of current combination, because it's structure may
            * change. Every time we compare a new set of nodes in a current level we have to
-           * start with original combination childrens. Otherwise there is a possible issue,
-           * where previous comparison may affect future compare.
+           * start with original combination. Otherwise there is a possible issue, where
+           * previous comparison may affect future compare.
            */
           comb[i].children && (comb[i].children = copy(combinations[c][i].children))
         } else i++
@@ -606,8 +606,8 @@ function match (tplNodesId, tplNodes, firstEl, level, maxLevel, extraParentEl = 
         /**
          * Here we reset all children of current combination, because it's structure may
          * change. Every time we compare a new set of nodes in a current level we have to
-         * start with original combination childrens. Otherwise there is a possible issue,
-         * where previous comparison may affect future compare.
+         * start with original combination. Otherwise there is a possible issue, where
+         * previous comparison may affect future compare.
          */
         i && comb.length > 1 && comb[i].children && (comb[i].children = copy(combinations[c][i].children))
         i--

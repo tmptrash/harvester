@@ -272,7 +272,7 @@ npm test
 ```
 
 ## Run linter
-Run `standardjs`` library to find possible issues in a code.
+Run `standardjs` library to find possible issues in a code.
 ```
 npm run lint
 ```

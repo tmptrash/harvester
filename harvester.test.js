@@ -1647,5 +1647,58 @@ describe('harvester library tests', () => {
       expect(ret[1]).toEqual(6)
       expect(ret[2]).toEqual(6)
     })
+    it('test for search of embedded nodes structure', () => {
+      const ret = testHarvester(`
+        span{s0}
+        span{s1}`, `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+        <div>
+          <span>SPAN0</span>
+          <span>SPAN1
+            <h1>H1</h1>
+          </span>
+        </div>
+      </body>
+      </html>
+      `, 'body > div')
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(ret[0]).toEqual({ s0: 'SPAN0', s1: 'SPAN1' })
+      expect(ret[1]).toEqual(4)
+      expect(ret[2]).toEqual(4)
+    })
+    it('test for search similar nodes', () => {
+      const ret = testHarvester(`
+        div
+          span{s0}
+          span{s1}`, `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+        <div>
+          <div>
+            <span>SPAN0</span>
+            <h1></h1>
+            <span>SPAN1
+              <span>SPAN2</span>
+              <span>SPAN3</span>
+            </span>
+          </div>
+        </div>
+      </body>
+      </html>
+      `, 'body > div')
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(ret[0]).toEqual({ s0: 'SPAN0', s1: 'SPAN1' })
+      expect(ret[1]).toEqual(5)
+      expect(ret[2]).toEqual(5)
+    })
   })
 })

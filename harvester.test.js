@@ -1729,8 +1729,7 @@ describe('harvester library tests', () => {
       expect(ret[1]).toEqual(6)
       expect(ret[2]).toEqual(6)
     })
-
-    it('test for small DOM tree', () => {
+    it('test for small DOM tree (1)', () => {
       const ret = testHarvester(`
         div
           span{s0:with:SPAN}
@@ -1748,6 +1747,74 @@ describe('harvester library tests', () => {
       expect(ret[0]).toEqual({})
       expect(ret[1]).toEqual(6)
       expect(ret[2]).toEqual(0)
+    })
+    it('test for small DOM tree (2)', () => {
+      const ret = testHarvester(`
+        span{s0}
+        span{s1}`, `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+        <span>S0
+          <span>S1</span>
+          <span>S2</span>
+        </span>
+      </body>
+      </html>
+      `, 'body')
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(ret[0]).toEqual({ s0: 'S1', s1: 'S2' })
+      expect(ret[1]).toEqual(4)
+      expect(ret[2]).toEqual(4)
+    })
+    it('test for small DOM tree (3)', () => {
+      const ret = testHarvester(`
+        span{s0}
+        span{s1}`, `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+        <span>S0
+          <span>S1</span>
+          <span>S2</span>
+        </span>
+        <span>S3</span>
+      </body>
+      </html>
+      `, 'body')
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(ret[0]).toEqual({ s0: 'S1', s1: 'S2' })
+      expect(ret[1]).toEqual(4)
+      expect(ret[2]).toEqual(4)
+    })
+    it('test for small DOM tree (4)', () => {
+      const ret = testHarvester(`
+        span{s0:with:S0}
+        span{s1}`, `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+        <span>S0
+          <span>S1</span>
+          <span>S2</span>
+        </span>
+        <span>S3</span>
+      </body>
+      </html>
+      `, 'body')
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(ret[0]).toEqual({ s0: 'S0', s1: 'S3' })
+      expect(ret[1]).toEqual(5)
+      expect(ret[2]).toEqual(5)
     })
   })
 })

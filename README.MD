@@ -277,6 +277,9 @@ Run `standardjs`` library to find possible issues in a code.
 npm run lint
 ```
 
+## Contribution
+Just create an issue or PR and we will start a conversation...
+
 ## License
 
 MIT

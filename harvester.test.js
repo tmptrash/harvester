@@ -1729,5 +1729,25 @@ describe('harvester library tests', () => {
       expect(ret[1]).toEqual(6)
       expect(ret[2]).toEqual(6)
     })
+
+    it('test for small DOM tree', () => {
+      const ret = testHarvester(`
+        div
+          span{s0:with:SPAN}
+          span{s1}`, `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+      </body>
+      </html>
+      `, 'body')
+      expect(consoleSpy).not.toHaveBeenCalled()
+      expect(ret[0]).toEqual({})
+      expect(ret[1]).toEqual(6)
+      expect(ret[2]).toEqual(0)
+    })
   })
 })

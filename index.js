@@ -230,7 +230,7 @@ function parse (lines, l, nodes, level, startSpaces = -1) {
  * @returns {Object[]} Parsed tree structure.
  */
 function toTree (tpl) {
-  const lines = tpl.split('\n')
+  const lines = tpl.toString().split('\n')
   const nodes = []
   id = 0
   parse(lines, 0, nodes, 0)
@@ -647,6 +647,7 @@ function match (tplNodesId, tplNodes, firstEl, level, maxLevel, extraParentEl = 
  * harvest(tpl, $('div')) // [{title: 'Title', price: '12.34', img: 'http://...'}, 8, 7, [...]]
  */
 function harvest (tpl, firstEl, opt = {}) {
+  if (!isObj(opt)) { console.error('"opt" argument is not an object'); return [{}, 0, 0, undefined] }
   buildOptions(opt)
   const tplNodes = toTree(tpl)
   const tplNodesId = getNodesId(tplNodes)

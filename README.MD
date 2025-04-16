@@ -2,7 +2,7 @@
 
 Harvester is a lightweight and highly optimized library for extracting data from the DOM tree. It supports tag texts with specified types and attributes.
 
-The main idea of this library is that the data you need to extract from an HTML page can be described using a text-based template. You roughly specify which tags are inside others and what data they contain. It is not necessary to know the exact structure of the HTML.
+The main idea of this library is that the data you need to extract from an HTML page can be described using a text-based template. You roughly specify which tags are inside others and what data they contain. It is not necessary to know the exact structure of the HTML. This library is also especially useful for HTML structures that lack clear identifiers, unique classes, or other stable anchors typically used in CSS selectors.
 
 To extract data, the user needs to describe a template of the DOM branch structure from which the extraction will be performed, and then call the harvest() function with two parameters: the described template and the parent branch in the DOM where the search will begin. This library can be used both in the browser and in web scraping tools such as [Puppeteer](https://pptr.dev).
 

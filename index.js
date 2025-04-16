@@ -201,7 +201,7 @@ function parse (lines, l, nodes, level, startSpaces = -1) {
       continue
     }
     if (curLevel === level) {
-      const node = { id: id++, tag: m[2].toUpperCase(), sc: 0 }
+      const node = { id: id++, tag: m[2].toUpperCase(), maxScore: 0 }
       m[3] && (node.textTag = m[3])
       m[4] && (node.textType = m[4])
       m[5] && (node.textVal = m[5])
@@ -334,7 +334,7 @@ function copy (obj) {
      * We know that only objects will be copied, so we do it without additional recursion steps
      * for every object property with simple type like string, number, undefined, ...
      */
-    const cpy = { id: obj.id, tag: obj.tag, el: obj.el, score: obj.score, sc: obj.sc }
+    const cpy = { id: obj.id, tag: obj.tag, el: obj.el, score: obj.score, maxScore: obj.maxScore }
     // obj.text related to textTag, so we copy them together and if textTag exists
     if (obj.textTag) {
       cpy.textTag = obj.textTag
@@ -415,18 +415,28 @@ function sameType (text, type, val) {
 }
 /**
  * Finds all nodes in a DOM tree according to JSON tree. The starting format of one JSON node
- * is following: {id: Number, el: Element, tag: String, textTag: String, children: []}, where:
- * id - unique identifier of the pseudo node, el - reference to DOM element, tag - name of the
- * HTML tag we are looking for or *, score - score of the current node (+1 if tag exist or *, +1
- * if textTag is not empty and HTML element also contains a text in it), text - text from HTML
- * tag, textTag - name of the text alias (will be used later for creating data map), children
- * - an array of the same nodes to support recursion search, attrTag - an array of two elements
- * with name of the attribute tag and name of the attribute of the DOM element. After all nodes
- * will be found "score" and "text" properties will be added into the result nodes. The minimum
- * node contains only "tag" property. Also, there are optional properties: textType and textVal.
- * They are used if we need to specify concrete type of the data we are looking for. For example
- * it may be a float number or integer or even an empty string. This function uses fuzzy trees
- * comparison and don't violate sequence of nodes on the same level. So if we are looking for
+ * is following: {id: Number, el: Element, tag: String, textTag: String, children: [], maxScore:
+ * Number, attrTag: Array, text: String, attr: String}, where:
+ *
+ * id       - unique identifier of the pseudo node
+ * el       - reference to DOM element
+ * tag      - name of the HTML tag we are looking for or *
+ * score    - found score of the current node (+1 if tag exist or *, +1 if textTag is not empty and
+ * HTML element also contains a text in it)
+ * text     - text grabbed from HTML tag
+ * textTag  - name of the property we will put data in
+ * textType - type of the tag's text we are looking for
+ * textVal  - additional value. Depends on textType
+ * children - an array of the same nodes to support recursion search
+ * attrTag  - an array of two elements with name of the attribute tag and name of the attribute of
+ * the DOM element.
+ * maxScore - maxScore, calculated before search
+ *
+ * After all nodes will be found "score" and "text" properties will be added into the result nodes.
+ * The minimum node contains only "tag" property. Also, there are optional properties: textType and
+ * textVal. They are used if we need to specify concrete type of the data we are looking for. For
+ * example it may be a float number or integer or even an empty string. This function uses fuzzy
+ * trees comparison and don't violate sequence of nodes on the same level. So if we are looking for
  * span, div, h1 on one level their order is important. It's possible to have tags between them,
  * but div is always stays after span and h1 is always after div and span.
  *
@@ -548,7 +558,7 @@ function match (tplNodesId, tplNodes, firstEl, level, maxLevel, extraParentEl = 
      * next combination has no sense. We have to skip it to make this matching faster.
      */
     const combRef = combinations[c]
-    const combScore = combRef.reduce((pre, cur) => pre + cur.sc, 0)
+    const combScore = combRef.reduce((pre, cur) => pre + cur.maxScore, 0)
     if (maxScore >= combScore) continue
     const comb = copy(combRef)
     let i = 0
@@ -655,17 +665,17 @@ function harvest (tpl, firstEl, opt = {}) {
   let depth = opt.minDepth
   /**
    * This peace calculates total maxScore and maxScore for every node to use it during matching
-   * later to skip nodes with lower score for optimization. maxScore - it's a global score, sc
+   * later to skip nodes with lower score for optimization. maxScore - it's a global score, maxScore
    * - it's a maxScore for every node.
    */
   walk(tplNodes, d => {
     if (!isObj(d)) return
-    if (d?.tag) { d.sc++; depth++ }
-    d.textTag && !d.textType && d.sc++
-    d.textType && (d.sc += 2)
-    d.attrTag && d.sc++
-    maxScore += d.sc
-  }, o => o?.children && (o.sc = o.children.reduce((pre, cur) => pre + cur.sc, o.sc || 0)))
+    if (d?.tag) { d.maxScore++; depth++ }
+    d.textTag && !d.textType && d.maxScore++
+    d.textType && (d.maxScore += 2)
+    d.attrTag && d.maxScore++
+    maxScore += d.maxScore
+  }, o => o?.children && (o.maxScore = o.children.reduce((pre, cur) => pre + cur.maxScore, o.maxScore || 0)))
   if (!firstEl) return [{}, maxScore, 0, []]
   rootEl = firstEl.parentNode
   startTime = performance.now()

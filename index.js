@@ -468,11 +468,8 @@ function match (tplNodesId, tplNodes, firstEl, level, maxLevel, extraParentEl = 
      *
      * In this example, we have to find two h1 tags of a pseudo tree in a DOM tree. Please pay
      * attention on the fact that two h1 tags in a DOM tree are on the root level and we have
-     * to skip div tag in a DOM tree during search. In this case we also should decrease score
-     * with 1, because we skip one level in a DOM and go further from the original pseudo tree
-     * in a template. And again every level skipping (up or down) decreases score with 1. Max
-     * possible score here is 2, but algorithm returns 1 (2 - 1: 2 h1 tags found minus one level
-     * skipped).
+     * to skip div tag in a DOM tree during search. Max possible score here is 2 and algorithm
+     * returns 2 (2 h1 tags found on an upper level).
      */
     const upEl = PARENT_CACHE.getParent(firstEl) || extraParentEl
     if (upEl !== rootEl) {
@@ -508,10 +505,8 @@ function match (tplNodesId, tplNodes, firstEl, level, maxLevel, extraParentEl = 
      *         h1
      *
      * In this example, we have to find two h1 tags inside the div, but div itself should be
-     * skipped. We also should decrease score with -1, because we are skipping one level in a
-     * DOM tree and go away from original pseudo tree in a template. Every level skip decreases
-     * score with 1. So max possible score here === 2, but algorithm should return 1 (2 - 1: two
-     * h1 tags found minus one skipped level).
+     * skipped. So max possible score here === 2 and algorithm should return 2 (two h1 tags found
+     * inside the div tag).
      */
     let el = firstEl
     while (el) {

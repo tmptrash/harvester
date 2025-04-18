@@ -8,6 +8,9 @@ This library is also especially useful for HTML structures that lack clear ident
 
 To extract data, the user needs to describe a template of the DOM branch structure from which the extraction will be performed, and then call the harvest() function with two parameters: the described template and the parent branch in the DOM where the search will begin. This library can be used both in the browser and in web scraping tools such as [Puppeteer](https://pptr.dev).
 
+## How to use in browser
+![How to use in browser](https://github.com/tmptrash/harvester/blob/main/screenshots/scr.png)
+
 ## Main concepts
 
 ### 1. Fuzzy search

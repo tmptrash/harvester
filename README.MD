@@ -79,11 +79,11 @@ P.S. If you want to see more examples of how this library is used, take a look a
 
 ## Advantages
 - **Declarative and readable** – the ability to see all block data at once, along with easy-to-read templates  
-- **Can find branches without identifiable elements** such as `id`, `class name`, or attributes  
+- **Can find DOM nodes without identifiable elements** such as `id`, `class name`, or attributes  
 - **Simplicity and minimalism** – the implemented features are enough to extract data from most websites, and the library's single function greatly simplifies its usage  
 - **Resistant to DOM structure changes** – HTML may look very different for the same data, but it will still be correctly extracted  
-- **Highly optimized and fast**  
-- **Extracts all data at once** – you don't need to define the structure of every field or tag manually  
+- **Highly optimized and fast** - a typical harvest() function call completes in 15ms
+- **Extracts all data at once** – you don't need to define the structure of every field or tag manually. All the data will be returned in a JS object 
 - **Supports various data types** such as `int`, `float`, `func`, `empty`, and more  
 - **Compatible with Puppeteer**
 

@@ -77,6 +77,17 @@ console.log('\nPress Ctrl-C to stop...')
 
 P.S. If you want to see more examples of how this library is used, take a look at the [harvester.test.js](https://github.com/tmptrash/harvester/blob/main/harvester.test.js) file. There you'll find various template examples and the corresponding search results extracted from HTML.
 
+## Advantages
+- Declarative (readability)
+- Find nodes without ids
+- Simplicity and minimalism
+- Robustness to DOM changes
+- Getting data in fuzzy DOM
+- It is pleasurably fast
+- Get all data per one call
+- Supports text data types
+- Works in JS and Puppeteer
+
 ## Main concepts
 
 ### 1. Fuzzy search

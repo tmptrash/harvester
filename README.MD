@@ -9,6 +9,8 @@ This library is also especially useful for HTML structures that lack clear ident
 To extract data, the user needs to describe a template of the DOM branch structure from which the extraction will be performed, and then call the harvest() function with two parameters: the described template and the parent branch in the DOM where the search will begin. This library can be used both in the browser and in web scraping tools such as [Puppeteer](https://pptr.dev).
 
 ## How to use in browser
+Let's imagine you want to extract product data, and the structure of that data is shown on the left in two variations. It may change depending on different factors, such as the user's role, time zone, etc. In the top-right corner, you can see a template that describes both data structures for the given HTML examples. At the bottom-right, you can see the result that the user will get after calling the `harvest()` function.
+
 ![How to use in browser](https://github.com/tmptrash/harvester/blob/main/screenshots/scr.png)
 
 ## Main concepts

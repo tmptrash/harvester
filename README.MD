@@ -78,15 +78,14 @@ console.log('\nPress Ctrl-C to stop...')
 P.S. If you want to see more examples of how this library is used, take a look at the [harvester.test.js](https://github.com/tmptrash/harvester/blob/main/harvester.test.js) file. There you'll find various template examples and the corresponding search results extracted from HTML.
 
 ## Advantages
-- Declarative (readability)
-- Find nodes without ids
-- Simplicity and minimalism
-- Robustness to DOM changes
-- Getting data in fuzzy DOM
-- It is pleasurably fast
-- Get all data per one call
-- Supports text data types
-- Works in JS and Puppeteer
+- **Declarative and readable** – the ability to see all block data at once, along with easy-to-read templates  
+- **Can find branches without identifiable elements** such as `id`, `class name`, or attributes  
+- **Simplicity and minimalism** – the implemented features are enough to extract data from most websites, and the library's single function greatly simplifies its usage  
+- **Resistant to DOM structure changes** – HTML may look very different for the same data, but it will still be correctly extracted  
+- **Highly optimized and fast**  
+- **Extracts all data at once** – you don't need to define the structure of every field or tag manually  
+- **Supports various data types** such as `int`, `float`, `func`, `empty`, and more  
+- **Compatible with Puppeteer**
 
 ## Main concepts
 

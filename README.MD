@@ -63,7 +63,7 @@ console.log(news, '\nPress Ctrl-C to stop...')
 ]
 ```
 
-P.S. If you want to see more examples of how this library is used, take a look at the [harvester.test.js](https://github.com/tmptrash/harvester/blob/main/harvester.test.js) file. There you'll find various template examples and the corresponding search results extracted from HTML.
+P.S. If you want to see more examples of how this library is used, take a look at the [examples](https://github.com/tmptrash/harvester/tree/main/examples) folder.
 
 ## Advantages
 - **Declarative and readable** – the ability to see all block data at once, along with easy-to-read templates  

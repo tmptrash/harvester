@@ -13,5 +13,6 @@ export async function goto (page, fn) {
 export async function open () {
   const { page } = await connect({ headless: false, args: ['--start-maximized'] })
   await page.setViewport(null)
+  await page.setUserAgent('Chrome/111.0.0.0 Safari/537.36')
   return page
 }

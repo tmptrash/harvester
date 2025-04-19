@@ -23,7 +23,7 @@ To run this code, you have to create a local project using the `npm init` comman
 npm i js-harvester puppeteer-real-browser
 ```
 
-After that, you can run the file using the command:  
+After that, you can run the file using Node.js:  
 ```bash
 npm run news
 ```

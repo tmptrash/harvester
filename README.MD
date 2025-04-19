@@ -117,6 +117,17 @@ The **further we deviate** from the tree structure defined in our **template**, 
 - The **deeper** we search from the entry point, the **fewer points** we collect.  
 - The **lower the score**, the **less likely** the data will be found.
 
+### Entry point DOM element
+To extract the data you need, you must specify a so-called **entry point**. The entry point is a specific DOM element that will be considered the starting (or root) node for the search. This element is passed as the second argument to the `harvest()` function.
+
+Usually, we use `document.querySelector('#product')` for this. It's important to note that the search is performed **starting from that branch and downwards**. That means if you pass the entire document (like the `<body>` or `<html>` tag) as the entry point, the data most likely won’t be found — because the algorithm searches “near” the `#product` node.
+
+Based on that, the recommended approach for setting the entry point is:
+1. Locate the block that contains the data you want.
+2. Create a unique CSS selector for it.
+3. Call `querySelector()` with that selector.
+4. Pass obtained DOM element as a second parameter to `harvest()` function
+
 ### 2. Score
 The next concept to understand is **score**. Score is how this library determines how well the extracted data matches our template. What does this mean?  
 - For each found tag in the DOM tree, the program assigns **1 point**.  

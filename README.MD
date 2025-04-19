@@ -25,11 +25,12 @@ npm i js-harvester puppeteer-real-browser
 
 After that, you can run the file using Node.js:  
 ```bash
-npm run news
+node news
 ```
 Harvester works perfectly in combination with [Puppeteer](https://pptr.dev). Here's a minimal example where we extract all today's news from the Ukrainska Pravda website.
 
 ```javascript
+// news.js
 import { harvest } from 'js-harvester'
 import { connect } from 'puppeteer-real-browser'
 

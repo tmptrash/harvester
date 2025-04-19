@@ -1,0 +1,21 @@
+{
+  "name": "js-harvester-examples",
+  "version": "1.0.0",
+  "description": "Examples of js-harvester library usage using puppeteer",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "js-harvester",
+    "examples",
+    "puppeteer"
+  ],
+  "author": "flatline",
+  "license": "MIT",
+  "dependencies": {
+    "js-harvester": "^0.2.10",
+    "puppeteer-real-browser": "^1.4.2"
+  }
+}

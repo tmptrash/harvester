@@ -1,5 +1,7 @@
+examples/node_modules/
 node_modules/
 coverage/
 .idea/
 dist/
 package-lock.json
+examples/package-lock.json

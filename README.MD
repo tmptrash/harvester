@@ -30,6 +30,7 @@ npm run news
 Harvester works perfectly in combination with [Puppeteer](https://pptr.dev). Here's a minimal example where we extract all today's news from the Ukrainska Pravda website.
 
 ```javascript
+// news.js
 import { harvest } from 'js-harvester'
 import { connect } from 'puppeteer-real-browser'
 

@@ -18,12 +18,7 @@ So if you have a template string and know DOM element to start with, you have to
 ![How to use in browser](https://github.com/tmptrash/harvester/blob/main/screenshots/scr1.png)
 
 ## How to use with puppeteer
-To run this code, you have to create a local project using the `npm init` command, and then install `js-harvester` and `puppeteer`. For example:
-```bash
-npm i js-harvester puppeteer-real-browser
-```
-
-After that, you can run the file using Node.js:  
+To run this code, you have to go to `examples` folder and run `npm i` command. After that, you can run one of the files using Node.js:  
 ```bash
 node news
 ```

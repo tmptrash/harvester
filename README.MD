@@ -11,6 +11,16 @@ To extract data, the user needs to describe a template or special tree-like DSL 
 ## How to use in browser
 First, you have to copy the content of the `js-harvester/index.js` file into the clipboard and paste it into the DevTools console of the browser. Let's imagine you want to extract product data, and the structure of that data is shown on the left in two variations. It may change depending on different factors, such as the user's role, time zone, etc. In the top-right corner, you can see a template that describes both data structures for the given HTML examples. This template is just a string and you may put it into the JavaScript variable like this: `var tpl = '  div{text}'`. At the bottom-right, you can see the result that the user will get after calling the `harvest(tpl, $('#rootElement'))` function.
 
+## Advantages
+- **Declarative and readable** – the ability to see all block data at once, along with easy-to-read templates  
+- **Can find DOM nodes without identifiable elements** such as `id`, `class name`, or attributes  
+- **Simplicity and minimalism** – the implemented features are enough to extract data from most websites, and the library's single function greatly simplifies its usage  
+- **Resistant to DOM structure changes** – HTML may look very different for the same data, but it will still be correctly extracted  
+- **Highly optimized and fast** - a typical harvest() function call completes in 15ms
+- **Extracts all data at once** – you don't need to define the structure of every field or tag manually. All the data will be returned in a JS object 
+- **Supports various data types** such as `int`, `float`, `func`, `empty`, and more  
+- **Compatible with Puppeteer**
+
 ![How to use in browser](https://github.com/tmptrash/harvester/blob/main/screenshots/scr.png)
 
 So if you have a template string and know DOM element to start with, you have to just call `harvester()` function like this:
@@ -64,16 +74,6 @@ console.log(news, '\nPress Ctrl-C to stop...')
 ```
 
 P.S. If you want to see more examples of how this library is used, take a look at the [examples](https://github.com/tmptrash/harvester/tree/main/examples) folder.
-
-## Advantages
-- **Declarative and readable** – the ability to see all block data at once, along with easy-to-read templates  
-- **Can find DOM nodes without identifiable elements** such as `id`, `class name`, or attributes  
-- **Simplicity and minimalism** – the implemented features are enough to extract data from most websites, and the library's single function greatly simplifies its usage  
-- **Resistant to DOM structure changes** – HTML may look very different for the same data, but it will still be correctly extracted  
-- **Highly optimized and fast** - a typical harvest() function call completes in 15ms
-- **Extracts all data at once** – you don't need to define the structure of every field or tag manually. All the data will be returned in a JS object 
-- **Supports various data types** such as `int`, `float`, `func`, `empty`, and more  
-- **Compatible with Puppeteer**
 
 ## Main concepts
 

@@ -1,6 +1,6 @@
 # Harvester 🚜
 
-Harvester is a lightweight and highly optimized library for extracting data from the DOM tree. It supports tag texts with specified types and attributes. it's tiny and has no dependencies.
+Harvester is a lightweight and highly optimized library for extracting data from the DOM tree. It supports extraction of tag texts with specified types and attributes. it's tiny and has no dependencies.
 
 The main idea of this library is that the data you need to extract from an HTML page can be described using a text-based template. You roughly specify which tags are inside others and what data they contain. It is not necessary to know the exact structure of the HTML.
 

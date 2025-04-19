@@ -18,7 +18,16 @@ So if you have a template string and know DOM element to start with, you have to
 ![How to use in browser](https://github.com/tmptrash/harvester/blob/main/screenshots/scr1.png)
 
 ## How to use with puppeteer
-This library works perfectly in combination with [Puppeteer](https://pptr.dev). Here's a minimal example where we extract all today's news from the Ukrainska Pravda website.
+To run this code, you have to create a local project using the `npm init` command, and then install `js-harvester` and `puppeteer`. For example:
+```bash
+npm i js-harvester puppeteer-real-browser
+```
+
+After that, you can run the file using the command:  
+```bash
+npm run news
+```
+Harvester works perfectly in combination with [Puppeteer](https://pptr.dev). Here's a minimal example where we extract all today's news from the Ukrainska Pravda website.
 
 ```javascript
 import { harvest } from 'js-harvester'

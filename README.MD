@@ -33,18 +33,22 @@ Harvester works perfectly in combination with [Puppeteer](https://pptr.dev). Her
 import { harvest } from 'js-harvester'
 import { connect } from 'puppeteer-real-browser'
 
+// The path, where js-harvester is installed
 const HARVESTER_PATH = './node_modules/js-harvester/index.js'
+// Template for a single news item
 const TPL = `
   div{time}
   div
     a{title}`
 
+// A helper function for loading a specific URL that waits until the page content is fully loaded.
 async function goto(page, fn) {
   return Promise.all([
     page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle2']}),
     fn?.()
   ])
 }
+// Opens a browser, make it fullscreen and returns current page
 async function open() {
   const { page } = await connect({headless: false, args: ["--start-maximized"]})
   await page.setViewport(null)
@@ -53,12 +57,15 @@ async function open() {
 
 const page = await open()
 await goto(page, async () => page.goto('https://www.pravda.com.ua/news/'))
+// This is how we inject the harvester lib's code into the page we need to
 await page.addScriptTag({path: HARVESTER_PATH})
 
 const news = await page.evaluate(tpl => {
+  // Unique CSS Query for every news item on a page
   const newsEls = document.querySelectorAll('.container_sub_news_list div.article_news_list')
   const newsData = []
   for (let i = 0; i < newsEls.length; i++) {
+    // Extracts time and news text and puts it into the array
     const n = harvest(tpl, newsEls[i])
     n?.[0]?.title && newsData.push(n[0])
   }

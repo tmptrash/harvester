@@ -180,13 +180,13 @@ Next, there is an optional block for extracting text from the current tag. In th
 #### tag's text types
 Once again, this parameter is optional, and we can omit it if we don’t need the text of the current tag. If we know the type of data contained within the current tag, `harvester` supports several basic types:  
 
-- `int` - an integer  
-- `float` - a floating-point number  
-- `with` - a substring search  
+- `int` - an integer
+- `float` - a floating-point number
+- `with` - a substring search
 - `func` - a custom function for text validation
 - `parent` - checks if specified node has a specified parent
-- `str` - a string  
-- `empty` - an empty text  
+- `str` - a string
+- `empty` - an empty text
 
 Let's look at an example of using these types. Suppose we want to find a title that contains the word "Big". The template line will look like this:  
 

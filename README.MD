@@ -133,13 +133,16 @@ div{title}
 `
 ```
 
-Here, we are looking for a **title** inside the text of the `div` tag and a **price** inside the text of **any** tag within the `div`, where the value must be of type `float`. To calculate the **maximum score** (`maxScore`), we need to go through all the lines of the template and sum up the points for each element:
-1. If the `div` tag matches: **+1 point**  
-2. If the `div` tag has text: **+1 point**  
-3. If there is **any** tag inside the `div`: **+1 point**  
-4. If this tag contains text of type `float`: **+2 points**  
+Here, we are looking for a **title** inside the text of the `div` tag and a **price** inside the text of **any** tag within the `div`, where the value must be of type `float`. To calculate the **maximum score** (`maxScore`), we need to go through all the lines of the template and sum up the points for each element from bottom to up:
+1. The `*` tag always matches: **+1 point**
+2. If the `*` tag has text with type `float`: **+12 points**
+3. Tag `*` is located on a level `1`, so we add **(maxLevel - level) === (5 - 1) === 4 points**
+4. If there is **div** tag upper: **+1 point**
+5. If this tag contains text: **+6 points**
+6. Tag `div` is located on a level `0`, so we add **(maxLevel - level) === (5 - 0) === 5 points**
+7. Tag `div` should sum it's own score and it's parent `*`, so it **+17 points**
 
-In total, that gives **5 points**. So, `maxScore = 5`.
+In total, that gives **29 points**. So, `maxScore = 29`.
 
 During the search, not everything may match exactly. For example, the tag might be different, but the text type matches, or the text might be present, but the required attribute is missing. **Harvester** will try to find the match that **accumulates the highest score**, meaning it is the closest match to our template. Essentially, **maximizing the score increases the accuracy** of finding the required information in the DOM tree.  
 

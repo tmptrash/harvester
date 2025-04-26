@@ -117,12 +117,11 @@ Based on that, the recommended approach for setting the entry point is:
 4. Pass obtained DOM element as a second parameter to `harvest()` function
 
 ### 2. Score
-The next concept to understand is **score**. Score is how this library determines how well the extracted data matches our template. What does this mean?  
+The next concept to understand is **score**. Score is how this library determines how well the extracted data matches our template. Scores are calculated separately for each branch separately. The general formula for calculating the score looks like this: `node.score += (subNodesScore + (node.score > 0 ? maxLevel - level : 0))`, where maxLevel is a maximum available search depth, level is a current depth level, subNodesScore is a sum of all nested nodes scores. Let's take a look on score calculation:
 - For each found tag in the DOM tree, the program assigns **1 point**.  
-- If the required text is found, **another point** is added.  
-- If the text type matches the specified type (e.g., `int` or `float`), an **extra 2 points** are given.  
-- Finally, **1 more point** is awarded if the required attribute is found on the current tag.
-- If we go one level down or move one level up when nothing is found at the current level, **we take 1 point**.
+- If the required text is found, **another 6 points** are added.  
+- If the text type matches the specified type (e.g., `int` or `float`), an **extra 12 points** are given.  
+- Finally, **6 more points** are awarded if the required attribute is found on the current tag.
 
 #### Example
 Let's assume we have the following template:  
@@ -184,7 +183,8 @@ Once again, this parameter is optional, and we can omit it if we don’t need th
 - `int` - an integer  
 - `float` - a floating-point number  
 - `with` - a substring search  
-- `func` - a custom function for text validation  
+- `func` - a custom function for text validation
+- `parent` - checks if specified node has a specified parent
 - `str` - a string  
 - `empty` - an empty text  
 
@@ -226,10 +226,13 @@ In this example, the value of the `src` attribute of the `img` tag will be extra
 Finds matches between a pseudo-tree and the DOM structure, extracting text and attributes. The only function you will use to retrieve data is harvest(). It takes three parameters: a text-based template describing the structure of the data, DOM element corresponding to the first specified tag and options. The options have this format (with default values):
 ```js
 const options = {
-  completeCoef: 1.6,    // The acceleration factor at which points will decrease when descending or ascending one level in the DOM tree. It affects the search speed and accuracy (lower value = more accuracy) 
   spaceAmount: 2,       // Default amount of spaces in a template between parent and child
   executionTime: 15000, // Maximum search time. The search will be automatically stopped when the time runs out
-  minDepth: 3           // Minimum depth we are doing search. This value is used to be more robust to the changed DOM structure, adding new and removing nodes
+  minDepth: 3,          // Minimum depth we are doing search. This value is used to be more robust to the changed DOM structure, adding new and removing nodes
+  tagScore: 1,          // Amount of point we add if the tag is equal to which we are looking for
+  tagTextScore: 6,      // Amount of points we add if tag's text is exist and are looking for it
+  tagAttrScore: 6,      // The same, but for attribute
+  tagTextTypeScore: 12  // Amount of points we add if tag & text are exist and text has the same type, which we are looking for
 }
 ```
 

@@ -1,23 +1,31 @@
 /**
- * Means how complete pseudo tree-like template will be found in a DOM tree. Should be bigger
- * then 1. For every deeper or upper level we multiply current level into this coefficient. Like
- * this: Math.round(level * TREE_COMPLETE_COEF) || 1
+ * This coefficient affects level calculation. Under level I mean every recursive call of match()
+ * function. For every deeper or upper jump we multiply current level into this coefficient. Like
+ * this: Math.round(level * TREE_COMPLETE_COEF) || 1. Looks like I refound Fibonacci coefficient :)
+ * The level affects score for every found node by this formula:
+ * (node.score > 0 || score > 0) && (node.score += (score + (node.score > 0 ? maxLevel - level : 0)))
+ * Also, level affects how many deeper or upper nodes will be using during search. This is also
+ * optimization metric.
  */
-const TREE_COMPLETE_COEF = 1.6
+const LEVEL_COEF = 1.61803398875
 /**
  * Number of spaces representing one indentation level.
  */
 const SPACE_AMOUNT = 2
 /**
+ * Minimum depth we are doing to search. This value is used to be more robust to the changed DOM
+ * (added and removed nodes) structure
+ */
+const MIN_DEPTH = 3
+/**
+ * Amount of point we add if the tag is equal to which we are loking for
+ */
+const TAG_SCORE = 1
+/**
  * Amount of milliseconds harvest() function may searching for the data in a DOM. When this timeout
  * is reached execution will be stopped and only found data will be returned in a map
  */
 const EXECUTION_TIME = 15000
-/**
- * Minimum depth we are doing search. This value is used to be more robust to the changed DOM
- * structure, adding new and removing nodes
- */
-const MIN_DEPTH = 3
 /**
  * Regular expression to parse a single line of the pseudo tree-like string. Matches:
  * indentation, tag name, optional text, optional text type, optional text value and
@@ -68,10 +76,13 @@ let id = -1
 let rootEl
 /**
  * Harvester options.
- *   completeCoef - see TREE_COMPLETE_COEF
  *   spaceAmount - see SPACE_AMOUNT
  *   executionTime - see EXECUTION_TIME
  *   minDepth - see MIN_DEPTH
+ *   tagScore - see TAG_SCORE
+ *   tagTextScore - === tagScore * minDepth * 2
+ *   tagAttrScore - === tagScore * minDepth * 2
+ *   tagTextTypeScore - === tagScore * minDepth * 4
  */
 let options = {}
 /**
@@ -80,24 +91,32 @@ let options = {}
  */
 let startTime = performance.now()
 /**
- * Returns a cached score for DOM element and pseudo tree-like node id. So if we trying to
- * calculate a score for the DOM node and all it's sub-nodes we have to check this cache first.
- * @param {Element} el DOM element
- * @param {Number} id Unique id of pseudo tree-like node
+ * Returns a cached score for DOM elements and pseudo tree-like nodes array. So if we trying to
+ * calculate a score for the DOM nodes and all it's sub-nodes we have to check this cache first.
+ * @param {Element} firstEl First DOM element we start to compare
+ * @param {Number} nodesId Unique id of pseudo tree-like nodes
  * @returns {Number|undefined} score or undefined
  */
-SCORE_CACHE.getScore = function getScore (el, id) {
-  if (this.get(el) === undefined) this.set(el, new Map())
-  return this.get(el).get(id)
+SCORE_CACHE.getScore = function getScore (firstEl, nodesId) {
+  if (this.get(firstEl) === undefined) this.set(firstEl, new Map())
+  return this.get(firstEl).get(nodesId)
 }
 /**
  * Sets score value into the cache. Score is related to DOM element and template node(s) id
- * @param {Element} el DOM element
- * @param {String} id Unique node(s) id
+ * @param {Element} firstEl First DOM element we start to compare
+ * @param {String} nodesId Unique pseudo tree-like nodes id
  * @param {Number} score Score
  */
-SCORE_CACHE.setScore = function setScore (el, id, score) {
-  this.get(el).set(id, score)
+SCORE_CACHE.setScore = function setScore (firstEl, nodesId, score) {
+  this.get(firstEl).set(nodesId, score)
+}
+/**
+ * Returns tag name from a cache by DOM element
+ */
+TAG_NAME_CACHE.getName = function getName (el) {
+  let tagName = TAG_NAME_CACHE.get(el)
+  if (tagName === undefined) TAG_NAME_CACHE.set(el, tagName = el.tagName.toUpperCase())
+  return tagName
 }
 /**
  * Returns cached text of the DOM element
@@ -145,10 +164,14 @@ NEXT_CACHE.getNext = function getNext (el) {
  * @returns {Object} Full options object
  */
 function buildOptions (opt = {}) {
-  !opt.completeCoef && (opt.completeCoef = TREE_COMPLETE_COEF)
+  !opt.completeCoef && (opt.completeCoef = LEVEL_COEF)
   !opt.spaceAmount && (opt.spaceAmount = SPACE_AMOUNT)
   !opt.executionTime && (opt.executionTime = EXECUTION_TIME)
   !opt.minDepth && (opt.minDepth = MIN_DEPTH)
+  !opt.tagScore && (opt.tagScore = TAG_SCORE)
+  !opt.tagTextScore && (opt.tagTextScore = opt.tagScore * opt.minDepth * 2)
+  !opt.tagAttrScore && (opt.tagAttrScore = opt.tagScore * opt.minDepth * 2)
+  !opt.tagTextTypeScore && (opt.tagTextTypeScore = opt.tagScore * opt.minDepth * 4)
   options = opt
 }
 /**
@@ -355,13 +378,21 @@ function copy (obj) {
  * @param {Object|Array} obj Object or array to traverse.
  * @param {Function} cb Callback function (cb(node, key)) for every node.
  * @param {Function} endCb Callback, which is called at the end of walking on an object
+ * @param {Number} level Recursion level
  */
-function walk (obj, cb, endCb) {
+function walk (obj, cb, endCb, level = 0) {
   if (Array.isArray(obj)) {
-    for (let i = 0; i < obj.length; i++) { cb(obj[i], i); walk(obj[i], cb, endCb) }
+    for (let i = 0; i < obj.length; i++) { cb(obj[i], i, level); walk(obj[i], cb, endCb, level) }
   } else if (typeof obj === 'object') {
-    for (const p in obj) if (p !== 'el') { cb(obj[p], p); walk(obj[p], cb, endCb) }
-    endCb?.(obj)
+    for (const p in obj) {
+      if (p !== 'el') {
+        const oldLevel = level
+        level = cb(obj[p], p, level)
+        walk(obj[p], cb, endCb, level)
+        level = oldLevel
+      }
+    }
+    endCb?.(obj, level)
   } else cb(obj)
 }
 /**
@@ -373,28 +404,27 @@ function walk (obj, cb, endCb) {
  */
 function sameTag (node, el) {
   if (node.tag === '*') return true
-  let tagName = TAG_NAME_CACHE.get(el)
-  if (tagName === undefined) TAG_NAME_CACHE.set(el, tagName = el.tagName.toUpperCase())
-  return tagName === node.tag
+  return TAG_NAME_CACHE.getName(el) === node.tag
 }
 /**
  * Checks if the tag's text has a type "type" and value "val". Is used for checking tag's text
  * for the specified type. For example: str, int, float, func,... If user sets "func" type it
  * means this function should be defined in a global context (window under browser and self
  * under Node.js).
+ * @param {Element} el Current DOM element we are sezrching on
  * @param {String} text Text we are checking
  * @param {String} type str, int, float,...
  * @param {String} val Additional parameter for type. For example for the func type we provide
  * custom function name to call
  * @returns {Boolean}
  */
-function sameType (text, type, val) {
+function sameType (el, text, type, val) {
   switch (type) {
     /* eslint-disable no-multi-spaces */
-    case 'int'  : return isInt(text)
-    case 'float': return isFloat(text)
-    case 'with' : return text.includes(val)
-    case 'func' : {
+    case 'int'   : return isInt(text)
+    case 'float' : return isFloat(text)
+    case 'with'  : return text.includes(val)
+    case 'func'  : {
       const obj = typeof global === 'undefined' ? self : global // eslint-disable-line no-undef
       if (!obj) {
         console.warn(`Unknown environment. Impossible to find global or self objects to run ${val} function`)
@@ -405,13 +435,62 @@ function sameType (text, type, val) {
         console.warn(`Function ${val} is not found in a global context`)
         return false
       }
-      return !!fn(text)
+      return !!fn(text, el)
     }
-    case 'str'  : return true
-    case 'empty': return text.trim() === ''
+    case 'parent': return TAG_NAME_CACHE.getName(PARENT_CACHE.getParent(el)) === val.toUpperCase()
+    case 'str'   : return true
+    case 'empty' : return text.trim() === ''
   }
   /* eslint-enable no-multi-spaces */
   return false
+}
+/**
+ * This function calculates total total maxScore and maxScore for every node. maxScore is used
+ * during matching to skip nodes with lower score for optimization. Global maxScore - it's a global
+ * score of the root node(s).
+ * @param {Node[]} tplNodes Pseudo template JSON tree
+ * @returns {[Number, Number]} [depth, maxScore] maximum depth in a DOM tree we will search &
+ * maxScore of the root node(s)
+ */
+function initTpl (tplNodes) {
+  let depth = options.minDepth
+
+  walk(tplNodes, (d, prop, level) => {
+    if (!isObj(d)) return prop !== 'children' ? level : Math.round(level * options.completeCoef) || 1
+    if (d?.tag) { d.maxScore += options.tagScore; depth++ }
+    d.textTag && !d.textType && (d.maxScore += options.tagTextScore)
+    d.textType && (d.maxScore += options.tagTextTypeScore)
+    d.attrTag && (d.maxScore += options.tagAttrScore)
+  })
+  walk(tplNodes, (d, prop, level) => {
+    if (!isObj(d)) return prop !== 'children' ? level : Math.round(level * options.completeCoef) || 1
+  }, (o, level) => {
+    if (o.maxScore) {
+      o?.children && (o.maxScore = o.children.reduce((pre, cur) => pre + cur.maxScore, o.maxScore || 0))
+      o.maxScore += (depth - level)
+    }
+  })
+  /**
+   * To calculate maxScore we have to sum all first level nodes
+   */
+  const maxScore = tplNodes.reduce((pre, cur) => pre + cur.maxScore, 0)
+
+  return [depth, maxScore]
+}
+/**
+ * Initializes match() function and it's data. Should be called before first match() call
+ * @param {Element} firstEl DOM element we are starting search from
+ */
+function initMatch (firstEl) {
+  rootEl = firstEl.parentNode
+  SCORE_CACHE.clear()
+  TAG_NAME_CACHE.clear()
+  PARENT_CACHE.clear()
+  FIRST_CHILD_CACHE.clear()
+  NEXT_CACHE.clear()
+  TEXT_CACHE.clear()
+  PARENT_CACHE.set(firstEl, rootEl)
+  startTime = performance.now()
 }
 /**
  * Finds all nodes in a DOM tree according to JSON tree. The starting format of one JSON node
@@ -455,7 +534,7 @@ function match (tplNodesId, tplNodes, firstEl, level, maxLevel, extraParentEl = 
   }
   let maxScore = 0
   let maxNodes
-  if (level < maxLevel) {
+  if (level <= maxLevel) {
     /**
      * First, we check current nodes array in one level upper without combinations. This variant
      * is used when DOM tree has a lack of nodes between current nodes in pseudo tree and DOM
@@ -474,23 +553,21 @@ function match (tplNodesId, tplNodes, firstEl, level, maxLevel, extraParentEl = 
     const upEl = PARENT_CACHE.getParent(firstEl) || extraParentEl
     if (upEl !== rootEl) {
       const parentEl = PARENT_CACHE.getParent(upEl)
-      if (parentEl !== rootEl) {
-        /**
-         * Optimization logic: we have to skip nodes with lower score, because other node is
-         * better than current.
-         */
-        const score = SCORE_CACHE.getScore(parentEl, tplNodesId)
-        if (score === undefined || score > maxScore) {
-          const newLevel = Math.round(level * options.completeCoef) || 1
-          const firstChildEl = FIRST_CHILD_CACHE.getFirstChild(parentEl)
-          const [upScore, upNodes] = match(tplNodesId, tplNodes, firstChildEl, newLevel, maxLevel)
-          if (upScore > maxScore && upNodes) {
-            maxScore = upScore
-            if (score === undefined && tplNodesId !== undefined) {
-              SCORE_CACHE.setScore(parentEl, tplNodesId, maxScore)
-            }
-            maxNodes = upNodes
+      const firstChildEl = parentEl === rootEl ? upEl : FIRST_CHILD_CACHE.getFirstChild(parentEl)
+      /**
+       * Optimization logic: we have to skip nodes with lower score, because other node is
+       * better than current.
+       */
+      const score = SCORE_CACHE.getScore(firstChildEl, tplNodesId)
+      if (score === undefined || score > maxScore) {
+        const newLevel = Math.round(level * options.completeCoef) || 1
+        const [upScore, upNodes] = match(tplNodesId, tplNodes, firstChildEl, newLevel, maxLevel)
+        if (upScore > maxScore && upNodes) {
+          maxScore = upScore
+          if (score === undefined && tplNodesId !== undefined && maxLevel - newLevel > options.minDepth) {
+            SCORE_CACHE.setScore(firstChildEl, tplNodesId, maxScore)
           }
+          maxNodes = upNodes
         }
       }
     }
@@ -510,20 +587,20 @@ function match (tplNodesId, tplNodes, firstEl, level, maxLevel, extraParentEl = 
      */
     let el = firstEl
     while (el) {
-      const firstChild = FIRST_CHILD_CACHE.getFirstChild(el)
-      if (firstChild) {
+      const firstChildEl = FIRST_CHILD_CACHE.getFirstChild(el)
+      if (firstChildEl) {
         /**
          * Optimization logic: we have to skip nodes with lower score, because other node is
          * better than current.
          */
-        const score = SCORE_CACHE.getScore(el, tplNodesId)
+        const score = SCORE_CACHE.getScore(firstChildEl, tplNodesId)
         if (score === undefined || score > maxScore) {
           const newLevel = Math.round(level * options.completeCoef) || 1
-          const [deepScore, deepNodes] = match(tplNodesId, tplNodes, firstChild, newLevel, maxLevel)
+          const [deepScore, deepNodes] = match(tplNodesId, tplNodes, firstChildEl, newLevel, maxLevel)
           if (deepScore > maxScore && deepNodes) {
             maxScore = deepScore
-            if (score === undefined && tplNodesId !== undefined) {
-              SCORE_CACHE.setScore(el, tplNodesId, maxScore)
+            if (score === undefined && tplNodesId !== undefined && maxLevel - newLevel > options.minDepth) {
+              SCORE_CACHE.setScore(firstChildEl, tplNodesId, maxScore)
             }
             maxNodes = deepNodes
           }
@@ -565,34 +642,37 @@ function match (tplNodesId, tplNodes, firstEl, level, maxLevel, extraParentEl = 
         node.score = 0
         // here we check tag name, tag text and attribute
         if (sameTag(node, el)) {
-          node.score++
+          node.score += options.tagScore
           if (node.textTag) {
             const t = TEXT_CACHE.getText(el)
             if (node.textType) {
-              if (sameType(t, node.textType, node.textVal)) {
-                node.score += 2
+              if (sameType(el, t, node.textType, node.textVal)) {
+                node.score += options.tagTextTypeScore
                 node.text = t
-              } else { node.score -= 2; delete node.text }
-            } else if (t) { node.text = t; node.score++ }
+              } else { node.score -= options.tagTextTypeScore; delete node.text }
+            } else if (t) { node.text = t; node.score += options.tagTextScore }
           }
           if (node.attrTag) {
             const a = el.getAttribute(node.attrTag[1])
-            a && (node.attr = a) && node.score++
+            a && (node.attr = a) && (node.score += options.tagAttrScore)
           }
         }
         // Here we go deeper and check inner nodes
         const subNodes = node.children
         if (subNodes?.length) {
-          const firstChild = FIRST_CHILD_CACHE.getFirstChild(el)
+          const firstChildEl = FIRST_CHILD_CACHE.getFirstChild(el)
           const newLevel = Math.round(level * options.completeCoef) || 1
-          const [score, nodes] = match(getNodesId(subNodes), subNodes, firstChild, newLevel, maxLevel, !firstChild ? el : null)
-          node.score += score
+          const extraEl = !firstChildEl ? el : null
+          const [score, nodes] = match(getNodesId(subNodes), subNodes, firstChildEl, newLevel, maxLevel, extraEl)
+          // The condition must be > 0
+          if (node.score > 0 || score > 0) node.score += (score + (node.score > 0 ? maxLevel - level : 0))
           nodes?.length && (node.children = nodes)
           const nodeId = `${node.id}`
-          if (node.id !== undefined && SCORE_CACHE.getScore(el, nodeId) === undefined) {
-            SCORE_CACHE.setScore(el, nodeId, node.score)
+          if (node.id !== undefined && SCORE_CACHE.getScore(el, nodeId) === undefined && maxLevel - newLevel > options.minDepth) {
+            SCORE_CACHE.setScore(el, nodeId, node.score) // score for only 1 node
           }
-        }
+          // The condition must be > 0
+        } else if (node.score > 0) node.score += (maxLevel - level)
 
         // all nodes found let's check if it's a best score
         if (i >= comb.length - 1) {
@@ -625,6 +705,31 @@ function match (tplNodesId, tplNodes, firstEl, level, maxLevel, extraParentEl = 
   return [maxScore, maxNodes]
 }
 /**
+ * This function collects final data map, which consists of text and attribute values and checks if
+ * there are errors in it
+ * @param {Node[]} nodes Nodes returned by match() function with meta data inside
+ * @returns {Object} Collected map
+ */
+function getMap (nodes) {
+  const map = {}
+
+  walk(nodes, d => {
+    if (!isObj(d)) return
+    if (d.textTag && d.text !== undefined) {
+      const tag = d.textTag
+      map[tag] && console.error(`Two or more equal text tags were found. Text tag: "${tag}"`)
+      map[tag] = d.text
+    }
+    if (d.attrTag && d.attr) {
+      const tag = d.attrTag[0]
+      map[tag] && console.error(`Two or more equal attr tags were found. Attr tag: "${tag}"`)
+      map[tag] = d.attr
+    }
+  })
+
+  return map
+}
+/**
  * Main function you should call to harvest the data from an DOM tree by template. First,
  * create a pseudo tree template like in example below. div, h1, span, img - are tag names
  * you are looking for. title, price, img - optional names of properties in a returned map,
@@ -655,51 +760,11 @@ function harvest (tpl, firstEl, opt = {}) {
   if (!isObj(opt)) { console.error('"opt" argument is not an object'); return [{}, 0, 0, undefined] }
   buildOptions(opt)
   const tplNodes = toTree(tpl)
-  const tplNodesId = getNodesId(tplNodes)
-  let maxScore = 0
-  let depth = opt.minDepth
-  /**
-   * This peace calculates total maxScore and maxScore for every node to use it during matching
-   * later to skip nodes with lower score for optimization. maxScore - it's a global score, maxScore
-   * - it's a maxScore for every node.
-   */
-  walk(tplNodes, d => {
-    if (!isObj(d)) return
-    if (d?.tag) { d.maxScore++; depth++ }
-    d.textTag && !d.textType && d.maxScore++
-    d.textType && (d.maxScore += 2)
-    d.attrTag && d.maxScore++
-    maxScore += d.maxScore
-  }, o => o?.children && (o.maxScore = o.children.reduce((pre, cur) => pre + cur.maxScore, o.maxScore || 0)))
+  const [depth, maxScore] = initTpl(tplNodes)
   if (!firstEl) return [{}, maxScore, 0, []]
-  rootEl = firstEl.parentNode
-  startTime = performance.now()
-  SCORE_CACHE.clear()
-  TAG_NAME_CACHE.clear()
-  PARENT_CACHE.clear()
-  FIRST_CHILD_CACHE.clear()
-  NEXT_CACHE.clear()
-  TEXT_CACHE.clear()
-  PARENT_CACHE.set(firstEl, rootEl)
-  const [score, nodes] = match(tplNodesId, tplNodes, firstEl, 0, depth)
-  /**
-   * This peace collects final data map, which consists of text and attribute values
-   * and checks if there are errors in it
-   */
-  const map = {}
-  walk(nodes, d => {
-    if (!isObj(d)) return
-    if (d.textTag && d.text !== undefined) {
-      const tag = d.textTag
-      map[tag] && console.error(`Two or more equal text tags were found. Text tag: "${tag}"`)
-      map[tag] = d.text
-    }
-    if (d.attrTag && d.attr) {
-      const tag = d.attrTag[0]
-      map[tag] && console.error(`Two or more equal attr tags were found. Attr tag: "${tag}"`)
-      map[tag] = d.attr
-    }
-  })
+  initMatch(firstEl)
+  const [score, nodes] = match(getNodesId(tplNodes), tplNodes, firstEl, 0, depth)
+  const map = getMap(nodes)
 
   return [map, maxScore, score, nodes]
 }

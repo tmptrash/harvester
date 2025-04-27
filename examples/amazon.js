@@ -15,19 +15,22 @@ div
         h2
           span{title}
     div
+    div
+    div
       div
         div
           div
             div
-              a
-                span
-                  span{price:with:$}
-`
+              div
+                a
+                  span
+                    span{price:func:price}`
 const page = await open()
 
 await goto(page, async () => page.goto('https://www.amazon.com/s?k=laptops'))
 const products = await page.evaluate((tpl, query) => {
-  return Array.from(document.querySelectorAll(query)).map(el => harvest(tpl, el)[0])
+  window.price = function price (t, el) { return el?.className === 'a-offscreen' && t?.indexOf('$') > -1 }
+  return Array.from(document.querySelectorAll(query)).map(el => harvest(tpl, el, { minDepth: 60 })[0])
 }, TPL, ELS_QUERY)
 
 console.log(products, '\nPress Ctrl-C to stop...')

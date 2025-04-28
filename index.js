@@ -169,8 +169,7 @@ NEXT_CACHE.getNext = function getNext (el) {
  * @returns {Object} Full options object
  */
 function buildOptions (opt = {}) {
-  // TODO: switch back to the constant
-  !opt.completeCoef && (opt.completeCoef = 1.61803398875)
+  !opt.completeCoef && (opt.completeCoef = LEVEL_COEF)
   !opt.spaceAmount && (opt.spaceAmount = SPACE_AMOUNT)
   !opt.executionTime && (opt.executionTime = EXECUTION_TIME)
   !opt.minDepth && (opt.minDepth = MIN_DEPTH)

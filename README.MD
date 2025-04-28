@@ -10,13 +10,11 @@ To extract data, the user needs to describe a template or special tree-like DSL 
 
 Here is a minimal example of usage. For the HTML:
 ```html
-  ...
   <div id="product">
     <div class="title">Title: MacBook M4 Pro Max</div>
     <div>AD section</div>
     <span>Price: 4990.00</span>
   </div>
-  ...
 ```
 You may harvest the title and price with this simple template:
 ```javascript

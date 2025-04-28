@@ -8,6 +8,25 @@ This library is also especially useful for HTML structures that lack clear ident
 
 To extract data, the user needs to describe a template or special tree-like DSL of the data from the DOM from which the extraction will be performed, and then call the `harvest()` function with two parameters: the described template and the start branch in the DOM where the search will begin. This library can be used both in the browser and in web scraping tools such as [Puppeteer](https://pptr.dev).
 
+Here is a minimal example of usage. For the HTML:
+```html
+  ...
+  <div id="product">
+    <div class="title">Title: MacBook M4 Pro Max</div>
+    <div>AD section</div>
+    <span>Price: 4990.00</span>
+  </div>
+  ...
+```
+You may harvest the title and price with this simple template:
+```javascript
+var tpl = `
+  div{title:with:Title}
+    *{price:float}
+`
+harvest(tpl, document.querySelector('#product'))
+```
+
 ## Advantages
 - **Declarative and readable** – the ability to see all block data at once, along with easy-to-read templates  
 - **Can find DOM nodes without identifiable elements** such as `id`, `class name`, or attributes  

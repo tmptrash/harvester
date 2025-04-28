@@ -75,6 +75,11 @@ let id = -1
  */
 let rootEl
 /**
+ * Reference to the firstEl, which is passed as a second parameter to the harvester() function. We
+ * need it to check if algorithm is not jumping outside the first element we started search from
+ */
+let rootFirstEl
+/**
  * Harvester options.
  *   spaceAmount - see SPACE_AMOUNT
  *   executionTime - see EXECUTION_TIME
@@ -164,7 +169,8 @@ NEXT_CACHE.getNext = function getNext (el) {
  * @returns {Object} Full options object
  */
 function buildOptions (opt = {}) {
-  !opt.completeCoef && (opt.completeCoef = LEVEL_COEF)
+  // TODO: switch back to the constant
+  !opt.completeCoef && (opt.completeCoef = 1.61803398875)
   !opt.spaceAmount && (opt.spaceAmount = SPACE_AMOUNT)
   !opt.executionTime && (opt.executionTime = EXECUTION_TIME)
   !opt.minDepth && (opt.minDepth = MIN_DEPTH)
@@ -482,6 +488,7 @@ function initTpl (tplNodes) {
  * @param {Element} firstEl DOM element we are starting search from
  */
 function initMatch (firstEl) {
+  rootFirstEl = firstEl
   rootEl = firstEl.parentNode
   SCORE_CACHE.clear()
   TAG_NAME_CACHE.clear()
@@ -606,7 +613,7 @@ function match (tplNodesId, tplNodes, firstEl, level, maxLevel, extraParentEl = 
           }
         }
       }
-      el = NEXT_CACHE.getNext(el)
+      el = el === rootFirstEl ? null : NEXT_CACHE.getNext(el)
     }
   }
   // No children in a current DOM node. No sense to search deeper
@@ -698,7 +705,7 @@ function match (tplNodesId, tplNodes, firstEl, level, maxLevel, extraParentEl = 
         i--
         if (i < 0) break
       }
-      comb[i].el = NEXT_CACHE.getNext(comb[i]?.el || el)
+      comb[i].el = comb[i].el === rootFirstEl ? null : NEXT_CACHE.getNext(comb[i]?.el || el)
     }
   }
 

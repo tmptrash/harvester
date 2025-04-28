@@ -1,7 +1,7 @@
 import { harvest } from 'js-harvester'
 import { open, goto } from './utils.js'
 
-const ELS_QUERY = '[role="listitem"] .s-card-container .a-section > [class=puisg-row]:nth-of-type(1)'
+const PRODUCTS_QUERY = '[role="listitem"] .s-card-container .a-section > [class=puisg-row]:nth-of-type(1)'
 const TPL = `
 div
   div
@@ -31,6 +31,6 @@ await goto(page, async () => page.goto('https://www.amazon.com/s?k=laptops'))
 const products = await page.evaluate((tpl, query) => {
   window.price = function price (t, el) { return el?.className === 'a-offscreen' && t?.indexOf('$') > -1 }
   return Array.from(document.querySelectorAll(query)).map(el => harvest(tpl, el, { minDepth: 60 })[0])
-}, TPL, ELS_QUERY)
+}, TPL, PRODUCTS_QUERY)
 
 console.log(products, '\nPress Ctrl-C to stop...')

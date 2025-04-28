@@ -13,7 +13,7 @@ Here is a minimal example of usage. For the HTML:
   <div id="product">
     <div class="title">Title: MacBook M4 Pro Max</div>
     <div>AD section</div>
-    <span>Price: 4990.00</span>
+    <span>4990.00</span>
   </div>
 ```
 You may harvest the title and price with this simple template:
@@ -22,7 +22,15 @@ var tpl = `
   div{title:with:Title}
     *{price:float}
 `
-harvest(tpl, document.querySelector('#product'))
+var data = harvest(tpl, document.querySelector('#product'))
+console.log(data[0]) // 0th element is a harvested data map
+```
+Output will be:
+```
+{
+  title: 'Title: MacBook M4 Pro Max',
+  price: '4990.00'
+}
 ```
 
 ## Advantages

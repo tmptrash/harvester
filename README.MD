@@ -32,6 +32,7 @@ Output will be:
   price: '4990.00'
 }
 ```
+More examples you may find [here](https://github.com/tmptrash/harvester/tree/main/examples).
 
 ## Advantages
 - **Declarative and readable** – the ability to see all block data at once, along with easy-to-read templates  

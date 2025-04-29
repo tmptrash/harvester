@@ -8,7 +8,7 @@ This library is also especially useful for HTML structures that lack clear ident
 
 To extract data, the user needs to describe a template or special tree-like DSL of the data from the DOM from which the extraction will be performed, and then call the `harvest()` function with two parameters: the described template and the start branch in the DOM where the search will begin. This library can be used both in the browser and in web scraping tools such as [Puppeteer](https://pptr.dev).
 
-Here is a minimal example of usage. For the HTML:
+Here is a minimal example of usage if you have an access to the destination DOM tree. For the HTML:
 ```html
   <div id="product">
     <div class="title">Title: MacBook M4 Pro Max</div>

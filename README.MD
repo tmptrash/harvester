@@ -142,7 +142,7 @@ Based on that, the recommended approach for setting the entry point is:
 4. Pass obtained DOM element as a second parameter to `harvest()` function
 
 ### 2. Score
-The next concept to understand is **score**. Score is how this library determines how well the extracted data matches our template. Scores are calculated separately for each branch separately. The general formula for calculating the score looks like this: `node.score += (subNodesScore + (node.score > 0 ? maxLevel - level : 0))`, where maxLevel is a maximum available search depth, level is a current depth level, subNodesScore is a sum of all nested nodes scores. Let's take a look on score calculation:
+The next concept to understand is **score**. Score is how this library determines how well the extracted data matches our template. Scores are calculated separately for each branch separately. The general formula for calculating the score looks like this: `node.score += (subNodesScore + (node.score > 0 ? maxLevel - level : 0))`, where `maxLevel` is a maximum available search depth, `level` is a current depth level, subNodesScore is a sum of all nested nodes scores. Let's take a look on score calculation:
 - For each found tag in the DOM tree, the program assigns **1 point**.  
 - If the required text is found, **another 6 points** are added.  
 - If the text type matches the specified type (e.g., `int` or `float`), an **extra 12 points** are given.  

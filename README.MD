@@ -98,7 +98,22 @@ console.log(news, '\nPress Ctrl-C to stop...')
 ]
 ```
 
-P.S. If you want to see more examples of how this library is used, take a look at the [examples](https://github.com/tmptrash/harvester/tree/main/examples) folder.
+## Examples
+This project contains few [examples](https://github.com/tmptrash/harvester/tree/main/examples) of usage the harvester with puppeteer and Node.js.
+
+### Installation
+If you're using **Harvester** as a complement to **Puppeteer**, all you need to do is install the npm package like this:  
+```bash
+npm i js-harvester --save
+```
+Then, you simply take the file `node_modules/js-harvester/index.js` and inject it into the page you want to scrape. An example using this approach can be found in the [examples](https://github.com/tmptrash/harvester/tree/main/examples) folder.
+
+### Running examples
+```bash
+cd examples
+npm i
+node rozetka
+```
 
 ## Main concepts
 

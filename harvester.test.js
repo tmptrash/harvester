@@ -374,7 +374,28 @@ describe('harvester library tests', () => {
       expect(ret[1]).toEqual(0)
       expect(ret[2]).toEqual(0)
     })
-    it('test for an empty template and wrong start padding', () => {
+    it('test for a template and wrong padding', () => {
+      const ret = testHarvester(`
+        div
+      span`, `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+        <div>
+          <span>
+            <h1>
+          </span>
+        </div>
+      </body>
+      </html>
+      `, 'body > div')
+      expect(consoleSpy).toHaveBeenCalledWith("Error in line '      span' #:2. Wrong left indentation level.")
+      expect(ret[0]).toEqual({})
+    })
+    it('test for a template and wrong start padding', () => {
       const ret = testHarvester(`
        div
         span

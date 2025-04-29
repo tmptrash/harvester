@@ -35,12 +35,11 @@ Output will be:
 More examples you may find [here](https://github.com/tmptrash/harvester/tree/main/examples).
 
 ## Advantages
-- **Declarative and readable** – the ability to see all block data at once, along with easy-to-read templates  
+- **Declarative and readable** – the ability to see all block data at once, along with easy-to-read templates. you don't need to define the structure of every field or tag manually. All the data will be returned in a JS object
 - **Can find DOM nodes without identifiable elements** such as `id`, `class name`, or attributes  
 - **Simplicity and minimalism** – the implemented features are enough to extract data from most websites, and the library's single function greatly simplifies its usage  
 - **Resistant to DOM structure changes** – HTML may look very different for the same data, but it will still be correctly extracted  
 - **Highly optimized and fast** - a typical harvest() function call completes in 15ms
-- **Extracts all data at once** – you don't need to define the structure of every field or tag manually. All the data will be returned in a JS object 
 - **Supports various data types** such as `int`, `float`, `func`, `empty`, and more  
 - **Compatible with Puppeteer**
 

@@ -374,7 +374,7 @@ Finally, if we are looking for something specific and have a special function to
 var tpl = "  img{title:func:checkTitle}"
 ```  
 
-In this example, `checkTitle` must exist in the global scope before calling the `harvest()` function. Like this `function checkTitle() {...}`
+In this example, `checkTitle` must exist in the global scope before calling the `harvest()` function. Like this `window.checkTitle = function checkTitle() {...}`
 
 #### attributes
 The next optional parameter is the search for a tag’s attribute value. For example, the `img` tag may have an `src` attribute, and to extract its value, we need to create the following template:  

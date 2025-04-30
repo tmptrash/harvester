@@ -8,7 +8,7 @@ Harvester is a lightweight and highly optimized library for extracting data from
 - [Installation](#installation)
 - [How to use in browser](#how-to-use-in-browser)
 - [How to use with puppeteer](#how-to-use-with-puppeteer)
-- [More examples](#more-examples)
+- [Examples folder](#more-examples)
 - [Main concepts](#main-concepts)
 - [API](#api)
 - [Example](#example-1)
@@ -134,7 +134,7 @@ console.log(news, '\nPress Ctrl-C to stop...')
 ]
 ```
 
-## More examples
+## Examples folder
 This project contains few [examples](https://github.com/tmptrash/harvester/tree/main/examples) of usage the harvester with puppeteer and Node.js.
 
 ### Examples installation
@@ -335,7 +335,6 @@ Let's imagine we have a HTML like this:
 
 And you need to grab a product title (you know that it has a "Name" in a title), price and an it's image. For this, your pseudo tree template may look like this:
 ```js
-import { harvest } from 'harvester'
 const tpl = `
 *                     // finds any tag as a parent
   h1{title:with:Name} // finds h1 inside parent tag with a substring "Name" in a text

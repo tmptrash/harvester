@@ -5,9 +5,9 @@ Harvester is a lightweight and highly optimized library for extracting data from
 # Table of contents
 - [Description](#description)
 - [Advantages](#advantages)
+- [Installation](#installation)
 - [How to use in browser](#how-to-use-in-browser)
 - [How to use with puppeteer](#how-to-use-with-puppeteer)
-- [Installation](#installation)
 - [Examples](#examples)
 - [Main concepts](#main-concepts)
 - [API](#api)
@@ -57,6 +57,14 @@ More examples you may find [here](https://github.com/tmptrash/harvester/tree/mai
 - **Highly optimized and fast** - a typical harvest() function call completes in 15ms
 - **Supports various data types** such as `int`, `float`, `func`, `empty`, and more  
 - **Compatible with Puppeteer**
+
+## Installation
+If you're using **Harvester** as a complement to **Puppeteer**, all you need to do is install the npm package like this:
+```bash
+npm i js-harvester --save
+```
+
+Then, you simply take the file `node_modules/js-harvester/index.js` and inject it into the page you want to scrape. An example using this approach can be found in the [examples](https://github.com/tmptrash/harvester/tree/main/examples) folder.
 
 ## How to use in browser
 First, you have to copy the content of the `js-harvester/index.js` file into the clipboard and paste it into the DevTools console of the browser. Let's imagine you want to extract product data, and the structure of that data is shown on the left in two variations. It may change depending on different factors, such as the user's role, time zone, etc. In the top-right corner, you can see a template that describes both data structures for the given HTML examples. This template is just a string and you may put it into the JavaScript variable like this: `var tpl = '  div{text}'`. At the bottom-right, you can see the result that the user will get after calling the `harvest(tpl, $('#rootElement'))` function.
@@ -112,14 +120,6 @@ console.log(news, '\nPress Ctrl-C to stop...')
   ...
 ]
 ```
-
-## Installation
-If you're using **Harvester** as a complement to **Puppeteer**, all you need to do is install the npm package like this:
-```bash
-npm i js-harvester --save
-```
-
-Then, you simply take the file `node_modules/js-harvester/index.js` and inject it into the page you want to scrape. An example using this approach can be found in the [examples](https://github.com/tmptrash/harvester/tree/main/examples) folder.
 
 ## Examples
 This project contains few [examples](https://github.com/tmptrash/harvester/tree/main/examples) of usage the harvester with puppeteer and Node.js.

@@ -378,7 +378,8 @@ It finds matches between a pseudo-tree and the DOM structure, extracting text an
 const options = {
   spaceAmount: 2,       // Default amount of spaces in a template between parent and child
   executionTime: 15000, // Maximum search time. The search will be automatically stopped when the time runs out
-  minDepth: 3,          // Minimum depth we are doing search. This value is used to be more robust to the changed DOM structure, adding new and removing nodes
+  minDepth: 3,          // The minimum depth to which we will descend or ascend during the search.
+This value is not linear — it represents the number of recursive calls made by the search function while traversing the DOM tree.adding new and removing nodes
   tagScore: 1,          // Amount of point we add if the tag is equal to which we are looking for
   tagTextScore: 6,      // Amount of points we add if tag's text is exist and are looking for it
   tagAttrScore: 6,      // The same, but for attribute

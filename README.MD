@@ -2,7 +2,7 @@
 
 ![Unit Tests](https://github.com/tmptrash/harvester/actions/workflows/test.yml/badge.svg)
 
-Harvester is a lightweight and highly optimized library for extracting data from the DOM tree. It supports extraction of tag texts with specified types and attributes. it's tiny and has no dependencies. Put simply, all you need to extract data from HTML is to call the `harvest()` function. To do this, the library script must be present on the page from which you're trying to extract data.
+Harvester is a lightweight and highly optimized javascript library for extracting data from the DOM tree. It supports extraction of tag texts with specified types and attributes. it's tiny and has no dependencies. Put simply, all you need to extract data from HTML is to call the `harvest()` function. To do this, the library script must be present on the page from which you're trying to extract data.
 
 # Table of contents
 - [Description](#description)
@@ -61,7 +61,7 @@ More examples you may find [here](https://github.com/tmptrash/harvester/tree/mai
 
 ## Installation
 ### For the Puppeteer
-If you're using **Harvester** as a complement to **Puppeteer**, all you need to do is install the npm package like this:
+If you're using **Harvester** as a complement to **Puppeteer**, all you need to do is install the npm package into your Puppeteer project like this:
 ```bash
 npm i js-harvester --save
 ```

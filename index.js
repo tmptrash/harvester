@@ -757,7 +757,7 @@ function getMap (nodes) {
  * in a DOM.
  *
  * @param {String} tpl template of pseudo tree-like string
- * @param {Element|String} firstEl Reference to the first DOM element for nodes[0] or css query
+ * @param {Element|String} element Reference to the first DOM element for nodes[0] or css query
  * @param {Object|undefined} opt Harvester options
  * @returns {[map: Object, maxScore: Number, foundScore: Number, foundNodes: Array]} map -
  * JavaScript object with all text tags and attribute tags in it;maxScore - maximum score.
@@ -773,13 +773,13 @@ function getMap (nodes) {
  *   img[img=href]`
  * harvest(tpl, $('div')) // [{title: 'Title', price: '12.34', img: 'http://...'}, 8, 7, [...]]
  */
-function harvest (tpl, firstEl, opt = {}) {
+function harvest (tpl, element, opt = {}) {
   if (!isObj(opt)) { console.error('"opt" argument is not an object'); return [{}, 0, 0, undefined] }
   buildOptions(opt)
   const tplNodes = toTree(tpl)
   const [depth, maxScore] = initTpl(tplNodes)
-  if (!firstEl) return [{}, maxScore, 0, []]
-  firstEl = initMatch(firstEl)
+  if (!element) return [{}, maxScore, 0, []]
+  const firstEl = initMatch(element)
   const [score, nodes] = match(getNodesId(tplNodes), tplNodes, firstEl, 0, depth)
   const map = getMap(nodes)
 

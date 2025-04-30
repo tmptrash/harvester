@@ -157,11 +157,12 @@ console.log(result)
 ```
 
 ## How to use with puppeteer
-To run this code, you have to go to `examples` folder and run `npm i` command. After that, you can run one of the example files using Node.js:  
+Harvester works perfectly in combination with [Puppeteer](https://pptr.dev). Here's a minimal example where we extract all today's news from the Ukrainska Pravda website. But before running this code, you have to go to `examples` folder and run `npm i` command. After that, you can run one of the example files using Node.js:  
 ```bash
 node news
 ```
-Harvester works perfectly in combination with [Puppeteer](https://pptr.dev). Here's a minimal example where we extract all today's news from the Ukrainska Pravda website.
+
+Let's take a look on a code for getting news from the site:
 
 ```javascript
 // news.js

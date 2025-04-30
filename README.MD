@@ -36,7 +36,7 @@ var tpl = `
   div{title:with:Title}
     *{price:float}
 `
-var data = harvest(tpl, document.querySelector('#product'))
+var data = harvest(tpl, $('#product'))
 console.log(data[0]) // 0th element is a harvested data map
 ```
 Output will be:

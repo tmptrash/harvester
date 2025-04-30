@@ -118,9 +118,11 @@ console.log(result)
 ]
 ```
 What if the HTML differs depending on external factors — for example, the time zone or the user's role?
+
 ![How to use in browser](https://github.com/tmptrash/harvester/blob/main/screenshots/scr.png)
 
 Let's modify our template so that it accommodates both cases.
+
 ![How to use in browser](https://github.com/tmptrash/harvester/blob/main/screenshots/scr1.png)
 
 ## How to use with puppeteer

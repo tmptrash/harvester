@@ -8,11 +8,29 @@ Harvester is a lightweight and highly optimized javascript library for extractin
 - [Description](#description)
 - [Advantages](#advantages)
 - [Installation](#installation)
+  - [For the Puppeteer](#for-the-puppeteer)
+  - [For the Browser](#for-the-browser)
 - [How to use in browser](#how-to-use-in-browser)
 - [How to use with puppeteer](#how-to-use-with-puppeteer)
 - [Examples folder](#examples-folder)
+  - [Examples installation](#examples-installation)
+  - [Running examples](#running-examples)
 - [Main concepts](#main-concepts)
+  - [Fuzzy search](#fuzzy-search)
+    - [Example Scenario](#example-scenario)
+    - [The Key Idea](#the-key-idea)
+  - [Entry point DOM element](#entry-point-dom-element)
+  - [Score](#score)
+    - [Example](#example)
+  - [Template format](#template-format)
+  - [Understanding the format of a single line](#understanding-the-format-of-a-single-line)
+    - [spaces](#spaces)
+    - [tag](#tag)
+    - [tag's text](#tags-text)
+    - [tag's text types](#tags-text-types)
+    - [attributes](#attributes)
 - [API](#api)
+  - [minDepth config](#mindepth-config)
 - [Run tests](#run-tests)
 - [Run linter](#run-linter)
 - [Contribution](#contribution)
@@ -105,7 +123,7 @@ const result = harvest(tpl, $('#product'))
 console.log(result)
 ```
 
-#### Output:
+The output would be:
 
 ```js
 [
@@ -143,7 +161,7 @@ div
 const result = harvest(tpl, $('#product'))
 console.log(result)
 ```
-### Output
+The output would be:
 
 ```js
 [
@@ -185,7 +203,7 @@ const news = await page.evaluate((tpl, query) => {
 
 console.log(news, '\nPress Ctrl-C to stop...')
 ```
-### Output:
+The output would be:
 ```
 [
   {
@@ -250,7 +268,7 @@ The **further we deviate** from the tree structure defined in our **template**, 
 - The **deeper** we search from the entry point, the **fewer points** we collect.  
 - The **lower the score**, the **less likely** the data will be found.
 
-### Entry point DOM element
+### 2. Entry point DOM element
 To extract the data you need, you must specify a so-called **entry point**. The entry point is a specific DOM element that will be considered the starting (or root) node for the search. This element is passed as the second argument to the `harvest()` function.
 
 Usually, we use `document.querySelector('#product')` for this. It's important to note that the search is performed **starting from that branch and downwards**. That means if you pass the entire document (like the `<body>` or `<html>` tag) as the entry point, the data most likely won’t be found — because the algorithm searches “near” the `#product` node.
@@ -261,7 +279,7 @@ Based on that, the recommended approach for setting the entry point is:
 3. Call `querySelector()` with that selector.
 4. Pass obtained DOM element as a second parameter to `harvest()` function
 
-### 2. Score
+### 3. Score
 The next concept to understand is **score**. Score is how this library determines how well the extracted data matches our template. Scores are calculated separately for each branch separately. The general formula for calculating the score looks like this: `node.score += (subNodesScore + (node.score > 0 ? maxLevel - level : 0))`, where `maxLevel` is a maximum available search depth, `level` is a current depth level, subNodesScore is a sum of all nested nodes scores. Let's take a look on score calculation:
 - For each found tag in the DOM tree, the program assigns **1 point**.  
 - If the required text is found, **another 6 points** are added.  
@@ -297,7 +315,7 @@ How does this affect `harvest()` function? The `harvest()` returns two types of 
 
 If `score` matches `maxScore`, then we have found everything we were looking for. However, in real - world scenarios, `score` will almost always be **lower** than `maxScore`.
 
-### 3. Template format
+### 4. Template format
 To describe the structure of a data template, we need to understand its format. A template consists of **lines**. For example:  
 
 ```js
@@ -315,7 +333,7 @@ var tpl = `
 
 In this example, we defined a template consisting of two tags - `img` and `div`, where `div` is inside `img`. It's important to note that if `div` is nested inside `img`, it doesn't necessarily mean it is its first child. This library implements a fuzzy data search, meaning that `div` may be deeper in the DOM tree. Also, please take a look that we are using multiline string here. The parser understands this type of string and gets only two lines instead of four. 
 
-### 4. Understanding the format of a single line
+### 5. Understanding the format of a single line
 #### spaces
 As you may have noticed, every two spaces before a tag are interpreted as a "nested element." This is how we determine that the `div` tag is inside the `img` tag - since it has two more leading spaces. If you make a mistake and add more spaces than necessary, the parser will throw an error, and the current line will not be included in the final tree.  
 

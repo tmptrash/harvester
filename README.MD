@@ -11,7 +11,7 @@ Harvester is a lightweight and highly optimized library for extracting data from
 - [More examples](#more-examples)
 - [Main concepts](#main-concepts)
 - [API](#api)
-- [Example](#example)
+- [Example](#example-1)
 - [Run tests](#run-tests)
 - [Run linter](#run-linter)
 - [Contribution](#contribution)

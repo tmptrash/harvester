@@ -94,10 +94,10 @@ First, you have to copy the content of the `js-harvester/index.js` file into the
 And you need to grab a product title (you know that it has a "Name" in a title), price, and it's image. For this, your pseudo tree template may look like this:
 ```js
 const tpl = `
-*                     // finds any tag as a parent
-  h1{name:with:Name}  // finds h1 inside parent tag with a substring "Name" in a text
-  span{price:float}   // finds a span inside parent tag with a float number as a text
-  *[img=src]          // finds any tag in a perent with src attribute
+*
+  h1{name:with:Name}
+  span{price:float}
+  *[img=src]
 `
 const result = harvest(tpl, $('#product'))
 console.log(result)
@@ -132,11 +132,11 @@ Let's modify our template so that it accommodates both cases.
 
 ```js
 const tpl = `
-div                   // finds div tag as a parent
-  *{name:with:Name}   // finds * tag inside parent with a substring "Name" in a text
-  span{price:float}   // finds a span inside parent tag with a float number as a text
-  img[img=src]        // finds img tag in a perent with src attribute
-  div{sku:with:SKU}   // finds div tag in a perent with "SKU" text
+div
+  *{name:with:Name}
+  span{price:float}
+  img[img=src]
+  div{sku:with:SKU}
 `
 const result = harvest(tpl, $('#product'))
 console.log(result)

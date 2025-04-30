@@ -265,6 +265,14 @@ function toTree (tpl) {
   return nodes
 }
 /**
+ * Checks if a val is a string
+ * @param {*} val
+ * @returns {Boolean}
+ */
+function isStr (val) {
+  return typeof val === 'string' || val instanceof String
+}
+/**
  * Checks if a value is a non-null object.
  * @param {*} val Value to check.
  * @returns {Boolean} True if val is an object, false otherwise.
@@ -484,9 +492,11 @@ function initTpl (tplNodes) {
 }
 /**
  * Initializes match() function and it's data. Should be called before first match() call
- * @param {Element} firstEl DOM element we are starting search from
+ * @param {Element|String} firstEl DOM element we are starting search from or css query
+ * @return {Element}
  */
 function initMatch (firstEl) {
+  firstEl = isStr(firstEl) ? document.querySelector(firstEl) : firstEl
   rootFirstEl = firstEl
   rootEl = firstEl.parentNode
   SCORE_CACHE.clear()
@@ -497,6 +507,7 @@ function initMatch (firstEl) {
   TEXT_CACHE.clear()
   PARENT_CACHE.set(firstEl, rootEl)
   startTime = performance.now()
+  return firstEl
 }
 /**
  * Finds all nodes in a DOM tree according to JSON tree. The starting format of one JSON node
@@ -746,7 +757,7 @@ function getMap (nodes) {
  * in a DOM.
  *
  * @param {String} tpl template of pseudo tree-like string
- * @param {Element} firstEl Reference to the first DOM element for nodes[0]
+ * @param {Element|String} firstEl Reference to the first DOM element for nodes[0] or css query
  * @param {Object|undefined} opt Harvester options
  * @returns {[map: Object, maxScore: Number, foundScore: Number, foundNodes: Array]} map -
  * JavaScript object with all text tags and attribute tags in it;maxScore - maximum score.
@@ -768,7 +779,7 @@ function harvest (tpl, firstEl, opt = {}) {
   const tplNodes = toTree(tpl)
   const [depth, maxScore] = initTpl(tplNodes)
   if (!firstEl) return [{}, maxScore, 0, []]
-  initMatch(firstEl)
+  firstEl = initMatch(firstEl)
   const [score, nodes] = match(getNodesId(tplNodes), tplNodes, firstEl, 0, depth)
   const map = getMap(nodes)
 

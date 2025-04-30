@@ -61,7 +61,7 @@ More examples you may find [here](https://github.com/tmptrash/harvester/tree/mai
 
 ## Installation
 ### For the Puppeteer
-If you're using **Harvester** as a complement to **Puppeteer**, all you need to do is install the npm package like this:
+If you're using **Harvester** as a complement to **Puppeteer**, all you need to do is install the npm package into your Puppeteer project like this:
 ```bash
 npm i js-harvester --save
 ```

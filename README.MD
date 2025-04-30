@@ -8,7 +8,7 @@ Harvester is a lightweight and highly optimized library for extracting data from
 - [Installation](#installation)
 - [How to use in browser](#how-to-use-in-browser)
 - [How to use with puppeteer](#how-to-use-with-puppeteer)
-- [Examples](#examples)
+- [More examples](#more-examples)
 - [Main concepts](#main-concepts)
 - [API](#api)
 - [Example](#example)
@@ -134,7 +134,7 @@ console.log(news, '\nPress Ctrl-C to stop...')
 ]
 ```
 
-## Examples
+## More examples
 This project contains few [examples](https://github.com/tmptrash/harvester/tree/main/examples) of usage the harvester with puppeteer and Node.js.
 
 ### Examples installation

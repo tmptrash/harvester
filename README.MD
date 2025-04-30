@@ -95,11 +95,11 @@ And you need to grab a product title (you know that it has a "Name" in a title),
 ```js
 const tpl = `
 *                     // finds any tag as a parent
-  h1{title:with:Name} // finds h1 inside parent tag with a substring "Name" in a text
+  h1{name:with:Name} // finds h1 inside parent tag with a substring "Name" in a text
   span{price:float}   // finds a span inside parent tag with a float number as a text
   *[img=src]          // finds any tag in a perent with src attribute
 `
-const result = harvest(tpl, document.querySelector('#product'))
+const result = harvest(tpl, $('#product'))
 console.log(result)
 ```
 
@@ -108,7 +108,7 @@ console.log(result)
 ```js
 [
   {
-    title: 'Product Name',
+    name: 'Product Name',
     price: '99.99',
     img: 'https://example.com/image.jpg'
   },    // Extracted data
@@ -119,11 +119,42 @@ console.log(result)
 ```
 What if the HTML differs depending on external factors — for example, the time zone or the user's role?
 
-![How to use in browser](https://github.com/tmptrash/harvester/blob/main/screenshots/scr.png)
+```html
+<div id="product">
+  <div>Some title</div>
+  <span>Product Name</span>
+  <span>99.99</span>
+  <div>SKU: 4278654</div>
+</div>
+```
 
 Let's modify our template so that it accommodates both cases.
 
-![How to use in browser](https://github.com/tmptrash/harvester/blob/main/screenshots/scr1.png)
+```js
+const tpl = `
+div                   // finds div tag as a parent
+  *{name:with:Name}   // finds * tag inside parent with a substring "Name" in a text
+  span{price:float}   // finds a span inside parent tag with a float number as a text
+  img[img=src]        // finds img tag in a perent with src attribute
+  div{sku:with:SKU}   // finds div tag in a perent with "SKU" text
+`
+const result = harvest(tpl, $('#product'))
+console.log(result)
+```
+### Output
+
+```js
+[
+  {
+    name: 'Product Name',
+    price: '99.99',
+    sku: '4278654'
+  },    // Extracted data
+  11,   // Maximum possible score
+  11,   // Matched score
+  [...] // Extracted tree with metadata
+]
+```
 
 ## How to use with puppeteer
 To run this code, you have to go to `examples` folder and run `npm i` command. After that, you can run one of the example files using Node.js:  

@@ -371,7 +371,7 @@ The **harvester** library uses just a single function to do all its work.
 
 `harvest(tpl, firstEl, options = {}): [data, maxScore, score, metaTree]`
 
-Finds matches between a pseudo-tree and the DOM structure, extracting text and attributes. The only function you will use to retrieve data is `harvest()`. It takes three parameters: a text-based template describing the structure of the data, DOM element corresponding to the first specified tag or CSS Query to the DOM element, and options. The options have this format (with default values):
+It finds matches between a pseudo-tree and the DOM structure, extracting text and attributes. The only function you will use to retrieve data is `harvest()`. It takes three parameters: a text-based template describing the structure of the data, DOM element corresponding to the first specified tag or CSS Query to the DOM element, and options. The options have this format (with default values):
 ```js
 const options = {
   spaceAmount: 2,       // Default amount of spaces in a template between parent and child

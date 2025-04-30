@@ -95,7 +95,7 @@ And you need to grab a product title (you know that it has a "Name" in a title),
 ```js
 const tpl = `
 *                     // finds any tag as a parent
-  h1{name:with:Name} // finds h1 inside parent tag with a substring "Name" in a text
+  h1{name:with:Name}  // finds h1 inside parent tag with a substring "Name" in a text
   span{price:float}   // finds a span inside parent tag with a float number as a text
   *[img=src]          // finds any tag in a perent with src attribute
 `

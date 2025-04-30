@@ -8,7 +8,7 @@ Harvester is a lightweight and highly optimized library for extracting data from
 - [Installation](#installation)
 - [How to use in browser](#how-to-use-in-browser)
 - [How to use with puppeteer](#how-to-use-with-puppeteer)
-- [Examples folder](#more-examples)
+- [Examples folder](#examples-folder)
 - [Main concepts](#main-concepts)
 - [API](#api)
 - [Example](#example-1)

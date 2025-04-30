@@ -59,12 +59,24 @@ More examples you may find [here](https://github.com/tmptrash/harvester/tree/mai
 - **Compatible with Puppeteer**
 
 ## Installation
+### For the Puppeteer
 If you're using **Harvester** as a complement to **Puppeteer**, all you need to do is install the npm package like this:
 ```bash
 npm i js-harvester --save
 ```
 
 Then, you simply take the file `node_modules/js-harvester/index.js` and inject it into the page you want to scrape. An example using this approach can be found in the [examples](https://github.com/tmptrash/harvester/tree/main/examples) folder.
+
+### For the browser
+For local testing and writing templates, it's convenient to use the library directly in the **Chrome DevTools console**. You can copy the library code directly from the GitHub repository and paste it into the browser console. After that, you can run the `harvest()` function on the actual page you're targeting. It might look like this:
+```javascript
+// here you insert js-harvester library code
+var tpl = `
+  div{title}
+    span{description}
+`
+harvest(tpl, $('#my_element'))
+```
 
 ## How to use in browser
 First, you have to copy the content of the `js-harvester/index.js` file into the clipboard and paste it into the DevTools console of the browser. Let's imagine you want to extract product data, and the structure of that data is shown on the left in two variations. It may change depending on different factors, such as the user's role, time zone, etc. In the top-right corner, you can see a template that describes both data structures for the given HTML examples. This template is just a string and you may put it into the JavaScript variable like this: `var tpl = '  div{text}'`. At the bottom-right, you can see the result that the user will get after calling the `harvest(tpl, $('#rootElement'))` function.

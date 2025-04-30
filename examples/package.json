@@ -15,7 +15,7 @@
   "author": "flatline",
   "license": "MIT",
   "dependencies": {
-    "js-harvester": "^0.3.5",
+    "js-harvester": "^0.3.6",
     "puppeteer-real-browser": "^1.4.2"
   }
 }

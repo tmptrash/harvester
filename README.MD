@@ -392,6 +392,16 @@ The function returns an array of four elements:
 - score - The actual score obtained based on the search for template elements.
 - metaTree - A metadata tree for debugging.
 
+### minDepth config
+
+Sometimes the search doesn't find the data you've specified in the template. In such cases, it makes sense to increase the search depth using the `minDepth` configuration like this:
+
+```javascript
+harvest(tpl, '#product', { minDepth: 30 })
+```
+
+This parameter controls how deeply the algorithm will search for your data within the DOM tree. For websites with complex structures, increasing this value can help locate the desired elements, but it may also increase search time.
+
 ## Run tests
 ```
 npm i

@@ -400,7 +400,7 @@ Sometimes the search doesn't find the data you've specified in the template. In 
 harvest(tpl, '#product', { minDepth: 30 })
 ```
 
-This parameter controls how deeply the algorithm will search for your data within the DOM tree. For websites with complex structures, increasing this value can help locate the desired elements, but it may also increase search time.
+This parameter controls how deeply the algorithm will search for your data within the DOM tree. For websites with complex structures, increasing this value can help locate the desired elements, but it may also increase search time. Here is an [example](https://github.com/tmptrash/harvester/blob/main/examples/amazon.js) of parsing Amazon site with this config.
 
 ## Run tests
 ```

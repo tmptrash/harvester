@@ -148,10 +148,10 @@ console.log(result)
   {
     name: 'Product Name',
     price: '99.99',
-    sku: '4278654'
+    sku: 'SKU: 4278654'
   },    // Extracted data
-  11,   // Maximum possible score
-  11,   // Matched score
+  83,   // Maximum possible score
+  69,   // Matched score
   [...] // Extracted tree with metadata
 ]
 ```

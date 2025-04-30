@@ -1,7 +1,21 @@
 # Harvester 🚜
 
-Harvester is a lightweight and highly optimized library for extracting data from the DOM tree. It supports extraction of tag texts with specified types and attributes. it's tiny and has no dependencies.
+Harvester is a lightweight and highly optimized library for extracting data from the DOM tree. It supports extraction of tag texts with specified types and attributes. it's tiny and has no dependencies. Put simply, all you need to extract data from HTML is to call the `harvest()` function. To do this, the library script must be present on the page from which you're trying to extract data.
 
+# Table of contents
+- [Description](#description)
+- [Advantages](#advantages)
+- [Installation](#installation)
+- [How to use in browser](#how-to-use-in-browser)
+- [How to use with puppeteer](#how-to-use-with-puppeteer)
+- [Examples folder](#examples-folder)
+- [Main concepts](#main-concepts)
+- [API](#api)
+- [Run tests](#run-tests)
+- [Run linter](#run-linter)
+- [Contribution](#contribution)
+
+## Description
 The main idea of this library is that the data you need to extract from an HTML page can be described using a text-based template. You roughly specify which tags are inside others and what data they contain. It is not necessary to know the exact structure of the HTML, because `harvester` can find the data in a fuzzy way.
 
 This library is also especially useful for HTML structures that lack clear identifiers, unique classes, or other stable anchors typically used in CSS selectors. It relies not on unique identifiers, but on the structure of the tree defined in the template.
@@ -22,7 +36,7 @@ var tpl = `
   div{title:with:Title}
     *{price:float}
 `
-var data = harvest(tpl, document.querySelector('#product'))
+var data = harvest(tpl, $('#product'))
 console.log(data[0]) // 0th element is a harvested data map
 ```
 Output will be:
@@ -43,14 +57,104 @@ More examples you may find [here](https://github.com/tmptrash/harvester/tree/mai
 - **Supports various data types** such as `int`, `float`, `func`, `empty`, and more  
 - **Compatible with Puppeteer**
 
+## Installation
+### For the Puppeteer
+If you're using **Harvester** as a complement to **Puppeteer**, all you need to do is install the npm package like this:
+```bash
+npm i js-harvester --save
+```
+
+Then, you simply take the file `node_modules/js-harvester/index.js` and inject it into the page you want to scrape. An example using this approach can be found in the [examples](https://github.com/tmptrash/harvester/tree/main/examples) folder.
+
+### For the browser
+For local testing and writing templates, it's convenient to use the library directly in the **Chrome DevTools console**. You can copy the [library code](https://github.com/tmptrash/harvester/blob/main/index.js) directly from the GitHub repository and paste it into the browser console. After that, you can run the `harvest()` function on the actual page you're targeting. It might look like this:
+```javascript
+// You are now in the browser console!
+// here you insert js-harvester library code
+var tpl = `
+  div{title}
+    span{description}
+`
+harvest(tpl, $('#my_element'))
+```
+
 ## How to use in browser
-First, you have to copy the content of the `js-harvester/index.js` file into the clipboard and paste it into the DevTools console of the browser. Let's imagine you want to extract product data, and the structure of that data is shown on the left in two variations. It may change depending on different factors, such as the user's role, time zone, etc. In the top-right corner, you can see a template that describes both data structures for the given HTML examples. This template is just a string and you may put it into the JavaScript variable like this: `var tpl = '  div{text}'`. At the bottom-right, you can see the result that the user will get after calling the `harvest(tpl, $('#rootElement'))` function.
+First, you have to copy the content of the `js-harvester/index.js` file into the clipboard and paste it into the DevTools console of the browser. Let's imagine you want to extract product data, and the structure of that data is shown on the left in two variations. It may change depending on different factors, such as the user's role, time zone, etc. In the top-right corner, you can see a template that describes both data structures for the given HTML examples. This template is just a string and you may put it into the JavaScript variable like this: `var tpl = '  div{text}'`. At the bottom-right, you can see the result that the user will get after calling the `harvest(tpl, $('#rootElement'))` function. Let's imagine we have an HTML like this:
+```html
+<div id="product">
+  <div>
+    <span>Some title</span>
+  </div>
+  <h1>Product Name</h1>
+  <span>99.99</span>
+  <img src="https://example.com/image.jpg"></img>
+</div>
+```
 
-![How to use in browser](https://github.com/tmptrash/harvester/blob/main/screenshots/scr.png)
+And you need to grab a product title (you know that it has a "Name" in a title), price, and it's image. For this, your pseudo tree template may look like this:
+```js
+const tpl = `
+*
+  h1{name:with:Name}
+  span{price:float}
+  *[img=src]
+`
+const result = harvest(tpl, $('#product'))
+console.log(result)
+```
 
-So if you have a template string and know DOM element to start with, you have to just call `harvester()` function like this:
+#### Output:
 
-![How to use in browser](https://github.com/tmptrash/harvester/blob/main/screenshots/scr1.png)
+```js
+[
+  {
+    name: 'Product Name',
+    price: '99.99',
+    img: 'https://example.com/image.jpg'
+  },    // Extracted data
+  59,   // Maximum possible score
+  59,   // Matched score
+  [...] // Extracted tree with metadata
+]
+```
+What if the HTML differs depending on external factors — for example, the time zone or the user's role?
+
+```html
+<div id="product">
+  <div>Some title</div>
+  <span>Product Name</span>
+  <span>99.99</span>
+  <div>SKU: 4278654</div>
+</div>
+```
+
+Let's modify our template so that it accommodates both cases.
+
+```js
+const tpl = `
+div
+  *{name:with:Name}
+  span{price:float}
+  img[img=src]
+  div{sku:with:SKU}
+`
+const result = harvest(tpl, $('#product'))
+console.log(result)
+```
+### Output
+
+```js
+[
+  {
+    name: 'Product Name',
+    price: '99.99',
+    sku: 'SKU: 4278654'
+  },    // Extracted data
+  83,   // Maximum possible score
+  69,   // Matched score
+  [...] // Extracted tree with metadata
+]
+```
 
 ## How to use with puppeteer
 To run this code, you have to go to `examples` folder and run `npm i` command. After that, you can run one of the example files using Node.js:  
@@ -98,15 +202,7 @@ console.log(news, '\nPress Ctrl-C to stop...')
 ]
 ```
 
-## Installation
-If you're using **Harvester** as a complement to **Puppeteer**, all you need to do is install the npm package like this:
-```bash
-npm i js-harvester --save
-```
-
-Then, you simply take the file `node_modules/js-harvester/index.js` and inject it into the page you want to scrape. An example using this approach can be found in the [examples](https://github.com/tmptrash/harvester/tree/main/examples) folder.
-
-## Examples
+## Examples folder
 This project contains few [examples](https://github.com/tmptrash/harvester/tree/main/examples) of usage the harvester with puppeteer and Node.js.
 
 ### Examples installation
@@ -290,48 +386,6 @@ The function returns an array of four elements:
 - maxScore - The maximum possible score based on the given template.
 - score - The actual score obtained based on the search for template elements.
 - metaTree - A metadata tree for debugging.
-
-## Example:
-
-Let's imagine we have a HTML like this:
-```html
-<div id="product">
-  <div>
-    <span>Some title</span>
-  </div>
-  <h1>Product Name</h1>
-  <span>99.99</span>
-  <img src="https://example.com/image.jpg"></img>
-</div>
-```
-
-And you need to grab a product title (you know that it has a "Name" in a title), price and an it's image. For this, your pseudo tree template may look like this:
-```js
-import { harvest } from 'harvester'
-const tpl = `
-*                     // finds any tag as a parent
-  h1{title:with:Name} // finds h1 inside parent tag with a substring "Name" in a text
-  span{price:float}   // finds a span inside parent tag with a float number as a text
-  *[img=src]          // finds any tag in a perent with src attribute
-`
-const result = harvest(tpl, document.querySelector('#product'))
-console.log(result)
-```
-
-#### Output:
-
-```js
-[
-  {
-    title: 'Product Name',
-    price: '99.99',
-    img: 'https://example.com/image.jpg'
-  },    // Extracted data
-  11,   // Maximum possible score
-  11,   // Matched score
-  [...] // Extracted tree with metadata
-]
-```
 
 ## Run tests
 ```

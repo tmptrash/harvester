@@ -80,12 +80,48 @@ harvest(tpl, $('#my_element'))
 ```
 
 ## How to use in browser
-First, you have to copy the content of the `js-harvester/index.js` file into the clipboard and paste it into the DevTools console of the browser. Let's imagine you want to extract product data, and the structure of that data is shown on the left in two variations. It may change depending on different factors, such as the user's role, time zone, etc. In the top-right corner, you can see a template that describes both data structures for the given HTML examples. This template is just a string and you may put it into the JavaScript variable like this: `var tpl = '  div{text}'`. At the bottom-right, you can see the result that the user will get after calling the `harvest(tpl, $('#rootElement'))` function.
+First, you have to copy the content of the `js-harvester/index.js` file into the clipboard and paste it into the DevTools console of the browser. Let's imagine you want to extract product data, and the structure of that data is shown on the left in two variations. It may change depending on different factors, such as the user's role, time zone, etc. In the top-right corner, you can see a template that describes both data structures for the given HTML examples. This template is just a string and you may put it into the JavaScript variable like this: `var tpl = '  div{text}'`. At the bottom-right, you can see the result that the user will get after calling the `harvest(tpl, $('#rootElement'))` function. Let's imagine we have an HTML like this:
+```html
+<div id="product">
+  <div>
+    <span>Some title</span>
+  </div>
+  <h1>Product Name</h1>
+  <span>99.99</span>
+  <img src="https://example.com/image.jpg"></img>
+</div>
+```
 
+And you need to grab a product title (you know that it has a "Name" in a title), price, and it's image. For this, your pseudo tree template may look like this:
+```js
+const tpl = `
+*                     // finds any tag as a parent
+  h1{title:with:Name} // finds h1 inside parent tag with a substring "Name" in a text
+  span{price:float}   // finds a span inside parent tag with a float number as a text
+  *[img=src]          // finds any tag in a perent with src attribute
+`
+const result = harvest(tpl, document.querySelector('#product'))
+console.log(result)
+```
+
+#### Output:
+
+```js
+[
+  {
+    title: 'Product Name',
+    price: '99.99',
+    img: 'https://example.com/image.jpg'
+  },    // Extracted data
+  11,   // Maximum possible score
+  11,   // Matched score
+  [...] // Extracted tree with metadata
+]
+```
+What if the HTML differs depending on external factors — for example, the time zone or the user's role?
 ![How to use in browser](https://github.com/tmptrash/harvester/blob/main/screenshots/scr.png)
 
-So if you have a template string and know DOM element to start with, you have to just call `harvester()` function like this:
-
+Let's modify our template so that it accommodates both cases.
 ![How to use in browser](https://github.com/tmptrash/harvester/blob/main/screenshots/scr1.png)
 
 ## How to use with puppeteer
@@ -318,47 +354,6 @@ The function returns an array of four elements:
 - maxScore - The maximum possible score based on the given template.
 - score - The actual score obtained based on the search for template elements.
 - metaTree - A metadata tree for debugging.
-
-## Example:
-
-Let's imagine we have a HTML like this:
-```html
-<div id="product">
-  <div>
-    <span>Some title</span>
-  </div>
-  <h1>Product Name</h1>
-  <span>99.99</span>
-  <img src="https://example.com/image.jpg"></img>
-</div>
-```
-
-And you need to grab a product title (you know that it has a "Name" in a title), price and an it's image. For this, your pseudo tree template may look like this:
-```js
-const tpl = `
-*                     // finds any tag as a parent
-  h1{title:with:Name} // finds h1 inside parent tag with a substring "Name" in a text
-  span{price:float}   // finds a span inside parent tag with a float number as a text
-  *[img=src]          // finds any tag in a perent with src attribute
-`
-const result = harvest(tpl, document.querySelector('#product'))
-console.log(result)
-```
-
-#### Output:
-
-```js
-[
-  {
-    title: 'Product Name',
-    price: '99.99',
-    img: 'https://example.com/image.jpg'
-  },    // Extracted data
-  11,   // Maximum possible score
-  11,   // Matched score
-  [...] // Extracted tree with metadata
-]
-```
 
 ## Run tests
 ```

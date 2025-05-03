@@ -84,7 +84,15 @@ If you're using **Harvester** as a complement to **Puppeteer**, all you need to 
 npm i js-harvester --save
 ```
 
-Then, you simply take the file `node_modules/js-harvester/index.js` and inject it into the page you want to scrape. An example using this approach can be found in the [examples](https://github.com/tmptrash/harvester/tree/main/examples) folder.
+Next, you need to call one of the two available functions `harvestPage()` or `harvestPageAll()`, in your Puppeteer code to extract one or all data blocks based on a given CSS query. Like this:
+
+```js
+import { harvestPageAll } from 'js-harvester/puppeteer.js'
+...
+await harvestPageAll(page, TPL, NEWS_QUERY, { inject: true, dataOnly: true })
+```
+
+More examples using this approach can be found in the [examples](https://github.com/tmptrash/harvester/tree/main/examples) folder.
 
 ### For the browser
 For local testing and writing templates, it's convenient to use the library directly in the **Chrome DevTools console**. You can copy the [library code](https://github.com/tmptrash/harvester/blob/main/index.js) directly from the GitHub repository and paste it into the browser console. After that, you can run the `harvest()` function on the actual page you're targeting. It might look like this:

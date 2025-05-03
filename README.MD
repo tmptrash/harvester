@@ -401,7 +401,7 @@ In this example, the value of the `src` attribute of the `img` tag will be extra
 
 ### harvest()
 
-The **harvester** library uses just a single function to do all its work.
+The **harvester** library uses just a single function to do all its work. It must be called in a browser context and **not in a client's code** of Puppeteer or a similar library.
 
 `harvest(tpl, element, options = {}): [data, maxScore, score, metaTree] | data`
 

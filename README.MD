@@ -409,7 +409,8 @@ const options = {
   tagScore: 1,          // Amount of point we add if the tag is equal to which we are looking for
   tagTextScore: 6,      // Amount of points we add if tag's text is exist and are looking for it
   tagAttrScore: 6,      // The same, but for attribute
-  tagTextTypeScore: 12  // Amount of points we add if tag & text are exist and text has the same type, which we are looking for
+  tagTextTypeScore: 12, // Amount of points we add if tag & text are exist and text has the same type, which we are looking for
+  dataOnly: false       // true means that only a data map will be returned instead of an array of four elements
 }
 ```
 

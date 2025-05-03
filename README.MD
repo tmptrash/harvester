@@ -226,6 +226,7 @@ The output would be:
   },
   ...
 ]
+Press Ctrl-C to stop...
 ```
 
 ## Examples folder

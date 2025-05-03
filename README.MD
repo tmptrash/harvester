@@ -527,6 +527,8 @@ The output:
 ]
 ```
 
+The custom functions work in the same [way](#custom-functions) like for `harvestPage()` function.
+
 ## Run tests
 ```
 npm i

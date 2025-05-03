@@ -40,7 +40,7 @@ async function initHarvester (page, tpl, query, opt = {}) {
   if (opt.inject) {
     if (!opt.path) opt.path = HARVESTER_PATH
     try {
-      await page.addScriptTag({ path: opt.path })
+      return page.addScriptTag({ path: opt.path })
     } catch (e) { throw new Error(`Error while injecting harvester library into the HTML page: ${e}`) }
   }
 }
@@ -59,13 +59,13 @@ async function initHarvester (page, tpl, query, opt = {}) {
  * array of four elements
  */
 export async function harvestPage (page, tpl, query, opt = {}) {
-  initHarvester(page, tpl, query, opt)
+  await initHarvester(page, tpl, query, opt)
 
-  return page.evaluate((query, tpl, opt) => {
+  return page.evaluate((tpl, query, opt) => {
     const el = document.querySelector(query)
     if (!el) throw new Error(`Selector "${query}" not found`)
     return harvest(tpl, el, opt) // eslint-disable-line no-undef
-  }, query, tpl, opt)
+  }, tpl, query, opt)
 }
 /**
  * Extracts all peaces of data by template, query, options and returns a Promise. It works with
@@ -84,11 +84,11 @@ export async function harvestPage (page, tpl, query, opt = {}) {
  * array of four elements
  */
 export async function harvestPageAll (page, tpl, query, opt = {}) {
-  initHarvester(page, tpl, query, opt)
+  await initHarvester(page, tpl, query, opt)
 
-  return page.evaluate((query, tpl, opt) => {
+  return page.evaluate((tpl, query, opt) => {
     const els = document.querySelectorAll(query)
     if (!els || !els.length) throw new Error(`Selector "${query}" not found`)
     return Array.from(els).map(el => harvest(tpl, el, opt)) // eslint-disable-line no-undef
-  }, query, tpl, opt)
+  }, tpl, query, opt)
 }

@@ -103,11 +103,11 @@ var tpl = `
   div{title}
     span{description}
 `
-harvest(tpl, $('#my_element'))
+harvest(tpl, '#my_element')
 ```
 
 ## How to use in browser
-First, you have to copy the content of the `js-harvester/index.js` file into the clipboard and paste it into the DevTools console of the browser. Let's imagine you want to extract product data, and the structure of that data is shown on the left in two variations. It may change depending on different factors, such as the user's role, time zone, etc. In the top-right corner, you can see a template that describes both data structures for the given HTML examples. This template is just a string and you may put it into the JavaScript variable like this: `var tpl = '  div{text}'`. At the bottom-right, you can see the result that the user will get after calling the `harvest(tpl, $('#rootElement'))` function. Let's imagine we have an HTML like this:
+First, you have to copy the content of the `js-harvester/index.js` file into the clipboard and paste it into the DevTools console of the browser. Let's imagine you want to extract product data, and the structure of that data is shown on the left in two variations. It may change depending on different factors, such as the user's role, time zone, etc. In the top-right corner, you can see a template that describes both data structures for the given HTML examples. This template is just a string and you may put it into the JavaScript variable like this: `var tpl = '  div{text}'`. At the bottom-right, you can see the result that the user will get after calling the `harvest(tpl, '#rootElement')` function. Let's imagine we have an HTML like this:
 ```html
 <div id="product">
   <div>
@@ -127,7 +127,7 @@ const tpl = `
   span{price:float}
   *[img=src]
 `
-const result = harvest(tpl, $('#product'))
+const result = harvest(tpl, '#product')
 console.log(result)
 ```
 
@@ -166,7 +166,7 @@ div
   img[img=src]
   div{sku:with:SKU}
 `
-const result = harvest(tpl, $('#product'))
+const result = harvest(tpl, '#product')
 console.log(result)
 ```
 The output would be:

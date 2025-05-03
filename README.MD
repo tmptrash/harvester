@@ -437,7 +437,7 @@ This parameter controls how deeply the algorithm will search for your data withi
 
 ### harvestPage()
 
-This function is specifically designed for programs using Puppeteer. It extracts a single data block based on the provided template, CSS query, and configuration and returns a Promise.
+This function is specifically designed for programs using Puppeteer. It extracts a single data block based on the provided template, CSS query, and configuration and returns a Promise. Function arguments are the same as for `harvest()` function, except page, it's a Puppeteer's page instance we are working on.
 
 `harvestPage(page, tpl, query, opt = {}): Promise<[data, maxScore, score, metaTree]> | Promise<data>`
 
@@ -475,7 +475,7 @@ The output:
 
 ### harvestPageAll()
 
-This function is also specifically designed for programs using Puppeteer. It extracts all found data blocks based on the provided template, CSS query, and configuration and returns a Promise.
+This function is also specifically designed for programs using Puppeteer. It extracts all found data blocks based on the provided template, CSS query, and configuration and returns a Promise. Function arguments are the same as for `harvest()` function, except page, it's a Puppeteer's page instance we are working on.
 
 `harvestPageAll(page, tpl, query, opt = {}): Promise<Array<[data, maxScore, score, metaTree]>> | Promise<Array<data>>`
 

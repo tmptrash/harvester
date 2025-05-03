@@ -396,9 +396,11 @@ In this example, the value of the `src` attribute of the `img` tag will be extra
 
 ## API
 
+### harvest()
+
 The **harvester** library uses just a single function to do all its work.
 
-`harvest(tpl, element, options = {}): [data, maxScore, score, metaTree]`
+`harvest(tpl, element, options = {}): [data, maxScore, score, metaTree] | data`
 
 It finds matches between a pseudo-tree and the DOM structure, extracting text and attributes. The only function you will use to retrieve data is `harvest()`. It takes three parameters: a text-based template describing the structure of the data, DOM element corresponding to the first specified tag or CSS Query to the DOM element, and options. The options have this format (with default values):
 ```js
@@ -420,7 +422,7 @@ The function returns an array of four elements:
 - score - The actual score obtained based on the search for template elements.
 - metaTree - A metadata tree for debugging.
 
-### minDepth config
+#### minDepth config
 
 Sometimes the search doesn't find the data you've specified in the template. In such cases, it makes sense to increase the search depth using the `minDepth` configuration like this:
 
@@ -429,6 +431,37 @@ harvest(tpl, '#product', { minDepth: 30 })
 ```
 
 This parameter controls how deeply the algorithm will search for your data within the DOM tree. For websites with complex structures, increasing this value can help locate the desired elements, but it may also increase search time. Here is an [example](https://github.com/tmptrash/harvester/blob/main/examples/amazon.js) of parsing Amazon site with this config.
+
+### harvestPage()
+
+This function is specifically designed for programs using Puppeteer. It extracts a single data block based on the provided template, CSS query, and configuration and returns a Promise.
+
+`harvestPage(page, tpl, query, opt = {}): Promise<[data, maxScore, score, metaTree]> | Promise<data>`
+
+`harvestPage()` supports few configuration parameters. It's important to know that this parameters will be passed into `harvest()` function. Take a look on config parameters only this function supports:
+
+```js
+const options = {
+  inject: false,       // true means - inject harvester.js file into the destination HTML page
+  path: './node_modules/js-harvester/src/harvester.js' // path, which library is used to find harvester.js file in your node_module folder
+}
+```
+
+It returns the same result like `harvest()` function wrapped by a Promise: array of four elements or data map. Here is an example of usage:
+
+```javascript
+import { harvestPageAll } from 'js-harvester/puppeteer.js'
+...
+const NEWS_QUERY = '.container_sub_news_list div.article_news_list'
+const TPL = `
+  div{time}
+  div
+    a{title}`
+const news = await harvestPageAll(page, TPL, NEWS_QUERY, { inject: true, dataOnly: true })
+console.log(news)
+```
+
+### harvestPageAll()
 
 ## Run tests
 ```

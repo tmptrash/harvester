@@ -2,7 +2,7 @@
 
 ![Unit Tests](https://github.com/tmptrash/harvester/actions/workflows/test.yml/badge.svg)
 
-Harvester is a lightweight and highly optimized javascript library for extracting data from the DOM tree. It supports extraction of tag texts with specified types and attributes. it's tiny and has no dependencies. Put simply, all you need to extract data from HTML is to call the `harvest()` function. To do this, the library script must be present on the page from which you're trying to extract data.
+Harvester is a lightweight and highly optimized javascript library for extracting data from the DOM tree. It supports extraction of tag texts with specified types and attributes. it's tiny and has no dependencies. The library consists of two parts: the `harvest()` function, which runs in the browser to extract data, and various integrations with JavaScript frameworks such as [Puppeteer](https://pptr.dev).
 
 # Table of contents
 - [Description](#description)
@@ -30,7 +30,11 @@ Harvester is a lightweight and highly optimized javascript library for extractin
     - [tag's text types](#tags-text-types)
     - [attributes](#attributes)
 - [API](#api)
-  - [minDepth config](#mindepth-config)
+  - [harvest()](#harvest)
+    - [minDepth config](#mindepth-config)
+  - [harvestPage()](#harvestpage)
+    - [custom functions](#custom-functions)
+  - [harvestPageAll()](#harvestpageall)
 - [Run tests](#run-tests)
 - [Run linter](#run-linter)
 - [Contribution](#contribution)
@@ -84,10 +88,18 @@ If you're using **Harvester** as a complement to **Puppeteer**, all you need to 
 npm i js-harvester --save
 ```
 
-Then, you simply take the file `node_modules/js-harvester/index.js` and inject it into the page you want to scrape. An example using this approach can be found in the [examples](https://github.com/tmptrash/harvester/tree/main/examples) folder.
+Next, you need to call one of the two available functions `harvestPage()` or `harvestPageAll()`, in your Puppeteer code to extract one or all data blocks based on a given CSS query. Like this:
+
+```js
+import { harvestPageAll } from 'js-harvester/puppeteer.js'
+...
+await harvestPageAll(page, TPL, NEWS_QUERY, { inject: true, dataOnly: true })
+```
+
+More examples using this approach can be found in the [examples](https://github.com/tmptrash/harvester/tree/main/examples) folder.
 
 ### For the browser
-For local testing and writing templates, it's convenient to use the library directly in the **Chrome DevTools console**. You can copy the [library code](https://github.com/tmptrash/harvester/blob/main/index.js) directly from the GitHub repository and paste it into the browser console. After that, you can run the `harvest()` function on the actual page you're targeting. It might look like this:
+For local testing and writing templates, it's convenient to use the library directly in the **Chrome DevTools console**. You can copy the [library code](https://github.com/tmptrash/harvester/blob/main/src/harvester.js) directly from the GitHub repository and paste it into the browser console. After that, you can run the `harvest()` function on the actual page you're targeting. It might look like this:
 ```javascript
 // You are now in the browser console!
 // here you insert js-harvester library code
@@ -95,11 +107,11 @@ var tpl = `
   div{title}
     span{description}
 `
-harvest(tpl, $('#my_element'))
+harvest(tpl, '#my_element')
 ```
 
 ## How to use in browser
-First, you have to copy the content of the `js-harvester/index.js` file into the clipboard and paste it into the DevTools console of the browser. Let's imagine you want to extract product data, and the structure of that data is shown on the left in two variations. It may change depending on different factors, such as the user's role, time zone, etc. In the top-right corner, you can see a template that describes both data structures for the given HTML examples. This template is just a string and you may put it into the JavaScript variable like this: `var tpl = '  div{text}'`. At the bottom-right, you can see the result that the user will get after calling the `harvest(tpl, $('#rootElement'))` function. Let's imagine we have an HTML like this:
+First, you have to copy the content of the `js-harvester/index.js` file into the clipboard and paste it into the DevTools console of the browser. Let's imagine you want to extract product data, and the structure of that data is shown on the left in two variations. It may change depending on different factors, such as the user's role, time zone, etc. In the top-right corner, you can see a template that describes both data structures for the given HTML examples. This template is just a string and you may put it into the JavaScript variable like this: `var tpl = '  div{text}'`. At the bottom-right, you can see the result that the user will get after calling the `harvest(tpl, '#rootElement')` function. Let's imagine we have an HTML like this:
 ```html
 <div id="product">
   <div>
@@ -119,7 +131,7 @@ const tpl = `
   span{price:float}
   *[img=src]
 `
-const result = harvest(tpl, $('#product'))
+const result = harvest(tpl, '#product')
 console.log(result)
 ```
 
@@ -158,7 +170,7 @@ div
   img[img=src]
   div{sku:with:SKU}
 `
-const result = harvest(tpl, $('#product'))
+const result = harvest(tpl, '#product')
 console.log(result)
 ```
 The output would be:
@@ -177,7 +189,7 @@ The output would be:
 ```
 
 ## How to use with puppeteer
-Harvester works perfectly in combination with [Puppeteer](https://pptr.dev). Here's a minimal example where we extract all today's news from the Ukrainska Pravda website. But before running this code, you have to go to `examples` folder and run `npm i` command. After that, you can run one of the example files using Node.js:  
+Harvester works perfectly in combination with [Puppeteer](https://pptr.dev). The library exports two main functions for data extraction: `harvestPage()` – for extracting a single data block using a CSS query, and `harvestPageAll()` – for extracting all data blocks matching a given CSS query. Here's a minimal example where we extract all today's news from the Ukrainska Pravda website. But before running this code, you have to go to `examples` folder and run `npm i` command. After that, you can run one of the example files using Node.js in that folder:  
 ```bash
 node news
 ```
@@ -185,8 +197,8 @@ node news
 Let's take a look on a code for getting news from the site:
 
 ```javascript
-// news.js
-import { harvest } from 'js-harvester'
+// examples/news.js
+import { harvestPageAll } from 'js-harvester/puppeteer.js'
 import { open, goto } from './utils.js'
 
 const NEWS_QUERY = '.container_sub_news_list div.article_news_list'
@@ -197,10 +209,7 @@ const TPL = `
 const page = await open()
 
 await goto(page, async () => page.goto('https://www.pravda.com.ua/news/'))
-const news = await page.evaluate((tpl, query) => {
-  return Array.from(document.querySelectorAll(query)).map(el => harvest(tpl, el)[0])
-}, TPL, NEWS_QUERY)
-
+const news = await harvestPageAll(page, TPL, NEWS_QUERY, { inject: true, dataOnly: true })
 console.log(news, '\nPress Ctrl-C to stop...')
 ```
 The output would be:
@@ -221,7 +230,11 @@ The output would be:
   },
   ...
 ]
+Press Ctrl-C to stop...
 ```
+
+Note the parameters `inject` and `dataOnly`. They mean "inject the Harvester library code" and "do not return metadata," respectively. In other words, we're telling the library to insert the JavaScript code from `harvester.js` into the HTML of the website we're extracting data from, and also asking it not to return `maxScore`, `score`, and the metadata tree (an array of 4 elements). Also, keep in mind that calling `harvestPageAll()` multiple times with the `inject: true` option will re-insert the library code each time, which can clutter the HTML page. Alternatively, you can manually inject the library code into the page using this function: `page.addScriptTag({ path: HARVESTER_PATH })`.
+
 
 ## Examples folder
 This project contains few [examples](https://github.com/tmptrash/harvester/tree/main/examples) of usage the harvester with puppeteer and Node.js.
@@ -387,9 +400,11 @@ In this example, the value of the `src` attribute of the `img` tag will be extra
 
 ## API
 
-The **harvester** library uses just a single function to do all its work.
+### harvest()
 
-`harvest(tpl, element, options = {}): [data, maxScore, score, metaTree]`
+The **harvester** library uses just a single function to do all its work. It must be called in a browser context and **not in a client's code** of Puppeteer or a similar library.
+
+`harvest(tpl, element, options = {}): [data, maxScore, score, metaTree] | data`
 
 It finds matches between a pseudo-tree and the DOM structure, extracting text and attributes. The only function you will use to retrieve data is `harvest()`. It takes three parameters: a text-based template describing the structure of the data, DOM element corresponding to the first specified tag or CSS Query to the DOM element, and options. The options have this format (with default values):
 ```js
@@ -400,7 +415,8 @@ const options = {
   tagScore: 1,          // Amount of point we add if the tag is equal to which we are looking for
   tagTextScore: 6,      // Amount of points we add if tag's text is exist and are looking for it
   tagAttrScore: 6,      // The same, but for attribute
-  tagTextTypeScore: 12  // Amount of points we add if tag & text are exist and text has the same type, which we are looking for
+  tagTextTypeScore: 12, // Amount of points we add if tag & text are exist and text has the same type, which we are looking for
+  dataOnly: false       // true means that only a data map will be returned instead of an array of four elements
 }
 ```
 
@@ -410,7 +426,7 @@ The function returns an array of four elements:
 - score - The actual score obtained based on the search for template elements.
 - metaTree - A metadata tree for debugging.
 
-### minDepth config
+#### minDepth config
 
 Sometimes the search doesn't find the data you've specified in the template. In such cases, it makes sense to increase the search depth using the `minDepth` configuration like this:
 
@@ -419,6 +435,99 @@ harvest(tpl, '#product', { minDepth: 30 })
 ```
 
 This parameter controls how deeply the algorithm will search for your data within the DOM tree. For websites with complex structures, increasing this value can help locate the desired elements, but it may also increase search time. Here is an [example](https://github.com/tmptrash/harvester/blob/main/examples/amazon.js) of parsing Amazon site with this config.
+
+### harvestPage()
+
+This function is specifically designed for programs using Puppeteer. It extracts a single data block based on the provided template, CSS query, and configuration and returns a Promise. Function arguments are the same as for `harvest()` function, except page, it's a Puppeteer's page instance we are working on.
+
+`harvestPage(page, tpl, query, opt = {}): Promise<[data, maxScore, score, metaTree]> | Promise<data>`
+
+`harvestPage()` supports few configuration parameters. It's important to know that this parameters will be passed into `harvest()` function. Take a look on config parameters only this function supports:
+
+```js
+const options = {
+  inject: false,       // true means - inject harvester.js file into the destination HTML page
+  path: './node_modules/js-harvester/src/harvester.js' // path, which library is used to find harvester.js file in your node_module folder
+}
+```
+
+It returns the same result like `harvest()` function wrapped by a Promise: array of four elements or data map. Here is an example of usage:
+
+```javascript
+import { harvestPage } from 'js-harvester/puppeteer.js'
+...
+const NEWS_QUERY = '.container_sub_news_list div.article_news_list'
+const TPL = `
+  div{time}
+  div
+    a{title}`
+const news = await harvestPage(page, TPL, NEWS_QUERY, { inject: true, dataOnly: true })
+console.log(news)
+```
+
+The output:
+
+```bash
+{
+  time: '17:40',
+  title: 'В Латвії заявили про необхідність мати на озброєнні "великі системи"'
+}
+```
+
+#### custom functions
+
+If your code uses custom functions inside the template, they must be present on the HTML page before you call `harvestPage()`. You can do it like this:
+
+```js
+await page.evaluate(() => {
+  window.price = function price(t, el) { return el?.className === 'my-class' && t?.indexOf('$') > -1 }
+})
+const products = await harvestPageAll(page, TPL, PRODUCTS_QUERY, { inject: true, dataOnly: true, minDepth: 60 })
+cnosole.log(products)
+```
+
+
+### harvestPageAll()
+
+This function is also specifically designed for programs using Puppeteer. It extracts all found data blocks based on the provided template, CSS query, and configuration and returns a Promise. Function arguments are the same as for `harvest()` function, except page, it's a Puppeteer's page instance we are working on.
+
+`harvestPageAll(page, tpl, query, opt = {}): Promise<Array<[data, maxScore, score, metaTree]>> | Promise<Array<data>>`
+
+All other parameters and behavior, except returning value, of this function is similar to `harvestPage()`. Here is a small example of usage:
+
+```javascript
+import { harvestPageAll } from 'js-harvester/puppeteer.js'
+...
+const NEWS_QUERY = '.container_sub_news_list div.article_news_list'
+const TPL = `
+  div{time}
+  div
+    a{title}`
+const news = await harvestPageAll(page, TPL, NEWS_QUERY, { inject: true, dataOnly: true })
+console.log(news)
+```
+
+The output:
+
+```bash
+[
+  {
+    time: '17:40',
+    title: 'В Латвії заявили про необхідність мати на озброєнні "великі системи"'
+  },
+  {
+    time: '17:07',
+    title: 'ЄС засудив Росію за відкриття прямого авіасполучення з невизнаною Абхазією'
+  },
+  {
+    time: '17:06',
+    title: 'Вчені знайшли нове джерело золота в космосі: воно могло існувати ще за раннього Всесвіту'
+  },
+  ...
+]
+```
+
+The custom functions work in the same [way](#custom-functions) like for `harvestPage()` function.
 
 ## Run tests
 ```

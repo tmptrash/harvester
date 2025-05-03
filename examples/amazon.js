@@ -1,4 +1,4 @@
-import { harvest } from 'js-harvester'
+import { harvestPageAll } from 'js-harvester/puppeteer.js'
 import { open, goto } from './utils.js'
 
 const PRODUCTS_QUERY = '[role="listitem"] .s-card-container .a-section > [class=puisg-row]:nth-of-type(1)'
@@ -28,9 +28,8 @@ div
 const page = await open()
 
 await goto(page, async () => page.goto('https://www.amazon.com/s?k=laptops'))
-const products = await page.evaluate((tpl, query) => {
+await page.evaluate(() => {
   window.price = function price (t, el) { return el?.className === 'a-offscreen' && t?.indexOf('$') > -1 }
-  return Array.from(document.querySelectorAll(query)).map(el => harvest(tpl, el, { minDepth: 60 })[0])
-}, TPL, PRODUCTS_QUERY)
-
+})
+const products = await harvestPageAll(page, TPL, PRODUCTS_QUERY, { inject: true, dataOnly: true, minDepth: 60 })
 console.log(products, '\nPress Ctrl-C to stop...')

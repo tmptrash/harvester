@@ -88,6 +88,7 @@ let rootFirstEl
  *   tagTextScore - === tagScore * minDepth * 2
  *   tagAttrScore - === tagScore * minDepth * 2
  *   tagTextTypeScore - === tagScore * minDepth * 4
+ *   dataOnly - return only data map, without maxScore, score and metaTree
  */
 let options = {}
 /**
@@ -177,6 +178,7 @@ function buildOptions (opt = {}) {
   !opt.tagTextScore && (opt.tagTextScore = opt.tagScore * opt.minDepth * 2)
   !opt.tagAttrScore && (opt.tagAttrScore = opt.tagScore * opt.minDepth * 2)
   !opt.tagTextTypeScore && (opt.tagTextTypeScore = opt.tagScore * opt.minDepth * 4)
+  !opt.dataOnly && (opt.dataOnly = false)
   options = opt
 }
 /**
@@ -783,7 +785,7 @@ function harvest (tpl, element, opt = {}) {
   const [score, nodes] = match(getNodesId(tplNodes), tplNodes, firstEl, 0, depth)
   const map = getMap(nodes)
 
-  return [map, maxScore, score, nodes]
+  return opt.dataOnly ? map : [map, maxScore, score, nodes]
 }
 
 if (typeof module === 'object' && typeof module.exports === 'object') module.exports = { toTree, harvest, buildOptions }

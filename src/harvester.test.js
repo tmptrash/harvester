@@ -1,6 +1,6 @@
 /* eslint-env jest */
 const { JSDOM } = require('jsdom')
-const { toTree, harvest, buildOptions } = require('./index')
+const { toTree, harvest, buildOptions } = require('./harvester')
 
 function testHarvester (tpl, html, query, opt = {}) {
   const dom = new JSDOM(html)

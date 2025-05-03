@@ -229,6 +229,9 @@ The output would be:
 Press Ctrl-C to stop...
 ```
 
+Note the parameters `inject` and `dataOnly`. They mean "inject the Harvester library code" and "do not return metadata," respectively. In other words, we're telling the library to insert the JavaScript code from `harvester.js` into the HTML of the website we're extracting data from, and also asking it not to return `maxScore`, `score`, and the metadata tree (an array of 4 elements). Also, keep in mind that calling `harvestPageAll()` multiple times with the `inject: true` option will re-insert the library code each time, which can clutter the HTML page. Alternatively, you can manually inject the library code into the page using this function: `page.addScriptTag({ path: HARVESTER_PATH })`.
+
+
 ## Examples folder
 This project contains few [examples](https://github.com/tmptrash/harvester/tree/main/examples) of usage the harvester with puppeteer and Node.js.
 

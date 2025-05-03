@@ -473,6 +473,19 @@ The output:
 }
 ```
 
+#### custom functions
+
+If your code uses custom functions inside the template, they must be present on the HTML page before you call `harvestPage()`. You can do it like this:
+
+```js
+await page.evaluate(() => {
+  window.price = function price(t, el) { return el?.className === 'my-class' && t?.indexOf('$') > -1 }
+})
+const products = await harvestPageAll(page, TPL, PRODUCTS_QUERY, { inject: true, dataOnly: true, minDepth: 60 })
+cnosole.log(products)
+```
+
+
 ### harvestPageAll()
 
 This function is also specifically designed for programs using Puppeteer. It extracts all found data blocks based on the provided template, CSS query, and configuration and returns a Promise. Function arguments are the same as for `harvest()` function, except page, it's a Puppeteer's page instance we are working on.

@@ -450,6 +450,35 @@ const options = {
 It returns the same result like `harvest()` function wrapped by a Promise: array of four elements or data map. Here is an example of usage:
 
 ```javascript
+import { harvestPage } from 'js-harvester/puppeteer.js'
+...
+const NEWS_QUERY = '.container_sub_news_list div.article_news_list'
+const TPL = `
+  div{time}
+  div
+    a{title}`
+const news = await harvestPage(page, TPL, NEWS_QUERY, { inject: true, dataOnly: true })
+console.log(news)
+```
+
+The output:
+
+```bash
+{
+  time: '17:40',
+  title: 'В Латвії заявили про необхідність мати на озброєнні "великі системи"'
+}
+```
+
+### harvestPageAll()
+
+This function is also specifically designed for programs using Puppeteer. It extracts all found data blocks based on the provided template, CSS query, and configuration and returns a Promise.
+
+`harvestPageAll(page, tpl, query, opt = {}): Promise<Array<[data, maxScore, score, metaTree]>> | Promise<Array<data>>`
+
+All other parameters and behavior of this function is similar to `harvestPage()`. Here is a small example of usage:
+
+```javascript
 import { harvestPageAll } from 'js-harvester/puppeteer.js'
 ...
 const NEWS_QUERY = '.container_sub_news_list div.article_news_list'
@@ -461,7 +490,25 @@ const news = await harvestPageAll(page, TPL, NEWS_QUERY, { inject: true, dataOnl
 console.log(news)
 ```
 
-### harvestPageAll()
+The output:
+
+```bash
+[
+  {
+    time: '17:40',
+    title: 'В Латвії заявили про необхідність мати на озброєнні "великі системи"'
+  },
+  {
+    time: '17:07',
+    title: 'ЄС засудив Росію за відкриття прямого авіасполучення з невизнаною Абхазією'
+  },
+  {
+    time: '17:06',
+    title: 'Вчені знайшли нове джерело золота в космосі: воно могло існувати ще за раннього Всесвіту'
+  },
+  ...
+]
+```
 
 ## Run tests
 ```

@@ -193,7 +193,7 @@ node news
 Let's take a look on a code for getting news from the site:
 
 ```javascript
-// news.js
+// examples/news.js
 import { harvestPageAll } from 'js-harvester/puppeteer.js'
 import { open, goto } from './utils.js'
 

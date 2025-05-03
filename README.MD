@@ -33,6 +33,7 @@ Harvester is a lightweight and highly optimized javascript library for extractin
   - [harvest()](#harvest)
     - [minDepth config](#mindepth-config)
   - [harvestPage()](#harvestpage)
+    - [custom functions](#custom-functions)
   - [harvestPageAll()](#harvestpageall)
 - [Run tests](#run-tests)
 - [Run linter](#run-linter)

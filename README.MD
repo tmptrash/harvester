@@ -479,7 +479,7 @@ This function is also specifically designed for programs using Puppeteer. It ext
 
 `harvestPageAll(page, tpl, query, opt = {}): Promise<Array<[data, maxScore, score, metaTree]>> | Promise<Array<data>>`
 
-All other parameters and behavior of this function is similar to `harvestPage()`. Here is a small example of usage:
+All other parameters and behavior, except returning value, of this function is similar to `harvestPage()`. Here is a small example of usage:
 
 ```javascript
 import { harvestPageAll } from 'js-harvester/puppeteer.js'

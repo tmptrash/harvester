@@ -185,7 +185,7 @@ The output would be:
 ```
 
 ## How to use with puppeteer
-Harvester works perfectly in combination with [Puppeteer](https://pptr.dev). Here's a minimal example where we extract all today's news from the Ukrainska Pravda website. But before running this code, you have to go to `examples` folder and run `npm i` command. After that, you can run one of the example files using Node.js:  
+Harvester works perfectly in combination with [Puppeteer](https://pptr.dev). The library exports two main functions for data extraction: `harvestPage()` – for extracting a single data block using a CSS query, and `harvestPageAll()` – for extracting all data blocks matching a given CSS query. Here's a minimal example where we extract all today's news from the Ukrainska Pravda website. But before running this code, you have to go to `examples` folder and run `npm i` command. After that, you can run one of the example files using Node.js in that folder:  
 ```bash
 node news
 ```

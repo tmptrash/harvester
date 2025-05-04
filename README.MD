@@ -248,7 +248,7 @@ npm i
 ### Running examples
 ```bash
 cd examples
-node rozetka
+node src/puppeteer/rozetka
 ```
 
 ## Main concepts

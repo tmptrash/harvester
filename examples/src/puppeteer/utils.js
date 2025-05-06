@@ -1,5 +1,4 @@
 import { connect } from 'puppeteer-real-browser'
-import { chromium } from 'playwright'
 
 export const HARVESTER_PATH = './node_modules/js-harvester/src/harvester.js'
 

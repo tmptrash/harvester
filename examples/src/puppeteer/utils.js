@@ -16,5 +16,3 @@ export async function open () {
   await page.setUserAgent('Chrome/111.0.0.0 Safari/537.36')
   return page
 }
-
-

@@ -11,4 +11,3 @@ const page = await open()
 await page.goto('https://www.pravda.com.ua/news/', { waitUntil: 'load' })
 const news = await harvestPageAll(page, TPL, NEWS_QUERY, { inject: true, dataOnly: true })
 console.log(news, '\nPress Ctrl-C to stop...')
-

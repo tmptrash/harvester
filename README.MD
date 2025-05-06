@@ -2,7 +2,7 @@
 
 ![Unit Tests](https://github.com/tmptrash/harvester/actions/workflows/test.yml/badge.svg)
 
-Harvester is a lightweight and highly optimized javascript library for extracting data from the DOM tree. It supports extraction of tag texts with specified types and attributes. it's tiny and has no dependencies. The library consists of two parts: the `harvest()` function, which runs in the browser to extract data, and various integrations with JavaScript frameworks such as [Puppeteer](https://pptr.dev).
+Harvester is a lightweight and highly optimized javascript library for extracting data from the DOM tree. It supports extraction of tag texts with specified types and attributes. it's tiny and has no dependencies. The library consists of two parts: the `harvest()` function, which runs in the browser to extract data, and various integrations with JavaScript frameworks such as [Puppeteer](https://pptr.dev) and [Playwright](https://playwright.dev).
 
 # Table of contents
 - [Description](#description)
@@ -45,7 +45,7 @@ The main idea of this library is that the data you need to extract from an HTML 
 
 This library is also especially useful for HTML structures that lack clear identifiers, unique classes, or other stable anchors typically used in CSS selectors. It relies not on unique identifiers, but on the structure of the tree defined in the template.
 
-To extract data, the user needs to describe a template or special tree-like DSL of the data from the DOM from which the extraction will be performed, and then call the `harvest()` function with two parameters: the described template and the start branch in the DOM where the search will begin. This library can be used both in the browser and in web scraping tools such as [Puppeteer](https://pptr.dev).
+To extract data, the user needs to describe a template or special tree-like DSL of the data from the DOM from which the extraction will be performed, and then call the `harvest()` function with two parameters: the described template and the start branch in the DOM where the search will begin. This library can be used both in the browser and in web scraping tools such as [Puppeteer](https://pptr.dev) and [Playwright](https://playwright.dev).
 
 Here is a minimal example of usage if you have an access to the destination DOM tree. For the HTML:
 ```html
@@ -255,7 +255,7 @@ Note the parameters `inject` and `dataOnly`. They mean "inject the Harvester lib
 
 
 ## Examples folder
-This project contains few [examples](https://github.com/tmptrash/harvester/tree/main/examples) of usage the harvester with puppeteer and Node.js.
+This project contains few [examples](https://github.com/tmptrash/harvester/tree/main/examples) of usage the harvester with puppeteer, playwright and Node.js.
 
 ### Examples installation
 ```bash
@@ -267,6 +267,7 @@ npm i
 ```bash
 cd examples
 node src/puppeteer/rozetka
+node src/playwright/news
 ```
 
 ## Main concepts
@@ -456,7 +457,7 @@ This parameter controls how deeply the algorithm will search for your data withi
 
 ### harvestPage()
 
-This function is specifically designed for programs using Puppeteer. It extracts a single data block based on the provided template, CSS query, and configuration and returns a Promise. Function arguments are the same as for `harvest()` function, except page, it's a Puppeteer's page instance we are working on.
+This function is specifically designed for programs using Puppeteer & Playwright. It extracts a single data block based on the provided template, CSS query, and configuration and returns a Promise. Function arguments are the same as for `harvest()` function, except page, it's a Puppeteer's or Playwright's page instance we are working on.
 
 `harvestPage(page, tpl, query, opt = {}): Promise<[data, maxScore, score, metaTree]> | Promise<data>`
 
@@ -507,7 +508,7 @@ cnosole.log(products)
 
 ### harvestPageAll()
 
-This function is also specifically designed for programs using Puppeteer. It extracts all found data blocks based on the provided template, CSS query, and configuration and returns a Promise. Function arguments are the same as for `harvest()` function, except page, it's a Puppeteer's page instance we are working on.
+This function is also specifically designed for programs using Puppeteer & Playwright. It extracts all found data blocks based on the provided template, CSS query, and configuration and returns a Promise. Function arguments are the same as for `harvest()` function, except page, it's a Puppeteer's or Playwright's page instance we are working on.
 
 `harvestPageAll(page, tpl, query, opt = {}): Promise<Array<[data, maxScore, score, metaTree]>> | Promise<Array<data>>`
 

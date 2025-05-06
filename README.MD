@@ -9,6 +9,7 @@ Harvester is a lightweight and highly optimized javascript library for extractin
 - [Advantages](#advantages)
 - [Installation](#installation)
   - [For the Puppeteer](#for-the-puppeteer)
+  - [For the Playwright](#for-the-playwright)
   - [For the Browser](#for-the-browser)
 - [How to use in browser](#how-to-use-in-browser)
 - [How to use with puppeteer](#how-to-use-with-puppeteer)
@@ -80,6 +81,7 @@ More examples you may find [here](https://github.com/tmptrash/harvester/tree/mai
 - **Highly optimized and fast** - a typical harvest() function call completes in 15ms
 - **Supports various data types** such as `int`, `float`, `func`, `empty`, and more  
 - **Compatible with Puppeteer**
+- **Compatible with Playwright**
 
 ## Installation
 ### For the Puppeteer
@@ -92,6 +94,22 @@ Next, you need to call one of the two available functions `harvestPage()` or `ha
 
 ```js
 import { harvestPageAll } from 'js-harvester/puppeteer.js'
+...
+await harvestPageAll(page, TPL, NEWS_QUERY, { inject: true, dataOnly: true })
+```
+
+More examples using this approach can be found in the [examples](https://github.com/tmptrash/harvester/tree/main/examples) folder.
+
+### For the Playwright
+If you're using **Harvester** as a complement to **Playwright**, all you need to do is install the npm package into your Playwright project like this:
+```bash
+npm i js-harvester --save
+```
+
+Next, you need to call one of the two available functions `harvestPage()` or `harvestPageAll()`, in your Playwright code to extract one or all data blocks based on a given CSS query. Like this:
+
+```js
+import { harvestPageAll } from 'js-harvester/playwright.js'
 ...
 await harvestPageAll(page, TPL, NEWS_QUERY, { inject: true, dataOnly: true })
 ```

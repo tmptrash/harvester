@@ -1,4 +1,5 @@
 import { connect } from 'puppeteer-real-browser'
+import { chromium } from 'playwright'
 
 export const HARVESTER_PATH = './node_modules/js-harvester/src/harvester.js'
 
@@ -16,3 +17,5 @@ export async function open () {
   await page.setUserAgent('Chrome/111.0.0.0 Safari/537.36')
   return page
 }
+
+

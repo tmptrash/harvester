@@ -1,4 +1,4 @@
-import { HARVESTER_PATH, isObj, isFunc, isStr } from './utils'
+import { HARVESTER_PATH, isObj, isFunc, isStr } from './utils.js'
 
 /**
  * Just a helper function to check harvestPage() & harvestPageAll() functions arguments. It also

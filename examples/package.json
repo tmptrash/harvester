@@ -16,6 +16,7 @@
   "license": "MIT",
   "dependencies": {
     "js-harvester": "^0.3.6",
+    "playwright": "^1.52.0",
     "puppeteer-real-browser": "^1.4.2"
   }
 }

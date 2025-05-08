@@ -4,13 +4,16 @@ This project contains a collection of examples using the Harvester library in [P
 
 # Table of contents
 - [Examples folder](#examples-folder)
-  - [Examples installation](#examples-installation)
-  - [Running examples](#running-examples)
+  - [Installation](#examples-installation)
+  - [Running](#running-examples)
 
 ## Examples folder
-This project contains few [examples](https://github.com/tmptrash/harvester/tree/main/examples) of usage the harvester with Puppeteer and Node.js. You may run three examples: `news.js`, `rozetka.js` and `amazon.js`.
+This project contains few [examples](https://github.com/tmptrash/harvester/tree/main/examples) of usage the harvester with Puppeteer, Playwright and Node.js. You may run three examples: `news.js`, `rozetka.js` and `amazon.js`.
 
 ### Installation
+
+If Node.js is not installed on your computer, install it from this [link](https://nodejs.org/en/download).
+
 ```bash
 cd examples
 npm i
@@ -20,4 +23,5 @@ npm i
 ```bash
 cd examples
 node src/puppeteer/rozetka
+node src/playwright/news
 ```

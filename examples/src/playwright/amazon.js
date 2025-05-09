@@ -27,7 +27,7 @@ div
                     span{price:func:price}`
 const page = await open()
 
-await page.goto('https://www.amazon.com/s?k=laptops', { waitUntil: 'load' })
+await page.goto('https://www.amazon.com/s?k=laptops', { waitUntil: 'domcontentloaded' })
 await page.evaluate(() => {
   window.price = function price (t, el) { return el?.className === 'a-offscreen' && t?.indexOf('$') > -1 }
 })

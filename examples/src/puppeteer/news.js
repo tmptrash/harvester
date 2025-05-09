@@ -8,6 +8,6 @@ const TPL = `
     a{title}`
 const page = await open()
 
-await goto(page, async () => page.goto('https://www.pravda.com.ua/news/'))
+await goto(page, async () => page.goto('https://www.pravda.com.ua/news/', { waitUntil: 'load' }))
 const news = await harvestPageAll(page, TPL, NEWS_QUERY, { inject: true, dataOnly: true })
 console.log(news, '\nPress Ctrl-C to stop...')

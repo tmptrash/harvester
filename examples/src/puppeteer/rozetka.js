@@ -15,7 +15,7 @@ const TPL = `
 `
 const page = await open()
 
-await goto(page, async () => page.goto('https://rozetka.com.ua/'))
+await goto(page, async () => page.goto('https://rozetka.com.ua/', { waitUntil: 'load' }))
 await page.evaluate(() => { window.price = function price (_, el) { return el.className.indexOf('price') > -1 } })
 const news = await harvestPageAll(page, TPL, PRODUCTS_QUERY, { inject: true, dataOnly: true })
 console.log(news, '\nPress Ctrl-C to stop...')

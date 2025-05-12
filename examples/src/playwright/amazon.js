@@ -28,6 +28,7 @@ div
 const page = await open()
 
 await page.goto('https://www.amazon.com/s?k=laptops', { waitUntil: 'load' })
+await page.waitForSelector(PRODUCTS_QUERY)
 await page.evaluate(() => {
   window.price = function price (t, el) { return el?.className === 'a-offscreen' && t?.indexOf('$') > -1 }
 })

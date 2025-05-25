@@ -1,6 +1,6 @@
 {
   "name": "js-harvester",
-  "version": "0.3.13",
+  "version": "0.3.14",
   "description": "Harvester is a lightweight and highly optimized javascript library for extracting data from the DOM tree. It supports extraction of tag texts with specified types and attributes. it's tiny and has no dependencies and also works with Puppeteer",
   "type": "module",
   "main": "index.js",

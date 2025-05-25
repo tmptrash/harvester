@@ -63,8 +63,10 @@ export async function harvestPageAll (page, tpl, query, opt = {}) {
   await initHarvester(page, tpl, query, opt)
 
   return page.evaluate((tpl, query, opt) => {
-    const els = document.querySelectorAll(query)
+    let els = document.querySelectorAll(query)
     if (!els || !els.length) throw new Error(`Selector "${query}" not found`)
-    return Array.from(els).map(el => harvest(tpl, el, opt)) // eslint-disable-line no-undef
+    els = Array.from(els)
+    if (opt.amount > 0) els.length = opt.amount
+    return els.map(el => harvest(tpl, el, opt)) // eslint-disable-line no-undef
   }, tpl, query, opt)
 }

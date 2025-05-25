@@ -466,7 +466,8 @@ This function is specifically designed for programs using Puppeteer & Playwright
 ```js
 const options = {
   inject: false,       // true means - inject harvester.js file into the destination HTML page
-  path: './node_modules/js-harvester/src/harvester.js' // path, which library is used to find harvester.js file in your node_module folder
+  path: './node_modules/js-harvester/src/harvester.js', // path, which library is used to find harvester.js file in your node_module folder
+  amount: undefined    // amount of elements to return. undefined means all elements
 }
 ```
 

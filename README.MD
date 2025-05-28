@@ -2,7 +2,7 @@
 
 ![Unit Tests](https://github.com/tmptrash/harvester/actions/workflows/test.yml/badge.svg)
 
-Harvester is a lightweight and highly optimized javascript library for extracting data from the DOM tree. It supports extraction of tag texts with specified types and attributes. it's tiny and has no dependencies. The library consists of two parts: the `harvest()` function, which runs in the browser to extract data, and various integrations with JavaScript frameworks such as [Puppeteer](https://pptr.dev) and [Playwright](https://playwright.dev).
+Harvester is a lightweight and highly optimized javascript library for extracting data from the DOM tree. It supports extraction of tag texts with specified types and attributes. It's tiny and has no dependencies. The library consists of two parts: the `harvest()` function, which runs in the browser to extract data, and various integrations with JavaScript frameworks such as [Puppeteer](https://pptr.dev) and [Playwright](https://playwright.dev).
 
 # Table of contents
 - [Description](#description)

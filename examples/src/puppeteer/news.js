@@ -1,7 +1,7 @@
 import { harvestPageAll } from 'js-harvester/puppeteer.js'
 import { open, goto } from './utils.js'
 
-const NEWS_QUERY = '.container_sub_news_list div.article_news_list'
+const NEWS_QUERY = '.section_news_list_wrapper div.article_news_list'
 const TPL = `
   div{time}
   div
